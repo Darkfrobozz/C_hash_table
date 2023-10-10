@@ -16,7 +16,7 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 //Linkedlist types
 typedef struct list ioopm_list_t; /// Meta: structure definition goes in C file
 typedef struct node node_t;
-
+typedef struct hash_table ioopm_hash_table_t;
 
 union elem
 {
@@ -26,6 +26,7 @@ union elem
   bool b;
   float f;
   unsigned char *string;
+  char *normal_string;
   void *p;
   size_t siz;
   /// other choices certainly possible

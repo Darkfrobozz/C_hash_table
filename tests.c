@@ -1,5 +1,6 @@
 #include <CUnit/Basic.h>
 #include "hash.h"
+#include "extended.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define no_buckets 17
@@ -401,16 +402,16 @@ test_merch_hashtable(void)
   ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_merch_hash,
   ioopm_merch_cmp, no_buckets);
 
-  merch_t m_1 = {.name = "KO", .desc = "rund", .price = 15, .shelf = "A50", .stock = 1};
+  merch_t m_1 = {.name = "KO", .desc = "rund", .price = 15, NULL};
   elem_t em_1;
   em_1.p = &m_1;
-  merch_t m_2 = {.name = "OXE", .desc = "kantig", .price = 14, .shelf = "B51", .stock = 1};
+  merch_t m_2 = {.name = "OXE", .desc = "kantig", .price = 14, NULL};
   elem_t em_2;
   em_2.p = &m_2;
-  merch_t m_3 = {.name = "OXI", .desc = "oval", .price = 13, .shelf = "C52", .stock = 1};
+  merch_t m_3 = {.name = "OXI", .desc = "oval", .price = 13, NULL};
   elem_t em_3;
   em_3.p = &m_3;
-  merch_t m_4 = {.name = "KOSSA", .desc = "romb", .price = 12, .shelf = "A50", .stock = 1};
+  merch_t m_4 = {.name = "KOSSA", .desc = "romb", .price = 12, NULL};
   elem_t em_4;
   em_4.p = &m_4;
   
@@ -433,6 +434,10 @@ test_merch_hashtable(void)
     merch_t *merch = ioopm_linked_list_get(list, i).return_value.p;
     printf("%s\n", merch->name);
   }
+  ioopm_linked_list_clear(list);
+  ioopm_linked_list_destroy(list);
+  ioopm_hash_table_clear(hash);
+  ioopm_hash_table_destroy(hash);
 
 }
 

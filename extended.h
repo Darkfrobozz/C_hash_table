@@ -1,5 +1,6 @@
 #pragma once
-#include "common.h"
+#include "hash.h"
+
 
 //Store data types
 typedef struct merchandise merch_t;
@@ -14,7 +15,7 @@ struct merchandise
     char *desc;
     char *shelf;
     int price;
-    int stock; //list containing elements, with key being shelf and value being freq
+    ioopm_hash_table_t *hash_stock; //list containing elements, with key being shelf and value being freq
 };
 
 struct shopping_cart
@@ -28,3 +29,9 @@ ioopm_merch_hash(elem_t key, void *arg);
 
 short
 ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch);
+
+int
+ioopm_stock_hash(elem_t shelf, void *arg);
+
+short
+ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);

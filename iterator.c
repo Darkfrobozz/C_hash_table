@@ -130,7 +130,7 @@ option_t ioopm_iterator_previous(ioopm_iterator_t *iter)
 
 option_t ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key)
 {
-    option_t result = {0};
+     option_t result = {0};
     if(!iter) return result;
     result = ioopm_insert_node((node_t *) iter->current_adress, 
     value, (ioopm_list_t *) iter->datastructure);

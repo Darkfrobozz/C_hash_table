@@ -1,11 +1,10 @@
 #include "extended.h"
 
+static
 short
-ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch)
+string_compare(char *hash_string, char *fetched_string)
 {
-  merch_t *f_merch = key_fetch.p;
-  merch_t *h_merch = key_hash.p;
-  int result = strcmp(h_merch->name, f_merch->name);
+  int result = strcmp(hash_string, fetched_string);
 
   if(!result)
     return REPLACE;
@@ -15,14 +14,52 @@ ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch)
   return MOVE_ON;
 }
 
+static
+int
+hash_char(char b, void *arg)
+{ 
+  int *buckets = arg;
+  int merch_first_letter = b % 256;
+
+  if(merch_first_letter > *buckets)
+  {
+    merch_first_letter = *buckets - 1;
+  }
+
+  return merch_first_letter;
+}
+
+
+
+// FOR MERCH HASH TABLE 
+short
+ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch)
+{
+  merch_t *f_merch = key_fetch.p;
+  merch_t *h_merch = key_hash.p;
+  return string_compare(h_merch->name, f_merch->name);
+}
+
 //Only works for higher bucket values...
 int
 ioopm_merch_hash(elem_t key_fetched, void *arg)
 {
-  int *buckets = arg;
   merch_t *merch_fetched = key_fetched.p;
-  char merch_first_letter = merch_fetched->name[0];
-
-  return merch_first_letter % (*buckets);
+  return hash_char(merch_fetched->name[0], arg);
 }
 
+
+
+//FOR STOCK HASH_TABLE
+
+short
+ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch)
+{
+  return string_compare(shelf_hash.normal_string, shelf_fetch.normal_string);
+}
+
+int
+ioopm_stock_hash(elem_t shelf, void *arg)
+{
+  return hash_char(shelf.normal_string[0], arg);
+}

@@ -1,6 +1,5 @@
 #pragma once
 #include "linked_list.h"
-#include "extended.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>

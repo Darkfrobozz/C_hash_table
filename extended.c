@@ -19,7 +19,7 @@ int
 hash_char(char b, void *arg)
 { 
   int *buckets = arg;
-  int merch_first_letter = b % 256;
+  int merch_first_letter = b % ASCII_SIZ;
 
   if(merch_first_letter > *buckets)
   {
@@ -48,7 +48,16 @@ ioopm_merch_hash(elem_t key_fetched, void *arg)
   return hash_char(merch_fetched->name[0], arg);
 }
 
-
+void
+ioopm_clean_merch(elem_t *key, void *arg)
+{
+  merch_t *merch = key->p;
+  free(merch->name);
+  free(merch->desc);
+  ioopm_hash_table_clear(merch->hash_stock);
+  ioopm_hash_table_destroy(merch->hash_stock);
+  free(merch);
+}
 
 //FOR STOCK HASH_TABLE
 

@@ -100,7 +100,6 @@ test_insert_overwrite(void)
     CU_ASSERT_EQUAL(ioopm_hash_table_lookup(hash, 
                     randomkeys[2]).return_value.i, sendvalues[1].i);
 
-
     ioopm_hash_table_clear(hash);
     ioopm_hash_table_destroy(hash); 
 }
@@ -438,9 +437,46 @@ test_merch_hashtable(void)
   ioopm_linked_list_destroy(list);
   ioopm_hash_table_clear(hash);
   ioopm_hash_table_destroy(hash);
-
 }
 
+void
+test_stock_hash(void)
+{
+  ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_merch_hash,
+  ioopm_merch_cmp, no_buckets);
+
+  ioopm_hash_table_t *stocks[25];
+  merch_t arr[25];
+
+  for(int index = 0; index < 25; index++)
+  {
+    char name[] = {65 + index, 0};
+    char *string = strdup(name);
+    arr[index].hash_stock = stocks[index] = ioopm_hash_table_create(ioopm_stock_hash,
+    ioopm_stock_cmp, no_buckets);
+    char shelfarr[] = {65 + index, index % 10 + 48, index % 10 + 48};
+    char *shelf = strdup(shelfarr);
+    ioopm_hash_table_insert(arr[index].hash_stock, (elem_t) shelf, (elem_t) 1);
+    arr[index].name = string;
+    arr[index].desc = string;
+    arr[index].price = 5 + index;
+    elem_t merch;
+    merch.p = arr + index;
+    ioopm_hash_table_insert(hash, merch, merch);
+  }
+  
+  for(int index = 0; index < 25; index++)
+  {
+    elem_t get_merch;
+    get_merch.p = arr + index;
+    merch_t *merch = ioopm_hash_table_lookup(hash, get_merch).return_value.p;
+    char shelfarr[] = {65 + index, index % 10 + 48, index % 10 + 48};
+    char *shelf = strdup(shelfarr);
+    CU_ASSERT(ioopm_hash_table_has_key(merch->hash_stock, (elem_t) shelf));
+    free(shelf);
+  }
+  
+}
 
 int 
 main() 
@@ -480,6 +516,7 @@ main()
     || (CU_add_test(hash_suite, "True for all", test_all) == NULL)
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
     || (CU_add_test(hash_suite, "Hashing merch", test_merch_hashtable) == NULL)
+    || (CU_add_test(hash_suite, "Adding shelves to merch", test_stock_hash) == NULL)
     || 0
   )
     {

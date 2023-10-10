@@ -16,7 +16,7 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 //Linkedlist types
 typedef struct list ioopm_list_t; /// Meta: structure definition goes in C file
 typedef struct node node_t;
-typedef struct hash_table ioopm_hash_table_t;
+
 
 union elem
 {
@@ -65,7 +65,6 @@ struct option
 #define ASCII_GARBAGE 33
 #define DEL 127
 #define ASCII_SIZ 256
-
 
 short
 ioopm_int_compare(elem_t a, elem_t b);

@@ -13,7 +13,6 @@ struct merchandise
 {
     char *name;
     char *desc;
-    char *shelf;
     int price;
     ioopm_hash_table_t *hash_stock; //list containing elements, with key being shelf and value being freq
 };
@@ -35,3 +34,12 @@ ioopm_stock_hash(elem_t shelf, void *arg);
 
 short
 ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);
+
+/**
+ * @brief Function used when removing elements from hashtable.
+ * 
+ * @param Adresstokey Used to free allocated chunk
+ * @param arg Extra arguments
+ */
+void
+ioopm_clean_merch(elem_t *key, void *arg);

@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 //Common and error handling data types
 typedef union elem elem_t;
@@ -66,6 +67,7 @@ struct option
 #define DEL 127
 #define ASCII_SIZ 256
 
+
 short
 ioopm_int_compare(elem_t a, elem_t b);
 
@@ -114,3 +116,11 @@ ioopm_print_string(elem_t *key, void *arg);
 void
 ioopm_print_number(elem_t *value, void *arg);
 
+/**
+ * @brief Used to clean one value at a time
+ * 
+ * @param value pointer to value to clean
+ * @param arg 
+ */
+void
+ioopm_clean_value_strings(elem_t *value, void *arg);

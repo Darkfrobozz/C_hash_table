@@ -19,7 +19,8 @@ struct hash_table
     hashing_func hh;
     //should return int.
     compare_func cf;
-    ioopm_apply_function_list cleaner;
+    ioopm_apply_function_list clean_key;
+    ioopm_apply_function_list clean_value;
 };
 
 /**
@@ -35,7 +36,7 @@ struct hash_table
 
 static
 bool
-transform_elements_extended(ioopm_list_t *list, void **arg)
+transform_elements(ioopm_list_t *list, void **arg)
 {
     ioopm_apply_function_list func_value = arg[0];
     ioopm_apply_function_list func_key = arg[2];
@@ -181,13 +182,7 @@ ioopm_hash_table_clear(ioopm_hash_table_t *ht)
 {
     //Clear and destroy destroys iterators, clears lists and destroys headers
     //and dummies of list
-    if(ht->cleaner)
-    {
-        ioopm_list_t *list = ioopm_hash_table_keys(ht);
-        ioopm_linked_list_apply_to_all(list, ht->cleaner, NULL);
-        ioopm_linked_list_clear(list);
-        ioopm_linked_list_destroy(list);
-    }
+    ioopm_hash_apply_extended(ht, ht->clean_value, NULL, ht->clean_key, NULL);
     void *arg[] = {ioopm_list_clear_and_destroy, NULL, NULL}; 
     
     //to do this to all lists in buckets
@@ -274,10 +269,15 @@ hash_remove_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
 {
     if(success)
     {
-        if(ht->cleaner)
+        if(ht->clean_key)
         {
             elem_t key = ioopm_iterator_current_key(iter).return_value;
-            ht->cleaner(&key, NULL);
+            ht->clean_key(&key, NULL);
+        }
+        if(ht->clean_value)
+        {
+            elem_t value = ioopm_iterator_current(iter).return_value;
+            ht->clean_value(&value, NULL);
         }
         ioopm_iterator_remove(iter);
     }
@@ -395,21 +395,22 @@ ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht,
 {
 
     ioopm_hash_apply_extended(ht, apply_fun, arg, NULL, NULL);
-    //void *arg_send[] = {apply_fun, arg};
-    //pipe_lists(ht, transform_elements, arg_send); 
 }
 
 void
-ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_apply_function_list cleaner)
+ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_apply_function_list i_clean_key, 
+                       ioopm_apply_function_list i_clean_value)
 {
-    ht->cleaner = cleaner;
+    ht->clean_key = i_clean_key;
+    ht->clean_value = i_clean_value;
 }
 
 void ioopm_hash_apply_extended(ioopm_hash_table_t *ht, 
                                ioopm_apply_function_list fun_value, void *extra_value,
                                ioopm_apply_function_list fun_key, void *extra_key)
 {    
-    
+    if(!fun_value && !fun_key)
+        return; 
     void *arg_send[] = {fun_value, extra_value, fun_key, extra_key};
-    pipe_lists(ht, transform_elements_extended, arg_send);
+    pipe_lists(ht, transform_elements, arg_send);
 }

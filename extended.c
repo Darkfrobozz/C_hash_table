@@ -31,7 +31,9 @@ hash_char(char b, void *arg)
 
 
 
-// FOR MERCH HASH TABLE 
+// FOR MERCH HASH TABLE
+
+
 short
 ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch)
 {
@@ -48,14 +50,28 @@ ioopm_merch_hash(elem_t key_fetched, void *arg)
   return hash_char(merch_fetched->name[0], arg);
 }
 
+
+merch_t *
+ioopm_merch_create(char *i_name, char *i_desc, int i_price)
+{
+  merch_t *merch = calloc(1, sizeof(merch_t));
+  merch->name = i_name;
+  merch->desc = i_desc;
+  merch->price = i_price;
+  return merch;
+}
+
 void
 ioopm_clean_merch(elem_t *key, void *arg)
 {
   merch_t *merch = key->p;
-  free(merch->name);
+  assert(merch->name);
+  assert(merch->desc);
+  if(merch->name != merch->desc)
+  {
+    free(merch->name);
+  }
   free(merch->desc);
-  ioopm_hash_table_clear(merch->hash_stock);
-  ioopm_hash_table_destroy(merch->hash_stock);
   free(merch);
 }
 
@@ -71,4 +87,19 @@ int
 ioopm_stock_hash(elem_t shelf, void *arg)
 {
   return hash_char(shelf.normal_string[0], arg);
+}
+
+void
+ioopm_clean_strings(elem_t *value, void *arg)
+{
+    char *string = value->normal_string;
+    assert(string);
+    free(string);
+}
+
+void
+ioopm_clean_stock(elem_t *value, void *arg)
+{
+    stock_value_t *val = value->p;
+    free(val);
 }

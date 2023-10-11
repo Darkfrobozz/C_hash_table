@@ -18,19 +18,24 @@ struct iterator
  * @return true rest of program should execute
  * @return false no execute
  */
-bool iterator_init(ioopm_iterator_t *iter)
+bool 
+iterator_init(ioopm_iterator_t *iter)
 {
+    assert(iter);
+    ioopm_list_t *list = iter->datastructure;
+    //check if empty
+    if(ioopm_linked_list_size(list))
+        return false;
+    //check if on dummy
     node_t *node = iter->current_adress;
-    if(node->previous) return true; //not in start
-    if(node->next->next) //not at end at start
-    {
+    if(node->previous) 
         iter->current_adress = node->next;
-        return true;
-    }
-    return false; // in start and at end cannot init
+    
+    return true;
 }
 
-ioopm_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
+ioopm_iterator_t *
+ioopm_list_iterator(ioopm_list_t *list)
 {
 
     ioopm_iterator_t *iter = calloc(1, sizeof(ioopm_iterator_t));
@@ -40,14 +45,15 @@ ioopm_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
     {
         list->iterator_list = ioopm_linked_list_create();
     }
-    ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter);
+    ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter, (elem_t) NULL);
     iter->datastructure = list;
     iter->type = list_iter;
     iterator_init(iter);
     return iter;
 }
 
-void ioopm_iterator_destroy(ioopm_iterator_t *iter)
+void 
+ioopm_iterator_destroy(ioopm_iterator_t *iter)
 {
     if(iter->type == list_iter)
     {
@@ -58,7 +64,8 @@ void ioopm_iterator_destroy(ioopm_iterator_t *iter)
     free(iter);
 }
 
-void ioopm_inform_removal(elem_t *value, void *removed_node)
+void 
+ioopm_inform_removal(elem_t *value, void *removed_node)
 {
     
     ioopm_iterator_t *iter = value->p;
@@ -76,7 +83,8 @@ void ioopm_inform_removal(elem_t *value, void *removed_node)
     }
 }
 
-bool ioopm_iterator_has_next(ioopm_iterator_t *iter)
+bool 
+ioopm_iterator_has_next(ioopm_iterator_t *iter)
 {
     if(!iterator_init(iter)) return false;
     node_t *node = iter->current_adress;
@@ -89,7 +97,8 @@ bool ioopm_iterator_has_next(ioopm_iterator_t *iter)
     return false;
 }
 
-option_t ioopm_iterator_next(ioopm_iterator_t *iter)
+option_t 
+ioopm_iterator_next(ioopm_iterator_t *iter)
 {
     option_t result = {0};
     if(!iterator_init(iter)) return result; //making sure that if the list ain't empty we will be on a valid spot.
@@ -110,65 +119,94 @@ option_t ioopm_iterator_next(ioopm_iterator_t *iter)
     return result; //if next is dummy node
 }
 
-option_t ioopm_iterator_previous(ioopm_iterator_t *iter)
+option_t 
+ioopm_iterator_previous(ioopm_iterator_t *iter)
 {
     option_t result = {0};
-    if(!iter) return result; 
+    if(!iterator_init(iter)) 
+        return result; 
     //making sure that if the list ain't empty we will be on a valid spot.
     node_t *node = iter->current_adress;
-    node_t *prev_node = node->previous;
+    //moving to the left
+    node = node->previous;
     //Checking if we on first dummynode
-    if(prev_node)
+    if(node->previous)
     {
-        iter->current_adress = prev_node;
-        result.return_value = prev_node->value;
+        iter->current_adress = node;
+        result.return_value = node->value;
         result.success = 1;
     }
 
     return result;
 }
 
-option_t ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key)
+option_t 
+ioopm_iterator_insert_right(ioopm_iterator_t *iter, elem_t value, elem_t key)
 {
-     option_t result = {0};
-    if(!iter) return result;
-    result = ioopm_insert_node((node_t *) iter->current_adress, 
-    value, (ioopm_list_t *) iter->datastructure);
-    node_t *prev = iter->current_adress;
-    node_t *inserted = prev->next;
-    inserted->key = key;
+    option_t result = {0};
+
+    //Moving to first if it exists
+    iterator_init(iter); 
+    node_t *to_send = iter->current_adress;
+    result = ioopm_insert_node(to_send, value, key, 
+                               (ioopm_list_t *) iter->datastructure);
+    
+    iter->current_adress = to_send->next;
+    return result;
+
+}
+
+option_t 
+ioopm_iterator_insert_left(ioopm_iterator_t *iter, elem_t value, elem_t key)
+{
+    option_t result = {0};
+    
+    node_t *to_send = iter->current_adress;
+    
+    //if list is empty just insert
+    if(iterator_init(iter))
+        to_send = to_send->previous;
+
+    result = ioopm_insert_node(to_send, value, 
+                      key, (ioopm_list_t  *) iter->datastructure);
+    
+    iter->current_adress = to_send->next;
+    
     return result;
 }
 
-option_t ioopm_iterator_remove(ioopm_iterator_t *iter)
+
+option_t 
+ioopm_iterator_remove(ioopm_iterator_t *iter)
 {
-    option_t result = {0};
-    if(!iterator_init(iter)) return result;
-    if(!iter) return result;
-    return ioopm_remove_node((ioopm_list_t *) iter->datastructure, (node_t *) iter->current_adress);
+    if(!iterator_init(iter)) 
+        return (option_t) {0};
+    return ioopm_remove_node((ioopm_list_t *) iter->datastructure, 
+                             (node_t *) iter->current_adress);
 }
 
-void ioopm_iterator_reset(ioopm_iterator_t *iter)
+void 
+ioopm_iterator_reset(ioopm_iterator_t *iter)
 {
-    iter->current_adress = ioopm_list_first((ioopm_list_t *) iter->datastructure);
+    ioopm_list_t *list = iter->datastructure;
+    iter->current_adress = list->first;
+    iterator_init(iter);
 }
 
-option_t ioopm_iterator_current(ioopm_iterator_t *iter)
+option_t 
+ioopm_iterator_current_value(ioopm_iterator_t *iter)
 {
-    option_t result = {0};
-    if(!iterator_init(iter)) return result;
+    if(!iterator_init(iter)) 
+        return (option_t) {0};
     node_t *node = iter->current_adress;
-    result.return_value = node->value;
-    result.success = 1;
-    return result; // You have come to the end of the list
+    return (option_t) {.success = 1, .return_value = node->value};
 }
 
-option_t ioopm_iterator_current_key(ioopm_iterator_t *iter)
+option_t 
+ioopm_iterator_current_key(ioopm_iterator_t *iter)
 {
-    option_t result = {0};
-    if(!iterator_init(iter)) return result;
+    if(!iterator_init(iter)) 
+        return (option_t) {0};
     node_t *node = iter->current_adress;
-    result.return_value = ioopm_get_key(node);
-    result.success = 1;
-    return result; // You have come to the end of the list
+    return (option_t) {.success = 1, .return_value = node->key};
 }

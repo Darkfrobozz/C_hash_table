@@ -114,8 +114,16 @@ ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht,
                               ioopm_apply_function_list apply_fun, void *arg);
 
 
+/**
+ * @brief Adds cleaners to hash
+ * 
+ * @param ht Hash
+ * @param clean_key 
+ * @param clean_value 
+ */
 void
-ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_apply_function_list cleaner);
+ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_apply_function_list clean_key,
+                       ioopm_apply_function_list clean_value);
 
 void 
 ioopm_hash_apply_extended(ioopm_hash_table_t *ht, 

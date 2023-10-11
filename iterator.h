@@ -31,19 +31,30 @@ option_t ioopm_iterator_next(ioopm_iterator_t *iter);
 option_t ioopm_iterator_previous(ioopm_iterator_t *iter);
 
 
-/// NOTE: REMOVE IS OPTIONAL TO IMPLEMENT 
 /// @brief Remove the current element from the underlying list, jumps to the previous one
 /// @param iter the iterator
 /// @param success whether the node and list exists or not
 /// @return the removed element
 option_t ioopm_iterator_remove(ioopm_iterator_t *iter);
 
-/// NOTE: INSERT IS OPTIONAL TO IMPLEMENT 
-/// @brief Insert a new element into the underlying list making the current element it's next
+/// @brief Inserts a new value to the right
 /// @param iter the iterator
 /// @param element the element to be inserted
 /// @param success whether the node and list exists or not
-option_t ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t element, elem_t key);
+option_t 
+ioopm_iterator_insert_right(ioopm_iterator_t *iter, elem_t value, elem_t key);
+
+
+/**
+ * @brief Inserts to the left of current node
+ * 
+ * @param iter 
+ * @param value 
+ * @param key 
+ * @return option_t 
+ */
+option_t 
+ioopm_iterator_insert_left(ioopm_iterator_t *iter, elem_t value, elem_t key);
 
 /// @brief Reposition the iterator at the start of the underlying list
 /// @param iter the iterator

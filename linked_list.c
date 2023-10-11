@@ -94,32 +94,13 @@ option_t ioopm_linked_list_get(ioopm_list_t *list, int index)
     return result;
 
 }
-
-node_t *ioopm_next_node(node_t *current)
-{
-    return current->next;   
-}
-
-node_t *ioopm_prev_node(node_t *current)
-{
-    return current->previous;   
-}
-
-elem_t ioopm_get_key(node_t *current)
-{
-    return current->key;
-}
-
-node_t *ioopm_list_first(ioopm_list_t *list)
-{
-    return list->first;
-}
-
-option_t ioopm_insert_node(node_t *prev_node, elem_t received_value, ioopm_list_t *list)
+option_t 
+ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
     option_t result = {0};
     node_t *insert = calloc(1, sizeof(node_t));
-    insert->value = received_value;
+    insert->value = i_value;
+    insert->key = i_key;
 
 
 
@@ -133,15 +114,16 @@ option_t ioopm_insert_node(node_t *prev_node, elem_t received_value, ioopm_list_
     list->size++;
 
     result.success = 1;
-    result.return_value = received_value;
+    result.return_value = i_value;
 
     return result;
     
 }
 
-option_t ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t received_value)
+option_t 
+ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t i_value, elem_t i_key)
 {
-    option_t result = {.return_value = received_value, .success = 0};
+    option_t result = {.return_value = i_value, .success = 0};
     if(index > list->size || index < 0)
     {
 
@@ -150,22 +132,23 @@ option_t ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t received
 
     node_t *prev_node = find_previous_node(list, index);
     
-    return ioopm_insert_node(prev_node, received_value, list);
+    return ioopm_insert_node(prev_node, i_value, i_key, list);
 }
 
 
-option_t ioopm_linked_list_append(ioopm_list_t *list, elem_t value)
+option_t 
+ioopm_linked_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     int index = list->size;
     
-    return ioopm_linked_list_insert(list, index, value);
+    return ioopm_linked_list_insert(list, index, i_value, i_key);
     
 }
 
 
-option_t ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value)
+option_t ioopm_linked_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    return ioopm_linked_list_insert(list, 0, value);
+    return ioopm_linked_list_insert(list, 0, i_value, i_key);
 }
 
 size_t ioopm_linked_list_size(ioopm_list_t *list)
@@ -218,9 +201,6 @@ option_t ioopm_linked_list_remove(ioopm_list_t *list, int index)
     return result;
 }
 
-
-
-
 ioopm_list_t *ioopm_get_iterator(ioopm_list_t *list)
 {
     return list->iterator_list;
@@ -265,11 +245,11 @@ append_node(node_t *node, bool *take_key, void **arg)
     ioopm_list_t *list = *arg;
     if(*take_key)
     {
-        ioopm_linked_list_append(list, node->key);
+        ioopm_linked_list_append(list, node->key, node->value);
         return;
     }
 
-    ioopm_linked_list_append(list, node->value);
+    ioopm_linked_list_append(list, node->value, node->key);
 }
 
 void transform_extended(node_t *node, bool *success, void **arg)
@@ -423,10 +403,3 @@ ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool take_key)
     
 }
 
-void
-ioopm_clean_value_strings(elem_t *value, void *arg)
-{
-    unsigned char *string = (*value).string;
-    if(string)
-        free(string);
-}

@@ -9,7 +9,9 @@ struct iterator
     enum itertypes type;
     void *datastructure;
     void *current_adress;
+    bool dummied;
 };
+
 /**
  * @brief Returns whether initiation is successful or not needs to be called
  * because we allow creation of cursor over empty lists.
@@ -18,20 +20,22 @@ struct iterator
  * @return true rest of program should execute
  * @return false no execute
  */
+static
 bool 
 iterator_init(ioopm_iterator_t *iter)
 {
     assert(iter);
+    if(!(iter->dummied))
+        return true;
     ioopm_list_t *list = iter->datastructure;
     //check if empty
     if(ioopm_linked_list_is_empty(list))
         return false;
-    //check if on dummy
+    //check 
     node_t *node = iter->current_adress;
 
-    if(!(node->previous)) 
-        iter->current_adress = node->next;
-    
+    iter->current_adress = node->next;
+    iter->dummied = false;
     return true;
 }
 
@@ -49,7 +53,8 @@ ioopm_list_iterator(ioopm_list_t *list)
     ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter, (elem_t) NULL);
     iter->datastructure = list;
     iter->type = list_iter;
-    iterator_init(iter);
+    iter->dummied = true;
+    iterator_init(iter); 
     return iter;
 }
 
@@ -80,6 +85,8 @@ ioopm_inform_removal(elem_t *value, void *removed_node)
         {
             node_t *current_adress = iter->current_adress;
             iter->current_adress = current_adress->previous;
+            if(!(current_adress->previous->previous))
+                iter->dummied = true;
         }
     }
 }
@@ -193,7 +200,10 @@ void
 ioopm_iterator_reset(ioopm_iterator_t *iter)
 {
     ioopm_list_t *list = iter->datastructure;
+
+    if(!ioopm_linked_list_is_empty(list))
     iter->current_adress = list->first;
+    iter->dummied = true;
     iterator_init(iter);
 }
 

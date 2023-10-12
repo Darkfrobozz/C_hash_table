@@ -53,6 +53,7 @@ test_insert(void)
     ioopm_int_compare, no_buckets);
     elem_t sendvalues[arr_siz];
     elem_t randomkeys[arr_siz];
+
     for(int i = 0; i < arr_siz; i++)
     {
       sendvalues[i].i = rand();

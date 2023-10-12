@@ -24,11 +24,12 @@ iterator_init(ioopm_iterator_t *iter)
     assert(iter);
     ioopm_list_t *list = iter->datastructure;
     //check if empty
-    if(ioopm_linked_list_size(list))
+    if(ioopm_linked_list_is_empty(list))
         return false;
     //check if on dummy
     node_t *node = iter->current_adress;
-    if(node->previous) 
+
+    if(!(node->previous)) 
         iter->current_adress = node->next;
     
     return true;
@@ -108,56 +109,55 @@ ioopm_iterator_has(ioopm_iterator_t *iter, short dir_command)
 bool 
 ioopm_iterator_has_next(ioopm_iterator_t *iter)
 {
-    ioopm_iterator_has(iter, RIGHT);
+    return ioopm_iterator_has(iter, RIGHT);
 }
 
 bool 
 ioopm_iterator_has_prev(ioopm_iterator_t *iter)
 {
-    ioopm_iterator_has(iter, LEFT);
+    return ioopm_iterator_has(iter, LEFT);
 }
 
 option_t 
 ioopm_iterator_next(ioopm_iterator_t *iter)
 {
     option_t result = {0};
-    if(!iterator_init(iter)) return result; //making sure that if the list ain't empty we will be on a valid spot.
 
-    node_t *node = iter->current_adress;
-    node_t *next_node = node->next;
-
-    if(next_node->next) //check if next is not dummy node
-    {
-        iter->current_adress = node->next; //then move forward
-
-        node = iter->current_adress; //new node
-        result.success = 1;
-        result.return_value = node->value;
+    if(!iterator_init(iter)) 
+        return result; //making sure that if the list ain't empty we will be on a valid spot.
+    if(!ioopm_iterator_has_next(iter))
         return result;
-    }
+    
+    node_t *node = iter->current_adress;
+    iter->current_adress = node->next;    
 
-    return result; //if next is dummy node
+    return ioopm_iterator_current_value(iter); //if next is dummy node
 }
 
 option_t 
 ioopm_iterator_previous(ioopm_iterator_t *iter)
 {
     option_t result = {0};
+
     if(!iterator_init(iter)) 
         return result; 
     //making sure that if the list ain't empty we will be on a valid spot.
+    if(!ioopm_iterator_has_prev(iter))
+        return result;
+    
     node_t *node = iter->current_adress;
-    //moving to the left
-    node = node->previous;
-    //Checking if we on first dummynode
-    if(node->previous)
-    {
-        iter->current_adress = node;
-        result.return_value = node->value;
-        result.success = 1;
-    }
+    iter->current_adress = node->previous;
+    
+    return ioopm_iterator_current_value(iter);
+}
 
-    return result;
+void
+ioopm_iterator_edit(ioopm_iterator_t *iter, elem_t value, elem_t key)
+{
+    node_t *node = iter->current_adress;
+
+    node->value = value;
+    node->key = key;
 }
 
 option_t 

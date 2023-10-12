@@ -82,19 +82,39 @@ ioopm_inform_removal(elem_t *value, void *removed_node)
         }
     }
 }
+static
+bool 
+ioopm_iterator_has(ioopm_iterator_t *iter, short dir_command)
+{
+    if(!iterator_init(iter)) 
+        return false;
+    node_t *node = iter->current_adress;
+
+    if(dir_command == LEFT)
+    {
+        if(node->previous->previous)
+            return true;
+
+        return false;
+    } 
+
+    if(node->next->next)
+        return true;
+    
+    return false;
+
+}
 
 bool 
 ioopm_iterator_has_next(ioopm_iterator_t *iter)
 {
-    if(!iterator_init(iter)) return false;
-    node_t *node = iter->current_adress;
-    node_t *next_node = node->next;
+    ioopm_iterator_has(iter, RIGHT);
+}
 
-    if(next_node->next) // check if next is a dummy_node
-    {
-        return true;
-    }
-    return false;
+bool 
+ioopm_iterator_has_prev(ioopm_iterator_t *iter)
+{
+    ioopm_iterator_has(iter, LEFT);
 }
 
 option_t 
@@ -141,30 +161,14 @@ ioopm_iterator_previous(ioopm_iterator_t *iter)
 }
 
 option_t 
-ioopm_iterator_insert_right(ioopm_iterator_t *iter, elem_t value, elem_t key)
-{
-    option_t result = {0};
-
-    //Moving to first if it exists
-    iterator_init(iter); 
-    node_t *to_send = iter->current_adress;
-    result = ioopm_insert_node(to_send, value, key, 
-                               (ioopm_list_t *) iter->datastructure);
-    
-    iter->current_adress = to_send->next;
-    return result;
-
-}
-
-option_t 
-ioopm_iterator_insert_left(ioopm_iterator_t *iter, elem_t value, elem_t key)
+ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
 {
     option_t result = {0};
     
     node_t *to_send = iter->current_adress;
     
     //if list is empty just insert
-    if(iterator_init(iter))
+    if(iterator_init(iter) && !dir)
         to_send = to_send->previous;
 
     result = ioopm_insert_node(to_send, value, 

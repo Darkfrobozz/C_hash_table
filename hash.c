@@ -194,6 +194,7 @@ option_t
 iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
 {
     option_t result = {0};
+    //TODO CREATE ITERATOR INSTEAD
     ioopm_iterator_reset(iter);
     do
     {
@@ -203,17 +204,19 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
             continue;
         
         int command = cf(current_key.return_value, key);
+
         if(command == REPLACE)
         {
+            //This does not work either at first block, if we try to insert after deleting
+            //we will be inserting after the element/order will be wrong
             result.success = 1;
-            result.return_value = ioopm_iterator_current(iter).return_value;
             return result;
         }
         //this is for insertion prior to element, this also means
         //that when using lookup we only go to the first to make us insert previous
         if(command == INSERT_PREVIOUS)
         {
-            ioopm_iterator_previous(iter);
+            //DOES NOT WORK IF WE ARE IN START SINCE WE CAN'T MOVE BACK
             return result;
         }
     }
@@ -276,7 +279,7 @@ hash_remove_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
         }
         if(ht->clean_value)
         {
-            elem_t value = ioopm_iterator_current(iter).return_value;
+            elem_t value = ioopm_iterator_current_value(iter).return_value;
             ht->clean_value(&value, NULL);
         }
         ioopm_iterator_remove(iter);
@@ -288,13 +291,17 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
 { 
     if(!ht)
         return (option_t) {0};
-    
-    ioopm_iterator_t *current = get_bucket_iter(ht, key);
-    option_t result = iterate_find_key(current, ht->cf, key);
 
-    hash_remove_node(current, ht, result.success);
+    ioopm_iterator_t *iter = get_bucket_iter(ht, key);
+    option_t result = iterate_find_key(iter, ht->cf, key);
 
-    ioopm_iterator_insert(current, value, key);
+    ioopm_iterator_insert(iter, value, key, RIGHT);
+
+    if(result.success)
+    {
+        ioopm_iterator_previous(iter);
+        hash_remove_node(iter, ht, result.success);
+    }
 
     return result;
 

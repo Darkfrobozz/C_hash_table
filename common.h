@@ -18,6 +18,16 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 typedef struct list ioopm_list_t; /// Meta: structure definition goes in C file
 typedef struct node node_t;
 
+#define MOVE_ON 0
+#define REPLACE 1
+#define INSERT_PREVIOUS -1
+#define ASCII_GARBAGE 33
+#define DEL 127
+#define ASCII_SIZ 256
+#define RIGHT 1
+#define LEFT 0
+
+
 
 union elem
 {
@@ -56,16 +66,9 @@ struct list
 struct option
 {
   elem_t return_value;
-  bool success;
+  short success;
 };
 
-
-#define MOVE_ON 0
-#define REPLACE 1
-#define INSERT_PREVIOUS 2
-#define ASCII_GARBAGE 33
-#define DEL 127
-#define ASCII_SIZ 256
 
 
 short

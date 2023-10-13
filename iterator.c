@@ -171,11 +171,11 @@ option_t
 ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
 {
     option_t result = {0};
-    
+    bool ans = iterator_init(iter);
     node_t *to_send = iter->current_adress;
     
     //if list is empty just insert
-    if(iterator_init(iter) && !dir)
+    if((dir == LEFT) && ans)
         to_send = to_send->previous;
 
     result = ioopm_insert_node(to_send, value, 

@@ -5,7 +5,7 @@ ENDFLAGS = -lcunit -o
 test.o: common.o hash.o iterator.o linked_list.o extended.o tests.o
 	${CC} ${FLAGS} $^ ${ENDFLAGS} $@
 
-common.o: common.c
+common.o: common.c 
 	${CC} ${FLAGS} -c $^ -o $@
 hash.o: hash.c
 	${CC} ${FLAGS} -c $^ -o $@

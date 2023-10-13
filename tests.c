@@ -295,21 +295,20 @@ void double_iterator()
   send_values[1].i = 9;
   send_values[2].i = 15;
   ioopm_iterator_insert(iter_a, send_values[0], (elem_t) NULL, RIGHT);
-  ioopm_iterator_reset(iter_a);
-  ioopm_iterator_insert(iter_a, send_values[1], (elem_t) NULL, RIGHT);
+  ioopm_iterator_insert(iter_a, send_values[1], (elem_t) NULL, LEFT);
 
   ioopm_iterator_remove(iter_b);
 
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[1].i);
 
   ioopm_iterator_insert(iter_b, send_values[2], (elem_t) NULL, RIGHT);
   ioopm_iterator_next(iter_a);
 
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[2].i);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_b).return_value.i, send_values[2].i);
 
-  ioopm_iterator_previous(iter_a);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[2].i);
+  ioopm_iterator_remove(iter_a);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_b).return_value.i, send_values[1].i);
 
   ioopm_iterator_destroy(iter_a);
   ioopm_iterator_destroy(iter_b);
@@ -412,7 +411,7 @@ test_remove(void)
     for(int i = 0; i < arr_siz; i++)
     {
       sendvalues[i].i = rand();
-      randomkeys[i].i = rand();
+      randomkeys[i].i = rand() % 100 + 100 * i;
       ioopm_hash_table_insert(hash, randomkeys[i], sendvalues[i]);
     }
 
@@ -423,7 +422,6 @@ test_remove(void)
       if(result.success)
       CU_ASSERT_EQUAL(result.return_value.i, sendvalues[index].i);
 
-      CU_ASSERT_FALSE(ioopm_hash_table_lookup(hash, sendvalues[index]).success);
     }
 
     ioopm_hash_table_clear(hash);

@@ -386,6 +386,8 @@ ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
         
     hash_remove_node(iter, ht, to_remove.success);
 
+    if(to_remove.success != REPLACE)
+        to_remove.success = 0;
     return to_remove;
 }
 

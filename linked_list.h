@@ -4,11 +4,6 @@
 
 
 
-typedef bool(*ioopm_predicate_list)(elem_t value, void *arg);
-
-typedef void(*ioopm_apply_function_list)(elem_t *value, void *arg);
-
-
 
 /// @brief Creates a new empty list
 /// @return an empty linked list
@@ -65,7 +60,7 @@ ioopm_linked_list_get(ioopm_list_t *list, int index);
 /// @param element the element sought
 /// @return true if element is in the list, else false
 bool 
-ioopm_linked_list_contains(ioopm_list_t *list, elem_t element, ioopm_predicate_list comparer);
+ioopm_linked_list_contains(ioopm_list_t *list, elem_t element, ioopm_pred_value comparer);
 
 /// @brief Lookup the number of elements in the linked list in O(1) time
 /// @param list the linked list
@@ -91,7 +86,7 @@ ioopm_linked_list_clear(ioopm_list_t *list);
 /// @param extra an additional argument (may be NULL) that will be passed to all internal calls of prop
 /// @return true if prop holds for all elements in the list, else false
 bool 
-ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate_list prop, void *extra);
+ioopm_linked_list_all(ioopm_list_t *list, ioopm_pred_value prop, void *extra);
 
 /// @brief Test if a supplied property holds for any element in a list.
 /// The function returns as soon as the return value can be determined.
@@ -100,18 +95,18 @@ ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate_list prop, void *extra
 /// @param extra an additional argument (may be NULL) that will be passed to all internal calls of prop
 /// @return true if prop holds for any elements in the list, else false
 bool 
-ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate_list prop, void *extra);
+ioopm_linked_list_any(ioopm_list_t *list, ioopm_pred_value prop, void *extra);
 
 /// @brief Apply a supplied function to all elements in a list.
 /// @param list the linked list
 /// @param fun the function to be applied
 /// @param extra an additional argument (may be NULL) that will be passed to all internal calls of fun
 void 
-ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_function_list fun, void *extra);
+ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_transform_value fun, void *extra);
 
 
 void 
-ioopm_filter_all(ioopm_list_t *list, ioopm_predicate_list pred, void *extra);
+ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra);
 
 
 void 
@@ -128,7 +123,8 @@ ioopm_list_t *
 ioopm_get_iterator(ioopm_list_t *list);
 
 void
-ioopm_list_clear_and_destroy(ioopm_list_t *list, ioopm_predicate_list pred, void **arg);
+ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value, 
+                   ioopm_transform_value i_clean_key);
 
 
 /**
@@ -154,7 +150,7 @@ ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool takekey);
  */
 void 
 ioopm_list_apply_extended(ioopm_list_t *list, 
-                               ioopm_apply_function_list fun_value, 
+                               ioopm_transform_value fun_value, 
                                void *extra_value,
-                               ioopm_apply_function_list fun_key, 
+                               ioopm_transform_value fun_key, 
                                void *extra_key);

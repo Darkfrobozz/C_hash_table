@@ -117,6 +117,14 @@ add_siz(elem_t A, elem_t B)
     return result;
 }
 
+elem_t
+biggest_siz(elem_t c_siz, elem_t f_siz)
+{
+  if(c_siz.siz < f_siz.siz)
+    return f_siz;
+  return c_siz;
+}
+
 void
 ioopm_print_string(elem_t *key, void *arg)
 {

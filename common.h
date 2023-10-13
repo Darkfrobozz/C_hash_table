@@ -14,6 +14,13 @@ typedef int(*hashing_func)(elem_t key, void *arg);
 typedef short(*compare_func)(elem_t node_key, elem_t key_fetched);
 typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 
+
+//applies to a nodes value
+typedef bool(*ioopm_pred_value)(elem_t value, void *arg);
+typedef void(*ioopm_transform_value)(elem_t *value, void *arg);
+
+
+
 //Linkedlist types
 typedef struct list ioopm_list_t; /// Meta: structure definition goes in C file
 typedef struct node node_t;
@@ -56,6 +63,8 @@ struct list
     size_t size;
     node_t *first; //dummy node
     node_t *last; // dummy node
+    ioopm_transform_value clean_value;
+    ioopm_transform_value clean_key;
     ioopm_list_t *iterator_list;
 };
 
@@ -97,27 +106,36 @@ ioopm_int_hash(elem_t key, void *arg);
 int
 ioopm_string_hash(elem_t key, void *arg);
 
-bool ioopm_equals_int(elem_t value, void *arg);
 
-void ioopm_increment_int(elem_t *value, void *arg);
+//Basic pred functions
+bool 
+ioopm_equals_int(elem_t value, void *arg);
 
-int compare_int_elements(elem_t a, elem_t b);
-
-bool ioopm_equals_adress(elem_t value, void *arg);
+bool 
+ioopm_equals_adress(elem_t value, void *arg);
 
 bool
 ioopm_lesser_than(elem_t value, void *arg);
 
+
+// combining functions
 elem_t 
 add_siz(elem_t A, elem_t B);
 
+elem_t
+biggest_siz(elem_t c_siz, elem_t f_siz);
 
-
+// printing functions
 void
 ioopm_print_string(elem_t *key, void *arg);
 
 void
 ioopm_print_number(elem_t *value, void *arg);
+
+//Transform funcs
+void 
+ioopm_increment_int(elem_t *value, void *arg);
+
 
 /**
  * @brief Used to clean one value at a time

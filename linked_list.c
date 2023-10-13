@@ -9,7 +9,8 @@
 typedef void(*handler)(node_t *node, bool *success, void **arg);
 
 
-ioopm_list_t *ioopm_linked_list_create(void)
+ioopm_list_t *
+ioopm_linked_list_create(void)
 {
     ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
     node_t *first = calloc(1, sizeof(node_t));
@@ -21,9 +22,13 @@ ioopm_list_t *ioopm_linked_list_create(void)
     return result;
 }
 
-void ioopm_linked_list_destroy(ioopm_list_t *list)
+void 
+ioopm_linked_list_destroy(ioopm_list_t *list)
 {
-    if(!list) return;
+    if(!list) 
+        return;
+    //iterator_list is merely destroyed but not cleared!
+    ioopm_linked_list_clear(list->iterator_list);
     ioopm_linked_list_destroy(list->iterator_list);
     free(list->first);
     free(list->last);
@@ -41,7 +46,9 @@ void ioopm_linked_list_destroy(ioopm_list_t *list)
  * 
  * @return node_t* A pointer to the previous node
  */
-node_t *traverse_list(node_t *starting_node, int start_index, int dir, int goal_index)
+static
+node_t *
+traverse_list(node_t *starting_node, int start_index, int dir, int goal_index)
 {
     while(start_index != goal_index)
     {
@@ -65,7 +72,9 @@ node_t *traverse_list(node_t *starting_node, int start_index, int dir, int goal_
 /// @brief Find the previous node of a node at a specific index and tells traverse list how to do its job
 /// @param list
 /// @param index
-node_t *find_previous_node(ioopm_list_t *list, int index)
+static
+node_t *
+find_previous_node(ioopm_list_t *list, int index)
 {
 
     if(index <= (list->size / 2))
@@ -78,7 +87,8 @@ node_t *find_previous_node(ioopm_list_t *list, int index)
 }
 
 
-option_t ioopm_linked_list_get(ioopm_list_t *list, int index)
+option_t 
+ioopm_linked_list_get(ioopm_list_t *list, int index)
 {
     option_t result = {0};
     if(list == NULL || index < 0 || index >= list->size)
@@ -94,16 +104,16 @@ option_t ioopm_linked_list_get(ioopm_list_t *list, int index)
     return result;
 
 }
+
 option_t 
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
-    option_t result = {0};
     node_t *insert = calloc(1, sizeof(node_t));
     insert->value = i_value;
     insert->key = i_key;
 
 
-
+    //can we abstract this?
     node_t *next_node = prev_node->next;
 
     prev_node->next = insert;
@@ -112,12 +122,7 @@ ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t 
     insert->previous = prev_node;
 
     list->size++;
-
-    result.success = 1;
-    result.return_value = i_value;
-
-    return result;
-    
+    return (option_t) {.return_value = i_value, .success = 1};    
 }
 
 option_t 
@@ -146,22 +151,26 @@ ioopm_linked_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 }
 
 
-option_t ioopm_linked_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
+option_t 
+ioopm_linked_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     return ioopm_linked_list_insert(list, 0, i_value, i_key);
 }
 
-size_t ioopm_linked_list_size(ioopm_list_t *list)
+size_t 
+ioopm_linked_list_size(ioopm_list_t *list)
 {
     return list->size;
 }
 
-bool ioopm_linked_list_is_empty(ioopm_list_t *list)
+bool 
+ioopm_linked_list_is_empty(ioopm_list_t *list)
 {
     return (list->size == 0);
 }
 
-option_t ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
+option_t 
+ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
 {
     option_t result = {0};
 
@@ -185,7 +194,8 @@ option_t ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
    
 }
 
-option_t ioopm_linked_list_remove(ioopm_list_t *list, int index)
+option_t 
+ioopm_linked_list_remove(ioopm_list_t *list, int index)
 {
 
     option_t result = {0};
@@ -201,7 +211,8 @@ option_t ioopm_linked_list_remove(ioopm_list_t *list, int index)
     return result;
 }
 
-ioopm_list_t *ioopm_get_iterator(ioopm_list_t *list)
+ioopm_list_t *
+ioopm_get_iterator(ioopm_list_t *list)
 {
     return list->iterator_list;
 }
@@ -212,9 +223,10 @@ ioopm_list_t *ioopm_get_iterator(ioopm_list_t *list)
  * @param success Communicate outcome of predicate
  * @param arg Contains predicate to apply and extra arguments to it
  */
-void true_all(node_t *node, bool *success, void **arg)
+void 
+true_all(node_t *node, bool *success, void **arg)
 {
-    ioopm_predicate_list pred = arg[0];
+    ioopm_pred_value pred = arg[0];
     if(!pred(node->value, arg[1]))
     {
         *success = false;
@@ -222,9 +234,10 @@ void true_all(node_t *node, bool *success, void **arg)
 }
 
 //similar to true all
-void true_any(node_t *node, bool *success, void **arg)
+void 
+true_any(node_t *node, bool *success, void **arg)
 {
-    ioopm_predicate_list pred = arg[0];
+    ioopm_pred_value pred = arg[0];
     if(pred(node->value, arg[1]))
     {
         *success = true;
@@ -252,43 +265,56 @@ append_node(node_t *node, bool *take_key, void **arg)
     ioopm_linked_list_append(list, node->value, node->key);
 }
 
-void transform_extended(node_t *node, bool *success, void **arg)
+void 
+transform_list_node(node_t *node, bool *success, void **arg)
 {
-    ioopm_apply_function_list func_value = arg[0];
-    ioopm_apply_function_list func_key = arg[1];
+    ioopm_transform_value func_value = arg[0];
+    ioopm_transform_value func_key = arg[1];
     if(func_value)
         func_value(&(node->value), arg[2]);
     if(func_key)
         func_key(&(node->key), arg[3]);
 }
 
-
-void clear_node(node_t *node, bool *success, void **arg)
-{
-    free(node);
-}
-
-void destroy_iter(node_t *node, bool *success, void **arg)
+void 
+destroy_iter(node_t *node, bool *success, void **arg)
 {
     ioopm_iterator_t *iter = node->value.p;
     ioopm_iterator_destroy(iter);
 }
 
-
-void filter(node_t *node, bool *success, void **arg)
+void
+ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value, 
+                   ioopm_transform_value i_clean_key)
 {
-    ioopm_predicate_list pred = arg[0];
+    list->clean_key = i_clean_key;
+    list->clean_value = i_clean_value;
+}
+
+static
+void 
+filter(node_t *node, bool *success, void **arg)
+{
+    ioopm_pred_value pred = arg[0];
     ioopm_list_t *list = arg[1];
-    if(pred(node->value, arg[2]))
+    //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
+    if(!pred || pred(node->value, arg[2]))
     {
         node_t *next_node = node->next;
         node_t *prev_node = node->previous;
+        //works when at 1 node
         next_node->previous = prev_node;
         prev_node->next = next_node;
-        clear_node(node, success, arg);
+
+        if(list->clean_key)
+            list->clean_key(&(node->key), NULL);
+        if(list->clean_value)
+            list->clean_value(&(node->value), NULL);
+        free(node);
         (list->size)--;
     }
 }
+
 /**
  * @brief This will be our factory pipeline, we put each element in the list into the pipe
  * and make some change to it.
@@ -301,13 +327,15 @@ void filter(node_t *node, bool *success, void **arg)
  * @return true 
  * @return false 
  */
-void pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
+static
+void 
+pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
 {
     if(list->size <= 0) return;
 
     node_t *node_to_handle = list->first->next;
 
-    while(node_to_handle != list->last)
+    while(node_to_handle->next)
     {
         node_t *temp = node_to_handle->next;
         func(node_to_handle, success, arg);
@@ -315,7 +343,7 @@ void pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
     }
 }
 
-bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate_list prop, void *extra)
+bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_pred_value prop, void *extra)
 {
     bool success = true;
     void *arg[] = {prop, extra};
@@ -323,7 +351,7 @@ bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate_list prop, void *
     return success;
 }
 
-bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate_list prop, void *extra)
+bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_pred_value prop, void *extra)
 {
     bool success = false;
     void *arg[] = {prop, extra};
@@ -333,13 +361,13 @@ bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate_list prop, void *
 
 
 
-bool ioopm_linked_list_contains(ioopm_list_t *list, elem_t element, ioopm_predicate_list comparer)
+bool ioopm_linked_list_contains(ioopm_list_t *list, elem_t element, ioopm_pred_value comparer)
 {
     return ioopm_linked_list_any(list, comparer, &element);
 }
 
 
-void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_function_list fun, 
+void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_transform_value fun, 
                                     void *extra)
 {
     if(!list || !fun) return;
@@ -347,50 +375,31 @@ void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_function_lis
     ioopm_list_apply_extended(list, fun, extra, NULL, NULL);
 }
 
-void ioopm_list_apply_extended(ioopm_list_t *list, 
-                               ioopm_apply_function_list fun_value, void *extra_value,
-                               ioopm_apply_function_list fun_key, void *extra_key)
+void 
+ioopm_list_apply_extended(ioopm_list_t *list, 
+                               ioopm_transform_value fun_value, void *extra_value,
+                               ioopm_transform_value fun_key, void *extra_key)
 {
     bool placeholder;
     void *arg[] = {fun_value, fun_key, extra_value, extra_key};
-    pipeline(list, &placeholder, transform_extended, arg);
+    pipeline(list, &placeholder, transform_list_node, arg);
 }
 
 
-void ioopm_linked_list_clear(ioopm_list_t *list)
+//we should expand this
+void 
+ioopm_linked_list_clear(ioopm_list_t *list)
 {
-    if(!list) return;
-    bool success = true;
-    pipeline(list, &success, clear_node, NULL);
-    list->first->next = list->last;
-    list->last->previous = list->first;
-    list->size = 0;
+    if(!list)
+        return;
+    ioopm_filter_all(list, NULL, NULL);
 }
 
-void ioopm_filter_all(ioopm_list_t *list, ioopm_predicate_list pred, void *extra)
+void ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra)
 {
     bool success;
     void *arg[] = {pred, list, extra};
     pipeline(list, &success, filter, arg);
-}
-
-void
-ioopm_list_clear_and_destroy(ioopm_list_t *list, ioopm_predicate_list pred, void **arg)
-{
-    if(list)
-    {
-        bool placeholder;
-        ioopm_list_t *iterator_list = ioopm_get_iterator(list);
-
-        if(iterator_list)
-        {
-            pipeline(iterator_list, &placeholder, destroy_iter, NULL);
-            ioopm_linked_list_clear(iterator_list);
-        }
-
-        ioopm_linked_list_clear(list);
-        ioopm_linked_list_destroy(list); //Destroys all lists recursively
-    }
 }
 
 
@@ -399,7 +408,6 @@ ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool take_key)
 {
     bool choice = take_key;
     void *arg[] = {listA};
-    pipeline(listB, &choice, append_node, arg);
-    
+    pipeline(listB, &choice, append_node, arg);    
 }
 

@@ -16,6 +16,7 @@ struct merchandise
     char *desc;
     int price;
     int hash_stock; //a counter, how many there are in stock total (including all shelfs)
+    ioopm_list_t *stock_slots;
 };
 
 struct stock_value

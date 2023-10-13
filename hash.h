@@ -87,7 +87,7 @@ ioopm_hash_table_has_key(ioopm_hash_table_t *ht, elem_t key);
 /// @param value the value sought
 bool 
 ioopm_hash_table_has_value(ioopm_hash_table_t *ht, 
-                           elem_t value, ioopm_predicate_list pred);
+                           elem_t value, ioopm_pred_value pred);
 
 /// @brief check if a predicate is satisfied by all entries in a hash table
 /// @param h hash table operated upon
@@ -95,7 +95,7 @@ ioopm_hash_table_has_value(ioopm_hash_table_t *ht,
 /// @param arg extra argument to pred
 bool 
 ioopm_hash_table_all(ioopm_hash_table_t *ht, 
-                     ioopm_predicate_list pred, void *arg);
+                     ioopm_pred_value pred, void *arg);
 
 /// @brief check if a predicate is satisfied by any entry in a hash table
 /// @param h hash table operated upon
@@ -103,7 +103,7 @@ ioopm_hash_table_all(ioopm_hash_table_t *ht,
 /// @param arg extra argument to pred
 bool 
 ioopm_hash_table_any(ioopm_hash_table_t *ht, 
-                     ioopm_predicate_list pred, void *arg);
+                     ioopm_pred_value pred, void *arg);
 
 /// @brief apply a function to all entries in a hash table
 /// @param h hash table operated upon
@@ -111,7 +111,7 @@ ioopm_hash_table_any(ioopm_hash_table_t *ht,
 /// @param arg extra argument to apply_fun
 void 
 ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, 
-                              ioopm_apply_function_list apply_fun, void *arg);
+                              ioopm_transform_value apply_fun, void *arg);
 
 
 /**
@@ -122,12 +122,30 @@ ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht,
  * @param clean_value 
  */
 void
-ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_apply_function_list clean_key,
-                       ioopm_apply_function_list clean_value);
+ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_transform_value clean_key,
+                       ioopm_transform_value clean_value);
 
 void 
 ioopm_hash_apply_extended(ioopm_hash_table_t *ht, 
-                               ioopm_apply_function_list fun_value, 
+                               ioopm_transform_value fun_value, 
                                void *extra_value,
-                               ioopm_apply_function_list fun_key, 
+                               ioopm_transform_value fun_key, 
                                void *extra_key);
+
+
+/**
+ * @brief Evaluates based on fill percent whether to resize
+ *
+ * @return yes or no 
+ */
+bool
+ioopm_evaluate_hash(ioopm_hash_table_t *ht);
+
+/**
+ * @brief This is to inspect the balance of the hash
+ * 
+ * @return ioopm_list_t* Returns a list with size and hash id
+ * Lists that do not exist will be 0 size
+ */
+ioopm_list_t *
+ioopm_get_size_table(void);

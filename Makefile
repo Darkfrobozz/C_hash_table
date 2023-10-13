@@ -1,19 +1,29 @@
 CC = gcc
-FLAGS = -Wall -g
+CFLAGS = -Wall -g -Iinclude
 ENDFLAGS = -lcunit -o
+HEADER_FILES := $(wildcard *.h)
+SRC_FILES := $(wildcard *.c)
+BIN_DIR := bin
 
-test.o: common.o hash.o iterator.o linked_list.o extended.o tests.o
-	${CC} ${FLAGS} $^ ${ENDFLAGS} $@
+LIB_DIR := lib
 
-common.o: common.c 
-	${CC} ${FLAGS} -c $^ -o $@
-hash.o: hash.c
-	${CC} ${FLAGS} -c $^ -o $@
-iterator.o: iterator.c
-	${CC} ${FLAGS} -c $^ -o $@
-linked_list.o: linked_list.c
-	${CC} ${FLAGS} -c $^ -o $@
-extended.o: extended.c
-	${CC} ${FLAGS} -c $^ -o $@
-tests.o: tests.c
-	${CC} ${FLAGS} -c $^ -o $@
+LIBRARY := $(LIB_DIR)/libhash.a
+
+OBJ_FILES := $(patsubst %.c, $(BIN_DIR)/%.o, $(SRC_FILES))
+
+all: $(LIBRARY)
+
+tests: $(BIN_DIR)/tests
+
+$(BIN_DIR)/tests: $(OBJ_FILES)
+	${CC} ${CFLAGS} $^ ${ENDFLAGS} $@
+
+$(LIBRARY): $(OBJ_FILES)
+	ar rcs $(LIBRARY) $^
+
+$(BIN_DIR)/%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+clean:
+	rm -f $(OBJ_FILES)

@@ -1,5 +1,5 @@
-#include "hash.h"
-#include "iterator.h"
+#include "include/hash.h"
+#include "include/iterator.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>

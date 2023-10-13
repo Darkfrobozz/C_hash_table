@@ -1,5 +1,5 @@
-#include "iterator.h"
-#include "linked_list.h"
+#include "include/iterator.h"
+#include "include/linked_list.h"
 #include <stdlib.h>
 
 enum itertypes{list_iter, hash_iter};

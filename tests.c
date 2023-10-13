@@ -1,13 +1,13 @@
 #include <CUnit/Basic.h>
-#include "hash.h"
-#include "extended.h"
-#include "iterator.h"
+#include "include/hash.h"
+#include "include/extended.h"
+#include "include/iterator.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
 #define no_buckets 17
 
-int
+int 
 init_suite(void) 
 {
   // Change this function if you want to do something *before* you

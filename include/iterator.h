@@ -84,3 +84,9 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter);
 /// @return the current key
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter);
+
+/// @brief Clears
+/// @param value 
+/// @param arg
+void
+ioopm_iterator_clear(elem_t *value, void *arg);

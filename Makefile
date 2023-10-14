@@ -1,8 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -g -Iinclude
 ENDFLAGS = -lcunit -o
-HEADER_FILES := $(wildcard *.h)
+HEADER_FILES := $(wildcard include/*.h)
 SRC_FILES := $(wildcard *.c)
+
+TEST_DIR := tests
+
 BIN_DIR := bin
 
 LIB_DIR := lib
@@ -13,10 +16,10 @@ OBJ_FILES := $(patsubst %.c, $(BIN_DIR)/%.o, $(SRC_FILES))
 
 all: $(LIBRARY)
 
-tests: $(BIN_DIR)/tests
+testhash: $(BIN_DIR)/testhash
 
-$(BIN_DIR)/tests: $(OBJ_FILES)
-	${CC} ${CFLAGS} $^ ${ENDFLAGS} $@
+$(BIN_DIR)/testhash: $(TEST_DIR)/tests.c $(LIBRARY)
+	${CC} ${CFLAGS} $<  -lhash -Llib ${ENDFLAGS} $@
 
 $(LIBRARY): $(OBJ_FILES)
 	ar rcs $(LIBRARY) $^

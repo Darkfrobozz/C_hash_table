@@ -1,7 +1,7 @@
 #include <CUnit/Basic.h>
-#include "include/hash.h"
-#include "include/extended.h"
-#include "include/iterator.h"
+#include "../include/hash.h"
+#include "../include/extended.h"
+#include "../include/iterator.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -25,7 +25,6 @@ clean_suite(void)
 
 // These are example test functions. You should replace them with
 // functions of your own.
-
 void test_list_init()
 {
   ioopm_list_t *test_link = ioopm_linked_list_create();
@@ -198,12 +197,19 @@ void test_increment()
 void test_create_iterator()
 {
   ioopm_list_t *link = ioopm_linked_list_create();
-  ioopm_iterator_t *i = ioopm_list_iterator(link);
-  ioopm_iterator_t *j = ioopm_list_iterator(link);
-  ioopm_iterator_destroy(i);
-  CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 1);
-  ioopm_iterator_destroy(j);
-  CU_ASSERT(ioopm_linked_list_is_empty(link->iterator_list));
+  ioopm_iterator_t *iter1 = ioopm_list_iterator(link);
+  ioopm_iterator_t *iter2 = ioopm_list_iterator(link);
+  ioopm_iterator_t *iter3 = ioopm_list_iterator(link);
+  ioopm_iterator_t *iter4 = ioopm_list_iterator(link);
+  ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
+  ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
+  ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
+  ioopm_iterator_destroy(iter1);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 3);
+  ioopm_iterator_destroy(iter2);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 2);
+  ioopm_iterator_has_next(iter3);
+  ioopm_iterator_has_next(iter4);
   ioopm_linked_list_clear(link);
   ioopm_linked_list_destroy(link);
   

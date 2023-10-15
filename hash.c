@@ -156,8 +156,7 @@ pipe_lists(ioopm_hash_table_t *ht, handler func, void **arg)
     {
         ioopm_list_t *list_to_handle = ht->buckets[index];
         work = func(list_to_handle, arg);   
-    }
-    
+    }    
 }
 
 //Creation and clearing methods
@@ -495,9 +494,29 @@ void ioopm_hash_apply_extended(ioopm_hash_table_t *ht,
     pipe_lists(ht, transform_elements, arg_send);
 }
 
+static
+ioopm_list_t *
+size_list(ioopm_hash_table_t *ht)
+{
+    ioopm_list_t *size_list = ioopm_linked_list_create();
+    elem_t result;
+    result.p = size_list;
+    void *arg[] = {fetch_list_size, ioopm_element_to_list, &result, NULL};
+
+    pipe_lists(ht, calculate_list, arg);
+
+    return size_list;
+
+}
+
+
+
 bool
 ioopm_evaluate_hash(ioopm_hash_table_t *ht)
 {
+    ioopm_list_t *balance = size_list(ht);
+    ioopm_linked_list_clear(balance);
+    ioopm_linked_list_destroy(balance);
     return false;
     //Gather data
     //Balance could look for mode... In other words return highest list size

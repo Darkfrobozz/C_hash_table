@@ -145,3 +145,6 @@ ioopm_increment_int(elem_t *value, void *arg);
  */
 void
 ioopm_clean_value_strings(elem_t *value, void *arg);
+
+elem_t
+ioopm_element_to_list(elem_t list, elem_t item);

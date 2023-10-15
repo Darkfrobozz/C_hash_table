@@ -68,3 +68,4 @@ ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);
 
 void
 ioopm_clean_strings(elem_t *key, void *arg);
+

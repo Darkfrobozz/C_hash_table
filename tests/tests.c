@@ -696,8 +696,22 @@ test_apply_all()
 }
 void
 test_hash_stats(void)
-{
+{  
+  ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash,
+  ioopm_int_compare, no_buckets);
+  elem_t sendvalues[arr_siz];
+  for(int i = 0; i < arr_siz; i++)
+  {
+    sendvalues[i].i = i;
+    int index = i % 2 + no_buckets * i;
+    elem_t index_elem;
+    index_elem.i = index;
+    ioopm_hash_table_insert(hash, index_elem, sendvalues[i]);
+  }
 
+  ioopm_evaluate_hash(hash);
+  ioopm_hash_table_clear(hash);
+  ioopm_hash_table_destroy(hash);
 }
 void
 test_resize(void)
@@ -737,11 +751,6 @@ test_merch_hashtable(void)
   }
 
   ioopm_list_t *list = ioopm_hash_table_keys(hash);
-  for(int i = 0; i < 4; i++)
-  {
-    merch_t *merch = ioopm_linked_list_get(list, i).return_value.p;
-    printf("%s\n", merch->name);
-  }
   ioopm_linked_list_clear(list);
   ioopm_linked_list_destroy(list);
   ioopm_hash_table_clear(hash);
@@ -853,6 +862,7 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
     || (CU_add_test(hash_suite, "Hashing merch", test_merch_hashtable) == NULL)
     || (CU_add_test(hash_suite, "Adding shelves to merch", test_stock_hash) == NULL)
+    || (CU_add_test(hash_suite, "Hash Stat", test_hash_stats) == NULL)
     || 0
   )
     {

@@ -103,3 +103,5 @@ ioopm_clean_stock(elem_t *value, void *arg)
     stock_value_t *val = value->p;
     free(val);
 }
+
+

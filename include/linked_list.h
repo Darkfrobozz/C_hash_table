@@ -154,3 +154,6 @@ ioopm_list_apply_extended(ioopm_list_t *list,
                                void *extra_value,
                                ioopm_transform_value fun_key, 
                                void *extra_key);
+
+elem_t
+ioopm_element_to_list(elem_t list, elem_t item);

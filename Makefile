@@ -16,9 +16,9 @@ OBJ_FILES := $(patsubst %.c, $(BIN_DIR)/%.o, $(SRC_FILES))
 
 all: $(LIBRARY)
 
-testhash: $(BIN_DIR)/testhash
+test: $(BIN_DIR)/hash
 
-$(BIN_DIR)/testhash: $(TEST_DIR)/tests.c $(LIBRARY)
+$(BIN_DIR)/hash: $(TEST_DIR)/tests.c $(LIBRARY)
 	${CC} ${CFLAGS} $<  -lhash -Llib ${ENDFLAGS} $@
 
 $(LIBRARY): $(OBJ_FILES)
@@ -29,4 +29,4 @@ $(BIN_DIR)/%.o: %.c
 
 
 clean:
-	rm -f $(OBJ_FILES)
+	rm -f $(OBJ_FILES) lib/libhash.a bin/hash

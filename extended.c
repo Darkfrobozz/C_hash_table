@@ -58,6 +58,8 @@ ioopm_merch_create(char *i_name, char *i_desc, int i_price)
   merch->name = i_name;
   merch->desc = i_desc;
   merch->price = i_price;
+  merch->hash_stock = 0;
+  merch->stock_slots = ioopm_linked_list_create();
   return merch;
 }
 
@@ -72,6 +74,8 @@ ioopm_clean_merch(elem_t *key, void *arg)
     free(merch->name);
   }
   free(merch->desc);
+  ioopm_linked_list_clear(merch->stock_slots);
+  ioopm_linked_list_destroy(merch->stock_slots);
   free(merch);
 }
 
@@ -104,4 +108,8 @@ ioopm_clean_stock(elem_t *value, void *arg)
     free(val);
 }
 
-
+stock_value_t
+ioopm_stock_value_create(int i_amount, merch_t *i_merch)
+{
+  return (stock_value_t) { .amount = i_amount, .merch = i_merch};
+}

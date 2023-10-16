@@ -178,6 +178,8 @@ void
 init_bucket(ioopm_hash_table_t *ht, int key)
 {
     ht->buckets[key] = ioopm_linked_list_create();
+    ht->buckets[key]->clean_key = ht->clean_key;
+    ht->buckets[key]->clean_value = ht->clean_value;
     ioopm_list_iterator(ht->buckets[key]);
 }
 

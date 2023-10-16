@@ -42,7 +42,7 @@ merch_t *
 ioopm_merch_create(char *name, char *desc, int price);
 
 stock_value_t
-ioopm_stock_value_create(int amount, merch_t *merch);
+ioopm_stock_value_create(int i_amount, merch_t *i_merch);
 
 int
 ioopm_merch_hash(elem_t key, void *arg);
@@ -53,6 +53,10 @@ ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch);
 int
 ioopm_stock_hash(elem_t shelf, void *arg);
 
+short
+ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);
+
+
 /**
  * @brief Function used when removing elements from hashtable. Can only be used
  * when merch is allocated on stack.
@@ -62,9 +66,6 @@ ioopm_stock_hash(elem_t shelf, void *arg);
  */
 void
 ioopm_clean_merch(elem_t *key, void *arg);
-
-short
-ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);
 
 void
 ioopm_clean_strings(elem_t *key, void *arg);

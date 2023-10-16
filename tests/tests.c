@@ -737,22 +737,20 @@ test_merch_hashtable(void)
   elem_t em_4;
   em_4.p = &m_4;
   
+  merch_t merch[] = {m_1, m_2, m_3, m_4};
   elem_t merchpointer[] = {em_1, em_2, em_3, em_4};
   
   for(int i = 0; i < 4; i++)
   {
-    ioopm_hash_table_insert(hash, merchpointer[i], merchpointer[i]);
+    ioopm_hash_table_insert(hash, (elem_t) merch[i].name, merchpointer[i]);
   }
 
   for(int i = 0; i < 4; i++)
   {
-    option_t value = ioopm_hash_table_lookup(hash, merchpointer[i]);
+    option_t value = ioopm_hash_table_lookup(hash, (elem_t) merch[i].name);
     CU_ASSERT(value.success);
   }
 
-  ioopm_list_t *list = ioopm_hash_table_keys(hash);
-  ioopm_linked_list_clear(list);
-  ioopm_linked_list_destroy(list);
   ioopm_hash_table_clear(hash);
   ioopm_hash_table_destroy(hash);
 }
@@ -766,7 +764,7 @@ test_stock_hash(void)
   ioopm_hash_table_t *stock_table = ioopm_hash_table_create(ioopm_stock_hash,
   ioopm_stock_cmp, no_buckets);
 
-  ioopm_hash_add_cleaner(merch_table, ioopm_clean_merch, NULL);
+  ioopm_hash_add_cleaner(merch_table, NULL, ioopm_clean_merch);
   ioopm_hash_add_cleaner(stock_table, ioopm_clean_strings, NULL);
 
   merch_t *arr[25];
@@ -794,16 +792,13 @@ test_stock_hash(void)
     
     elem_t m_hashed;
     m_hashed.p = arr[index];
-    ioopm_hash_table_insert(merch_table, m_hashed, m_hashed);
+    ioopm_hash_table_insert(merch_table, (elem_t) arr[index]->name, m_hashed);
   }
 
   //Trying to get the merch through a   
   for(int index = 0; index < 25; index++)
   {
-    elem_t get_merch;
-    get_merch.p = arr[index];
-
-    CU_ASSERT(ioopm_hash_table_lookup(merch_table, get_merch).success);
+    CU_ASSERT(ioopm_hash_table_lookup(merch_table, (elem_t) arr[index]->name).success);
 
     char shelfarr[] = {65 + index, index % 10 + 48, index % 10 + 48};
     char *shelf = strdup(shelfarr);

@@ -32,22 +32,19 @@ hash_char(char b, void *arg)
 
 
 // FOR MERCH HASH TABLE
-
+// Fix normal string WHAT IS THIS
 
 short
 ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch)
 {
-  merch_t *f_merch = key_fetch.p;
-  merch_t *h_merch = key_hash.p;
-  return string_compare(h_merch->name, f_merch->name);
+  return string_compare(key_hash.normal_string, key_fetch.normal_string);
 }
 
 //Only works for higher bucket values...
 int
 ioopm_merch_hash(elem_t key_fetched, void *arg)
 {
-  merch_t *merch_fetched = key_fetched.p;
-  return hash_char(merch_fetched->name[0], arg);
+  return hash_char(key_fetched.normal_string[0], arg);
 }
 
 

@@ -166,8 +166,8 @@ ioopm_hash_table_create(hashing_func hh_received, compare_func cf_received,
 {
     ioopm_hash_table_t *ht = calloc(1, sizeof(ioopm_hash_table_t));
     ht->hash_siz = hash_siz;
-    ht->buckets = calloc(ht->hash_siz, sizeof(ioopm_list_t *));
     ht->hh = hh_received;
+    ht->buckets = calloc(ht->hash_siz, sizeof(ioopm_list_t *));
     ht->cf = cf_received;
     return ht;
 }
@@ -180,7 +180,6 @@ init_bucket(ioopm_hash_table_t *ht, int key)
     ht->buckets[key] = ioopm_linked_list_create();
     ht->buckets[key]->clean_key = ht->clean_key;
     ht->buckets[key]->clean_value = ht->clean_value;
-    ioopm_list_iterator(ht->buckets[key]);
 }
 
 
@@ -292,12 +291,10 @@ get_bucket_iter(ioopm_hash_table_t *ht, elem_t key)
 
     list_s = ht->buckets[index];
 
-    ioopm_list_t *list_iterator = ioopm_get_iterator(list_s);
+    
+    ioopm_iterator_t *list_iterator = ioopm_list_iterator(list_s);
 
-    ioopm_iterator_t *current =
-    ioopm_linked_list_get(list_iterator, 0).return_value.p;
-
-    return current;
+    return list_iterator;
 }
 
 
@@ -309,12 +306,18 @@ ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
     if(!ht)
         return result;
 
-    result = iterate_find_key(get_bucket_iter(ht, key), ht->cf, key);
 
-    if(result.success == REPLACE)
-        return result;
+    ioopm_iterator_t *iter = get_bucket_iter(ht, key);
+    result = iterate_find_key(iter, ht->cf, key);
+
+    if(result.success != REPLACE)
+        result.success = 0;
     
-    return (option_t) {0};
+    //cleaning up iterator from get_bucket_iter
+    if(iter)
+        ioopm_iterator_destroy(iter);
+    
+    return result;
 }
 
 void
@@ -358,23 +361,26 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
     if(result.success == INSERT_PREVIOUS)
     {
         ht->elements++;
-        return ioopm_iterator_insert(iter, value, key, LEFT);
+        result = ioopm_iterator_insert(iter, value, key, LEFT);
     }
     
     if(result.success == REPLACE) 
     {
         clean_data(iter, ht->clean_value, ht->clean_key);
         ioopm_iterator_edit(iter, value, key);
-        return ioopm_iterator_current_value(iter);
+        result = ioopm_iterator_current_value(iter);
     }
 
     if(result.success == MOVE_ON)
     {
         ht->elements++;
-        return ioopm_iterator_insert(iter, value, key, RIGHT);
+        result = ioopm_iterator_insert(iter, value, key, RIGHT);
     }
 
-    return (option_t) {0};
+    if(iter)
+        ioopm_iterator_destroy(iter);
+    
+    return result;
 
 }
 
@@ -389,6 +395,8 @@ ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
 
     if(to_remove.success != REPLACE)
         to_remove.success = 0;
+    
+    ioopm_iterator_destroy(iter);
     return to_remove;
 }
 

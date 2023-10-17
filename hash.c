@@ -162,10 +162,10 @@ pipe_lists(ioopm_hash_table_t *ht, handler func, void **arg)
 //Creation and clearing methods
 ioopm_hash_table_t *
 ioopm_hash_table_create(hashing_func hh_received, compare_func cf_received, 
-                        size_t hash_siz)
+                        size_t i_hash_siz)
 {
     ioopm_hash_table_t *ht = calloc(1, sizeof(ioopm_hash_table_t));
-    ht->hash_siz = hash_siz;
+    ht->hash_siz = i_hash_siz;
     ht->hh = hh_received;
     ht->buckets = calloc(ht->hash_siz, sizeof(ioopm_list_t *));
     ht->cf = cf_received;
@@ -270,7 +270,12 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
     return result;
 }
 
-
+static
+int
+applying_hash_func(ioopm_hash_table_t *hash, elem_t key)
+{
+    return hash->hh(key, &(hash->hash_siz));
+}
 /**
  * @brief Also creates a list if empty with method init
  * 
@@ -279,10 +284,9 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
  * @return iterator
  */
 ioopm_iterator_t *
-get_bucket_iter(ioopm_hash_table_t *ht, elem_t key)
+get_bucket_iter(ioopm_hash_table_t *ht, int index)
 {
-    int buckets = (int) ht->hash_siz;
-    int index = ht->hh(key, &buckets);
+    //seperate into a new functions finding key!
     ioopm_list_t *list_s = ht->buckets[index];
 
     //if list is empty initiate the list.
@@ -306,8 +310,9 @@ ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
     if(!ht)
         return result;
 
+    int hash_key = applying_hash_func(ht, key);    
 
-    ioopm_iterator_t *iter = get_bucket_iter(ht, key);
+    ioopm_iterator_t *iter = get_bucket_iter(ht, hash_key);
     result = iterate_find_key(iter, ht->cf, key);
 
     if(result.success != REPLACE)
@@ -337,6 +342,7 @@ clean_data(ioopm_iterator_t *iter, ioopm_transform_value clean_value,
  
 }
 
+static
 void
 hash_remove_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
 {
@@ -354,7 +360,8 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
     if(!ht)
         return (option_t) {0};
 
-    ioopm_iterator_t *iter = get_bucket_iter(ht, key);
+    int index = applying_hash_func(ht, key);
+    ioopm_iterator_t *iter = get_bucket_iter(ht, index);
     option_t result = iterate_find_key(iter, ht->cf, key);
 
 
@@ -387,15 +394,26 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
 option_t
 ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
 {
-    ioopm_iterator_t *iter = get_bucket_iter(ht, key);
+    int index = applying_hash_func(ht, key);
+    ioopm_iterator_t *iter = get_bucket_iter(ht, index);
     
     option_t to_remove = iterate_find_key(iter, ht->cf, key);
         
     hash_remove_node(iter, ht, to_remove.success);
 
     if(to_remove.success != REPLACE)
-        to_remove.success = 0;
-    
+    {
+        to_remove.success = 0; 
+    }
+
+    if(ioopm_iter_list_siz(iter) == 0)
+    {
+        //This will destroy iterator aswell!!
+        ioopm_iter_destroy_list(iter);
+        ht->buckets[index] = NULL;
+        return to_remove;
+    }
+
     ioopm_iterator_destroy(iter);
     return to_remove;
 }

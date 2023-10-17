@@ -90,3 +90,9 @@ ioopm_iterator_current_key(ioopm_iterator_t *iter);
 /// @param arg
 void
 ioopm_iterator_clear(elem_t *value, void *arg);
+
+void
+ioopm_iter_destroy_list(ioopm_iterator_t *iter);
+
+size_t
+ioopm_iter_list_siz(ioopm_iterator_t *iter);

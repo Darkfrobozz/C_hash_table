@@ -231,3 +231,18 @@ ioopm_iterator_clear(elem_t *value, void *arg)
     free(iter);
     *value = (elem_t) NULL;
 }
+
+void
+ioopm_iter_destroy_list(ioopm_iterator_t *iter)
+{
+    ioopm_list_t *list = iter->datastructure;
+    ioopm_linked_list_clear(list);
+    ioopm_linked_list_destroy(list);
+}
+
+size_t
+ioopm_iter_list_siz(ioopm_iterator_t *iter)
+{
+    ioopm_list_t *list = iter->datastructure;
+    return ioopm_linked_list_size(list);
+}

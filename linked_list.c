@@ -343,6 +343,13 @@ pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
     }
 }
 
+// option_t
+// ioopm_linked_list_calculate(ioopm_list_t *list, ioopm_calc_value calc, 
+//                             ioopm_comb_value comb, void *extra)
+// {
+
+// }
+
 bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_pred_value prop, void *extra)
 {
     bool success = true;

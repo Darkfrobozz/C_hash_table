@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g -Iinclude
-ENDFLAGS = -lcunit -o
+ENDFLAGS = -lcunit -lm -o
 HEADER_FILES := $(wildcard include/*.h)
 SRC_FILES := $(wildcard *.c)
 
@@ -25,7 +25,7 @@ $(LIBRARY): $(OBJ_FILES)
 	ar rcs $(LIBRARY) $^
 
 $(BIN_DIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< ${ENDFLAGS} $@
 
 
 clean:

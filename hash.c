@@ -1,5 +1,6 @@
 #include "include/hash.h"
 #include "include/iterator.h"
+#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,9 +9,6 @@
 typedef bool(*handler)(ioopm_list_t *list, void **arg);
 
 typedef void(*mutate_func)(ioopm_list_t *list, ioopm_pred_value pred, void **extra);
-
-typedef option_t(*calc_func)(ioopm_list_t *list, void **extra);
-typedef elem_t(*add_func)(elem_t a, elem_t b);
 
 struct hash_table
 {
@@ -27,9 +25,9 @@ struct hash_table
 //CALC FUNCTION
 static
 option_t
-fetch_list_size(ioopm_list_t *list, void **arg)
+fetch_list_size(elem_t list, void **arg)
 {
-    return (option_t) {.return_value = (elem_t) ioopm_linked_list_size(list), 
+    return (option_t) {.return_value = (elem_t) ioopm_linked_list_size(list.p), 
                        .success = 1};
 }
 
@@ -113,10 +111,10 @@ mutate_list(ioopm_list_t *list, void **arg)
  * 
  * @param list 
  * @param arg In following order
- * Calc_func
- * add_func
+ * ioopm_calc_value
+ * ioopm_comb_value
  * elem_t * (THIS IS A POINTER)
- * EXTRA for calc_func
+ * EXTRA for ioopm_calc_value
  * @return true 
  * @return false 
  */
@@ -126,13 +124,15 @@ calculate_list(ioopm_list_t *list, void **arg)
 {
     if(!list)
         return true;
-    calc_func func = *arg;
+    ioopm_calc_value func = *arg;
     arg++;
-    add_func combining_results = *arg;
+    ioopm_comb_value combining_results = *arg;
     arg++;
     elem_t *current_result = *arg;
      arg++;
-    option_t fetched_result = func(list, arg);
+    elem_t send;
+    send.p = list;
+    option_t fetched_result = func(send, arg);
     if(fetched_result.success)
     {
         *current_result = combining_results(*current_result, fetched_result.return_value);   
@@ -238,7 +238,8 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
 {
     option_t result = {.success = MOVE_ON, .return_value = (elem_t) 0};
     //TODO CREATE ITERATOR INSTEAD
-    ioopm_iterator_reset(iter);
+    if (ioopm_iter_list_siz(iter) == 0)
+        return result;
     do
     {
         option_t current_key = ioopm_iterator_current_key(iter);
@@ -543,6 +544,12 @@ bool
 ioopm_evaluate_hash(ioopm_hash_table_t *ht)
 {
     ioopm_list_t *balance = size_list(ht);
+    //To achieve perfect balance we should be looking for (elements / buckets to the power of two) times buckets
+    //aka a perfect spread of elements
+    double amount_element = ht->elements;
+    double hash_size = ht->hash_siz;
+    double ideal_balance = pow((amount_element/ hash_size), 2) * hash_size;
+    ideal_balance--;
     ioopm_linked_list_clear(balance);
     ioopm_linked_list_destroy(balance);
     return false;

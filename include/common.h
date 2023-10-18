@@ -19,6 +19,11 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 typedef bool(*ioopm_pred_value)(elem_t value, void *arg);
 typedef void(*ioopm_transform_value)(elem_t *value, void *arg);
 
+//Used for calculating a value across a function
+typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
+typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
+
+
 
 
 //Linkedlist types

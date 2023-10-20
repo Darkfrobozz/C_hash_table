@@ -339,6 +339,8 @@ clean_data(ioopm_iterator_t *iter, ioopm_transform_value clean_value,
         elem_t value = ioopm_iterator_current_value(iter).return_value;
         clean_value(&value, NULL);
     }
+    void *arg[] = {NULL, NULL};
+    ioopm_iterator_edit(iter, NULL, arg);
  
 }
 

@@ -42,11 +42,10 @@ option_t
 ioopm_iterator_previous(ioopm_iterator_t *iter);
 
 /// @brief Used to edit element iterator is on.
-/// If the param is NULL, it means that it won't be changed.
-/// This means you can not change it to a null pointer.
+/// If the param is NULL, it means that that param will be nullified
 /// @param iter 
 /// @param transformation  
-/// @param arg
+/// @param arg In order: value, key or extra args for transformation
 void
 ioopm_iterator_edit(ioopm_iterator_t *iter, 
                     ioopm_transform_value transformation, 

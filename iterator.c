@@ -158,12 +158,20 @@ ioopm_iterator_previous(ioopm_iterator_t *iter)
 }
 
 void
-ioopm_iterator_edit(ioopm_iterator_t *iter, elem_t value, elem_t key)
+ioopm_iterator_edit(ioopm_iterator_t *iter, ioopm_transform_value transformation, 
+                    void *arg)
 {
     node_t *node = iter->current_adress;
-
-    node->value = value;
-    node->key = key;
+    if(!transformation)
+    {
+        void **arg_array = arg; 
+        elem_t *value = arg_array[0];
+        elem_t *key = arg_array[1];
+        node->value = *value;
+        node->key = *key;
+        return;
+    }
+    transformation(&(node->value), arg);
 }
 
 option_t 

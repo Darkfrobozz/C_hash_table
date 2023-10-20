@@ -149,3 +149,25 @@ ioopm_evaluate_hash(ioopm_hash_table_t *ht);
  */
 ioopm_list_t *
 ioopm_get_size_table(void);
+
+/**
+ * @brief
+ *
+ * @param
+ * @param
+ * @param
+ * @return
+ */
+option_t
+ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, elem_t key, void *arg);
+
+/**
+ * @brief Rehashes
+ * 
+ * @param ht hashtable to rehash in
+ * @param old_key Key to container to rehash
+ * @param new_key Key 
+ * @return option_t Contains adress to value of node 
+ */
+option_t
+ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key);

@@ -178,8 +178,6 @@ void
 init_bucket(ioopm_hash_table_t *ht, int key)
 {
     ht->buckets[key] = ioopm_linked_list_create();
-    ht->buckets[key]->clean_key = ht->clean_key;
-    ht->buckets[key]->clean_value = ht->clean_value;
 }
 
 
@@ -295,7 +293,8 @@ get_bucket_iter(ioopm_hash_table_t *ht, int index)
         init_bucket(ht, index);
 
     list_s = ht->buckets[index];
-
+    list_s->clean_key = ht->clean_key;
+    list_s->clean_value = ht->clean_value;
     
     ioopm_iterator_t *list_iterator = ioopm_list_iterator(list_s);
 
@@ -375,7 +374,8 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
     if(result.success == REPLACE) 
     {
         clean_data(iter, ht->clean_value, ht->clean_key);
-        ioopm_iterator_edit(iter, value, key);
+        void *bundled_data[] = {&value, &key};
+        ioopm_iterator_edit(iter, NULL, bundled_data);
         result = ioopm_iterator_current_value(iter);
     }
 
@@ -511,8 +511,8 @@ ioopm_hash_add_cleaner(ioopm_hash_table_t *ht, ioopm_transform_value i_clean_key
 {
     ht->clean_key = i_clean_key;
     ht->clean_value = i_clean_value;
-}
 
+}
 void ioopm_hash_apply_extended(ioopm_hash_table_t *ht, 
                                ioopm_transform_value fun_value, void *extra_value,
                                ioopm_transform_value fun_key, void *extra_key)
@@ -535,9 +535,26 @@ size_list(ioopm_hash_table_t *ht)
     pipe_lists(ht, calculate_list, arg);
 
     return size_list;
-
 }
 
+static
+option_t
+hash_table_remove_no_clean(ioopm_hash_table_t *ht, elem_t key)
+{
+    // save clening functions for key and value
+    void *value_cleaner = ht->clean_value;
+    void *key_cleaner = ht->clean_key;
+    
+    // disable cleaning functions for know
+    ioopm_hash_add_cleaner(ht, NULL, NULL);
+    
+    // remove
+    option_t result = ioopm_hash_table_remove(ht, key);
+
+    // enable 
+    ioopm_hash_add_cleaner(ht, value_cleaner, key_cleaner);
+    return result;
+}
 
 
 bool
@@ -549,8 +566,8 @@ ioopm_evaluate_hash(ioopm_hash_table_t *ht)
     double amount_element = ht->elements;
     double hash_size = ht->hash_siz;
     double ideal_balance = pow((amount_element/ hash_size), 2) * hash_size;
-    ideal_balance--;
     ioopm_linked_list_clear(balance);
+    ideal_balance--;
     ioopm_linked_list_destroy(balance);
     return false;
     //Gather data
@@ -558,4 +575,31 @@ ioopm_evaluate_hash(ioopm_hash_table_t *ht)
     // 
 
     //make decision, look for two things unbalance and 
+}
+
+option_t
+ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, elem_t key, void *arg)
+{
+    ioopm_iterator_t *iter = get_bucket_iter(ht, applying_hash_func(ht, key));
+    option_t result = iterate_find_key(iter, ht->cf, key);
+    
+    if(result.success != REPLACE)
+    {
+        // if it can not find it
+        return (option_t) {0};
+    }
+    
+    ioopm_iterator_edit(iter, edit, arg);
+    elem_t new_v = ioopm_iterator_current_value(iter).return_value;
+    return (option_t) {.return_value = new_v, .success = 1};
+}
+
+option_t
+ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key)
+{
+    // remove if old_key exists, returns false otherwise
+    option_t result = hash_table_remove_no_clean(ht, old_key);
+    if(!result.success)
+        return result;
+    return ioopm_hash_table_insert(ht, new_key, result.return_value);     
 }

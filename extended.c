@@ -99,6 +99,7 @@ ioopm_transform_merch(elem_t *value, void *arg)
   switch_string(&(current_m->desc), changes[1]);
 
   current_m->price = atoi(changes[2]);
+  free(changes[2]);
 }
 
 //FOR STOCK HASH_TABLE

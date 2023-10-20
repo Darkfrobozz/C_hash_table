@@ -156,15 +156,16 @@ ioopm_list_t *
 ioopm_get_size_table(void);
 
 /**
- * @brief
+ * @brief This function edits a function
  *
- * @param
- * @param
- * @param
- * @return
+ * @param ht The hashtable
+ * @param Edit functions a transform value func
+ * @param Arguments Passed directly to the edit func
+ * @return Success and pointer to new merch
  */
 option_t
-ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, elem_t key, void *arg);
+ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, 
+                elem_t key, void *arg);
 
 /**
  * @brief Rehashes

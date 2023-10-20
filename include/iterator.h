@@ -68,7 +68,6 @@ option_t
 ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, 
                       short dir);
 
-
 /// @brief Reposition the iterator at the start of the underlying list.
 /// @param iter the iterator
 void 

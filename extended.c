@@ -1,6 +1,19 @@
 #include "include/extended.h"
 
 static
+void
+switch_string(char **location, char *change)
+{
+  if(!change)
+    return;
+  
+  if(change != *location)
+    free(*location);
+  
+  *location = change;
+}
+
+static
 short
 string_compare(char *hash_string, char *fetched_string)
 {
@@ -81,11 +94,11 @@ ioopm_transform_merch(elem_t *value, void *arg)
 {
   char **changes = arg;
   merch_t *current_m = value->p;
-  if(changes[0] && changes[0] )
-  {
-    current_m->name = changes[0];
-  }
-  
+
+  switch_string(&(current_m->name), changes[0]);
+  switch_string(&(current_m->desc), changes[1]);
+
+  current_m->price = atoi(changes[2]);
 }
 
 //FOR STOCK HASH_TABLE

@@ -163,7 +163,6 @@ void
 ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value, 
                    ioopm_transform_value i_clean_key);
 
-
 /// @brief ListA is changed to the result. ListB is only read from.
 /// @param listA 
 /// @param listB 
@@ -171,18 +170,12 @@ ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value,
 void
 ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool takekey);
 
-
-
-
-/**
- * @brief Extending the apply all to both keys and values
- * 
- * @param list 
- * @param fun_value 
- * @param extra_value 
- * @param fun_key 
- * @param extra_key 
- */
+/// @brief Extending the apply all to both keys and values.
+/// @param list 
+/// @param fun_value 
+/// @param extra_value 
+/// @param fun_key 
+/// @param extra_key 
 void 
 ioopm_list_apply_extended(ioopm_list_t *list, 
                                ioopm_transform_value fun_value, 
@@ -190,5 +183,9 @@ ioopm_list_apply_extended(ioopm_list_t *list,
                                ioopm_transform_value fun_key, 
                                void *extra_key);
 
+/// @brief
+/// @param list
+/// @param item
+/// @return 
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item);

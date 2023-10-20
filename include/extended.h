@@ -50,6 +50,21 @@ ioopm_merch_hash(elem_t key, void *arg);
 short
 ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch);
 
+
+/**
+ * @brief Used to transform merch.
+ * 
+ * @param value - Takes the values to be edited 
+ * @param arg Array of changes
+ * IN ORDER
+ * NEW MERCH NAME
+ * NEW MERCH DESCRIPTION
+ * NEW MERCH PRICE 
+ */
+void
+ioopm_transform_merch(elem_t *value, void *arg);
+
+
 int
 ioopm_stock_hash(elem_t shelf, void *arg);
 

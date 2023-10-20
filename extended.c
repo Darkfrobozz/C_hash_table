@@ -76,6 +76,18 @@ ioopm_clean_merch(elem_t *key, void *arg)
   free(merch);
 }
 
+void
+ioopm_transform_merch(elem_t *value, void *arg)
+{
+  char **changes = arg;
+  merch_t *current_m = value->p;
+  if(changes[0] && changes[0] )
+  {
+    current_m->name = changes[0];
+  }
+  
+}
+
 //FOR STOCK HASH_TABLE
 
 short

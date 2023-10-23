@@ -339,8 +339,6 @@ clean_data(ioopm_iterator_t *iter, ioopm_transform_value clean_value,
         elem_t value = ioopm_iterator_current_value(iter).return_value;
         clean_value(&value, NULL);
     }
-    void *arg[] = {NULL, NULL};
-    ioopm_iterator_edit(iter, NULL, arg);
  
 }
 
@@ -548,13 +546,13 @@ hash_table_remove_no_clean(ioopm_hash_table_t *ht, elem_t key)
     void *key_cleaner = ht->clean_key;
     
     // disable cleaning functions for know
-    ioopm_hash_add_cleaner(ht, NULL, NULL);
+    ioopm_hash_add_cleaner(ht, key_cleaner, NULL);
     
     // remove
     option_t result = ioopm_hash_table_remove(ht, key);
 
     // enable 
-    ioopm_hash_add_cleaner(ht, value_cleaner, key_cleaner);
+    ioopm_hash_add_cleaner(ht, key_cleaner, value_cleaner);
     return result;
 }
 
@@ -580,7 +578,8 @@ ioopm_evaluate_hash(ioopm_hash_table_t *ht)
 }
 
 option_t
-ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, elem_t key, void *arg)
+ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, 
+                elem_t key, void *arg)
 {
     ioopm_iterator_t *iter = get_bucket_iter(ht, applying_hash_func(ht, key));
     option_t result = iterate_find_key(iter, ht->cf, key);

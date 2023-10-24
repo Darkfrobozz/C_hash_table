@@ -1,5 +1,5 @@
 #include "include/iterator.h"
-#include "include/linked_list.h"
+#include "include/nodes.h"
 #include <stdlib.h>
 
 enum itertypes{list_iter, hash_iter};
@@ -49,7 +49,7 @@ ioopm_list_iterator(ioopm_list_t *list)
     if(!(list->iterator_list))
     {
         list->iterator_list = ioopm_linked_list_create();
-        list->iterator_list->clean_value = ioopm_iterator_clear;
+        ioopm_add_cleaners(list->iterator_list, ioopm_iterator_clear, NULL);
     }
     ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter, (elem_t) NULL);
     iter->datastructure = list;

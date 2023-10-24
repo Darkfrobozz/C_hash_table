@@ -72,13 +72,11 @@ ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch);
 void
 ioopm_transform_merch(elem_t *value, void *arg);
 
-
 int
 ioopm_stock_hash(elem_t shelf, void *arg);
 
 short
 ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch);
-
 
 /**
  * @brief Function used when removing elements from hashtable. Can only be used
@@ -92,4 +90,3 @@ ioopm_clean_merch(elem_t *key, void *arg);
 
 void
 ioopm_clean_strings(elem_t *key, void *arg);
-

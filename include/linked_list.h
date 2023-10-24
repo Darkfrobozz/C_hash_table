@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 
+typedef struct list ioopm_list_t; 
 
 /// @brief Creates a new empty list.
 /// @return an empty linked list
@@ -132,23 +133,6 @@ void
 ioopm_inform_removal(elem_t *value, void *arg);
 
 /// @brief
-/// @param iterator_list
-/// @param remove_node
-/// @return
-option_t 
-ioopm_remove_node(ioopm_list_t *iterator_list, node_t *remove_node);
-
-/// @brief
-/// @param prev_node
-/// @param i_value
-/// @param i_key
-/// @param list
-/// @return 
-option_t 
-ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, 
-                  ioopm_list_t *list);
-
-/// @brief
 /// @param list
 /// @return 
 ioopm_list_t *
@@ -189,17 +173,3 @@ ioopm_list_apply_extended(ioopm_list_t *list,
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item);
 
-/**
- * @brief This edits a nodes value
- * 
- * @param list 
- * @param edit Function to edit the node with 
- * @param node_edit 
- * @param arg If no edit, add the value to change to here
- * Else add possible arguments for edit function
- * @return New node and success of operation 
- */
-option_t
-ioopm_edit_node_value(ioopm_list_t *list, 
-                      ioopm_transform_value edit, 
-                      node_t *node_edit, void *arg);

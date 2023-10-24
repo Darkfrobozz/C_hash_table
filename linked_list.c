@@ -1,5 +1,4 @@
-#include "include/linked_list.h"
-#include "include/iterator.h"
+#include "include/nodes.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -344,13 +343,6 @@ transform_list_node(node_t *node, bool *success, void **arg)
         func_value(&(node->value), arg[2]);
     if(func_key)
         func_key(&(node->key), arg[3]);
-}
-
-void 
-destroy_iter(node_t *node, bool *success, void **arg)
-{
-    ioopm_iterator_t *iter = node->value.p;
-    ioopm_iterator_destroy(iter);
 }
 
 void

@@ -27,8 +27,6 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 
 
 //Linkedlist types
-typedef struct list ioopm_list_t; /// Meta: structure definition goes in C file
-typedef struct node node_t;
 
 #define MOVE_ON 0
 #define REPLACE 1
@@ -53,24 +51,6 @@ union elem
   void *p;
   size_t siz;
   /// other choices certainly possible
-};
-
-struct node
-{
-    node_t *previous;
-    elem_t value;
-    elem_t key;
-    node_t *next;
-};
-
-struct list
-{
-    size_t size;
-    node_t *first; //dummy node
-    node_t *last; // dummy node
-    ioopm_transform_value clean_value;
-    ioopm_transform_value clean_key;
-    ioopm_list_t *iterator_list;
 };
 
 /**

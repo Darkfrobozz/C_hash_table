@@ -303,7 +303,7 @@ get_bucket_iter(ioopm_hash_table_t *ht, int index)
 
     //Making sure current cleaner of list is same as cleaners of hashtable
     //This will only be necessary if cleaners are updated though.
-    ioopm_add_cleaners(list_s, ht->clean_key, ht->clean_value);
+    ioopm_add_cleaners(list_s, ht->clean_value, ht->clean_key);
     
     ioopm_iterator_t *list_iterator = ioopm_list_iterator(list_s);
 

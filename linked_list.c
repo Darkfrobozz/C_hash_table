@@ -481,7 +481,6 @@ ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool take_key)
     pipeline(listB, &choice, append_node, arg);    
 }
 
-//What is this?
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item)
 {

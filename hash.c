@@ -354,6 +354,7 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
     option_t result = iterate_find_key(iter, ht->cf, key);
 
 
+    void *bundled_data[] = {&key, &value};
     switch (result.success)
     {
         case INSERT_PREVIOUS:
@@ -362,8 +363,6 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
             break;
         
         case REPLACE:
-            clean_data(iter, ht->clean_value, ht->clean_key);
-            void *bundled_data[] = {&value, &key};
             ioopm_iterator_edit(iter, NULL, bundled_data);
             result = ioopm_iterator_current_value(iter);
             break;

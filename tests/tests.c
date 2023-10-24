@@ -205,7 +205,7 @@ void test_create_iterator()
   ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
   ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
   ioopm_iterator_destroy(iter1);
-  CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 3);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(), 3);
   ioopm_iterator_destroy(iter2);
   CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 2);
   ioopm_iterator_has_next(iter3);

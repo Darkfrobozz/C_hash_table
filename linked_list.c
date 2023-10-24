@@ -223,15 +223,18 @@ ioopm_linked_list_is_empty(ioopm_list_t *list)
 
 option_t
 ioopm_edit_node_value(ioopm_list_t *list, 
-                      ioopm_transform_value edit, 
+                      ioopm_transform_value edit_function, 
                       node_t *node_edit, void *arg)
 {
-    if(edit)
+    if(edit_function)
     {
-        edit(&(node_edit->value), arg);
+        edit_function(&(node_edit->value), arg);
+
+        //return edited value
         return (option_t) {.return_value = node_edit->value,
                            .success = 1};
     }
+    //Here we clean up before replacing.
     if(list->clean_value)
         list->clean_value(&(node_edit->value), NULL);
 
@@ -356,6 +359,13 @@ ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value,
     list->clean_value = i_clean_value;
 }
 
+/**
+ * @brief Function to actually test whether to filter out each node
+ * 
+ * @param remove_node 
+ * @param success 
+ * @param arg 
+ */
 static
 void 
 filter(node_t *remove_node, bool *success, void **arg)
@@ -403,13 +413,6 @@ pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
     }
 }
 
-// option_t
-// ioopm_linked_list_calculate(ioopm_list_t *list, ioopm_calc_value calc, 
-//                             ioopm_comb_value comb, void *extra)
-// {
-
-// }
-
 bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_pred_value prop, void *extra)
 {
     bool success = true;
@@ -453,7 +456,6 @@ ioopm_list_apply_extended(ioopm_list_t *list,
 }
 
 
-//we should expand this
 void 
 ioopm_linked_list_clear(ioopm_list_t *list)
 {
@@ -462,7 +464,8 @@ ioopm_linked_list_clear(ioopm_list_t *list)
     ioopm_filter_all(list, NULL, NULL);
 }
 
-void ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra)
+void 
+ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra)
 {
     bool success;
     void *arg[] = {pred, list, extra};
@@ -478,6 +481,7 @@ ioopm_append_lists(ioopm_list_t *listA, ioopm_list_t *listB, bool take_key)
     pipeline(listB, &choice, append_node, arg);    
 }
 
+//What is this?
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item)
 {

@@ -110,6 +110,9 @@ add_siz(elem_t A, elem_t B);
 elem_t
 biggest_siz(elem_t c_siz, elem_t f_siz);
 
+elem_t
+ioopm_element_to_list(elem_t list, elem_t item);
+
 // printing functions
 void
 ioopm_print_string(elem_t *key, void *arg);
@@ -131,5 +134,3 @@ ioopm_increment_int(elem_t *value, void *arg);
 void
 ioopm_clean_value_strings(elem_t *value, void *arg);
 
-elem_t
-ioopm_element_to_list(elem_t list, elem_t item);

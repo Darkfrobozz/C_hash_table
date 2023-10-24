@@ -205,9 +205,9 @@ void test_create_iterator()
   ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
   ioopm_linked_list_append(link, (elem_t) NULL, (elem_t) NULL);
   ioopm_iterator_destroy(iter1);
-  CU_ASSERT_EQUAL(ioopm_linked_list_size(), 3);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(ioopm_get_iterator(link)), 3);
   ioopm_iterator_destroy(iter2);
-  CU_ASSERT_EQUAL(ioopm_linked_list_size(link->iterator_list), 2);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(ioopm_get_iterator(link)), 2);
   ioopm_iterator_has_next(iter3);
   ioopm_iterator_has_next(iter4);
   ioopm_linked_list_clear(link);
@@ -843,11 +843,10 @@ test_relocate_node(void)
   value.i = 100;
   elem_t key;
   key.i = 173;
-  void *bundled_data[] = {&value, &key};
-  ioopm_hash_edit(hash, NULL, key, bundled_data);
+  ioopm_hash_edit(hash, NULL, key, &value);
   CU_ASSERT_EQUAL(ioopm_hash_table_lookup(hash, key).return_value.i, 100); 
   
-  CU_ASSERT_FALSE(ioopm_hash_edit(hash, NULL, value, bundled_data).success); 
+  CU_ASSERT_FALSE(ioopm_hash_edit(hash, NULL, value, &value).success); 
   
   ioopm_hash_table_clear(hash);
   ioopm_hash_table_destroy(hash);

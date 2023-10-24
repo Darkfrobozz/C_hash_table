@@ -14,6 +14,8 @@ ioopm_linked_list_create(void)
     ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
     node_t *first = calloc(1, sizeof(node_t));
     node_t *last = calloc(1, sizeof(node_t));
+    result->clean_key = NULL;
+    result->clean_value = NULL;
     result->first = first;
     first->next = last;
     last->previous = first;
@@ -67,6 +69,7 @@ void
 clean_data(node_t *node_to_clean, ioopm_transform_value clean_value, 
            ioopm_transform_value clean_key)
 {
+    assert(node_to_clean);
     if(clean_key)
     {
         elem_t key = node_to_clean->key;
@@ -229,8 +232,8 @@ ioopm_edit_node_value(ioopm_list_t *list,
         return (option_t) {.return_value = node_edit->value,
                            .success = 1};
     }
-
-    list->clean_value(&(node_edit->value), NULL);
+    if(list->clean_value)
+        list->clean_value(&(node_edit->value), NULL);
 
     elem_t *replace_value = arg;
     node_edit->value = *replace_value;

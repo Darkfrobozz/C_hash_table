@@ -161,8 +161,9 @@ void
 ioopm_iterator_edit(ioopm_iterator_t *iter, ioopm_transform_value transformation, 
                     void *arg)
 {
+    ioopm_list_t *list = iter->datastructure;
     //we need to free data we replace..
-    ioopm_edit_node_value((ioopm_list_t *) iter->current_adress, 
+    ioopm_edit_node_value(list, 
                           transformation, 
                           (node_t *) iter->current_adress, arg);
 }

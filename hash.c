@@ -165,6 +165,8 @@ ioopm_hash_table_create(hashing_func hh_received, compare_func cf_received,
                         size_t i_hash_siz)
 {
     ioopm_hash_table_t *ht = calloc(1, sizeof(ioopm_hash_table_t));
+    ht->clean_key = NULL;
+    ht->clean_value = NULL;
     ht->hash_siz = i_hash_siz;
     ht->hh = hh_received;
     ht->buckets = calloc(ht->hash_siz, sizeof(ioopm_list_t *));
@@ -354,23 +356,28 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
     option_t result = iterate_find_key(iter, ht->cf, key);
 
 
-    void *bundled_data[] = {&key, &value};
     switch (result.success)
     {
         case INSERT_PREVIOUS:
+        {
             ht->elements++;
             result = ioopm_iterator_insert(iter, value, key, LEFT);
             break;
+        }
         
         case REPLACE:
-            ioopm_iterator_edit(iter, NULL, bundled_data);
+        {
+            ioopm_iterator_edit(iter, NULL, &value);
             result = ioopm_iterator_current_value(iter);
             break;
+        }
         
         case MOVE_ON:
+        {
             ht->elements++;
             result = ioopm_iterator_insert(iter, value, key, RIGHT);
             break;
+        }
     }
 
     if(iter)

@@ -30,6 +30,8 @@ struct shopping_cart
     int user_id;
     ioopm_list_t *shopping_list;
 };
+
+
 /**
  * @brief Allocates memory on the heap for a merch struct
  * 
@@ -41,6 +43,13 @@ struct shopping_cart
 merch_t *
 ioopm_merch_create(char *name, char *desc, int price);
 
+/**
+ * @brief Allocates memory on the heap for a stock_value struct
+ * 
+ * @param i_amount
+ * @param i_merch
+ * @return stock_value_t 
+ */
 stock_value_t
 ioopm_stock_value_create(int i_amount, merch_t *i_merch);
 
@@ -49,7 +58,6 @@ ioopm_merch_hash(elem_t key, void *arg);
 
 short
 ioopm_merch_cmp(elem_t key_hash, elem_t key_fetch);
-
 
 /**
  * @brief Used to transform merch.

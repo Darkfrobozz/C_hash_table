@@ -161,28 +161,10 @@ void
 ioopm_iterator_edit(ioopm_iterator_t *iter, ioopm_transform_value transformation, 
                     void *arg)
 {
-    node_t *node = iter->current_adress;
-    if(!transformation)
-    {
-        void **arg_array = arg; 
-        elem_t *value = arg_array[0];
-        elem_t *key = arg_array[1];
-        
-        //setting keys
-        if(!key)
-            node->key.p = 0;
-        else
-            node->key = *key;
-        
-        //setting value
-        if(!value)
-            node->value.p = 0;
-        else
-            node->value = *value;
-
-        return;
-    }
-    transformation(&(node->value), arg);
+    //we need to free data we replace..
+    ioopm_edit_node_value((ioopm_list_t *) iter->current_adress, 
+                          transformation, 
+                          (node_t *) iter->current_adress, arg);
 }
 
 option_t 

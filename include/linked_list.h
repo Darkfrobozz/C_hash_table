@@ -1,5 +1,4 @@
 #pragma once
-#include <stdbool.h>
 #include "common.h"
 
 
@@ -189,3 +188,18 @@ ioopm_list_apply_extended(ioopm_list_t *list,
 /// @return 
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item);
+
+/**
+ * @brief This edits a nodes value
+ * 
+ * @param list 
+ * @param edit Function to edit the node with 
+ * @param node_edit 
+ * @param arg If no edit, add the value to change to here
+ * Else add possible arguments for edit function
+ * @return New node and success of operation 
+ */
+option_t
+ioopm_edit_node_value(ioopm_list_t *list, 
+                      ioopm_transform_value edit, 
+                      node_t *node_edit, void *arg);

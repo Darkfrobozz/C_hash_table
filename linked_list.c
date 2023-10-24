@@ -36,6 +36,55 @@ ioopm_linked_list_destroy(ioopm_list_t *list)
 }
 
 /**
+ * @brief Contracts list around a node
+ * 
+ * @param node Point to contract around 
+ */
+static
+void
+contract(node_t *node)
+{    
+    //selecting nodes around point
+    node_t *prev_node = node->previous;
+    node_t *next_node = node->next;
+    //making sure nodes exist
+    assert(prev_node);
+    assert(next_node);
+    prev_node->next = next_node;
+    next_node->previous = prev_node;
+}
+
+
+/**
+ * @brief This is called when removing a node 
+ * 
+ * @param node_to_clean node to clean 
+ * @param clean_value This will not work if cleaner is not
+ * correctly configured to value
+ * @param clean_key Same note as clean_value
+ */
+static
+void
+clean_data(node_t *node_to_clean, ioopm_transform_value clean_value, 
+           ioopm_transform_value clean_key)
+{
+    if(clean_key)
+    {
+        elem_t key = node_to_clean->key;
+        clean_key(&key, NULL);
+    }
+
+
+    if(clean_value)
+    {
+        elem_t value = node_to_clean->value;
+        clean_value(&value, NULL);
+    } 
+    
+    free(node_to_clean);
+}
+
+/**
  * @brief Responsible for traversing the list either from last node or first node 
  * 
  * @param starting_node - The last or first dummy node.
@@ -169,29 +218,50 @@ ioopm_linked_list_is_empty(ioopm_list_t *list)
     return (list->size == 0);
 }
 
+
+option_t
+ioopm_edit_node_value(ioopm_list_t *list, 
+                      ioopm_transform_value edit, 
+                      node_t *node_edit, void *arg)
+{
+    if(edit)
+    {
+        edit(&(node_edit->value), arg);
+        return (option_t) {.return_value = node_edit->value,
+                           .success = 1};
+    }
+
+    list->clean_value(&(node_edit->value), NULL);
+
+    elem_t *replace_value = arg;
+    node_edit->value = *replace_value;
+    return (option_t) {.return_value = node_edit->value,
+                       .success = 1};
+}
+
 option_t 
 ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
 {
     option_t result = {0};
 
-    node_t *prev_node = remove_node->previous;
-    node_t *next_node = remove_node->next;
 
-    result.return_value = remove_node->value;
+    if(!(list->clean_value))
+        result.return_value = remove_node->value;
 
     //informing iterators
     ioopm_linked_list_apply_to_all(list->iterator_list, ioopm_inform_removal, remove_node);
 
-    free(remove_node);
-    list->size--;
+    //contracting, this should never be a non existent node.
+    contract(remove_node);
+    
+    //clean the value of nodes
+    clean_data(remove_node, list->clean_value, list->clean_key);
 
-    prev_node->next = next_node;
-    next_node->previous = prev_node;
+    list->size--;
 
     result.success = 1;
 
-    return result;
-   
+    return result; 
 }
 
 option_t 
@@ -293,25 +363,20 @@ ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value,
 
 static
 void 
-filter(node_t *node, bool *success, void **arg)
+filter(node_t *remove_node, bool *success, void **arg)
 {
     ioopm_pred_value pred = arg[0];
     ioopm_list_t *list = arg[1];
     //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
-    if(!pred || pred(node->value, arg[2]))
-    {
-        node_t *next_node = node->next;
-        node_t *prev_node = node->previous;
-        //works when at 1 node
-        next_node->previous = prev_node;
-        prev_node->next = next_node;
+    if(!pred || pred(remove_node->value, arg[2]))
+    {    
+        //contract to isolate remove node
+        contract(remove_node);
 
-        if(list->clean_key)
-            list->clean_key(&(node->key), NULL);
-        if(list->clean_value)
-            list->clean_value(&(node->value), NULL);
-        free(node);
-        (list->size)--;
+        //clean the data of the node so that the heap can be reused
+        clean_data(remove_node, list->clean_value, list->clean_key);
+
+       (list->size)--;
     }
 }
 
@@ -426,3 +491,4 @@ ioopm_element_to_list(elem_t list, elem_t item)
     ioopm_linked_list_append(list_to_add, item, (elem_t) NULL);
     return list;
 }
+

@@ -198,6 +198,10 @@ clear_bucket(ioopm_list_t *list, ioopm_pred_value placeholder, void **arg)
 
     if(list)
     {
+        //making sure cleaners are recursive could make pointers instead
+        ioopm_add_cleaners(list, ht->clean_value, ht->clean_key);
+
+        //making sure list is destroyed
         ioopm_linked_list_clear(list);
         ioopm_linked_list_destroy(list);
         ht->buckets[*key] = NULL;
@@ -292,9 +296,12 @@ get_bucket_iter(ioopm_hash_table_t *ht, int index)
     if(!list_s) 
         init_bucket(ht, index);
 
+    //reseting list
     list_s = ht->buckets[index];
-    list_s->clean_key = ht->clean_key;
-    list_s->clean_value = ht->clean_value;
+
+    //Making sure current cleaner of list is same as cleaners of hashtable
+    //This will only be necessary if cleaners are updated though.
+    ioopm_add_cleaners(list_s, ht->clean_key, ht->clean_value);
     
     ioopm_iterator_t *list_iterator = ioopm_list_iterator(list_s);
 
@@ -325,30 +332,12 @@ ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
     return result;
 }
 
-void
-clean_data(ioopm_iterator_t *iter, ioopm_transform_value clean_value, 
-           ioopm_transform_value clean_key)
-{
-    if(clean_key)
-    {
-        elem_t key = ioopm_iterator_current_key(iter).return_value;
-        clean_key(&key, NULL);
-    }
-    if(clean_value)
-    {
-        elem_t value = ioopm_iterator_current_value(iter).return_value;
-        clean_value(&value, NULL);
-    }
- 
-}
-
 static
 void
 hash_remove_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
 {
     if(success == REPLACE)
     {
-       clean_data(iter, ht->clean_value, ht->clean_key);
        ioopm_iterator_remove(iter);
        ht->elements--;
     }

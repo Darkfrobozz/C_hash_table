@@ -597,8 +597,8 @@ ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key)
     option_t result = ioopm_hash_table_lookup(ht, old_key);
     ioopm_hash_table_insert(ht, new_key, result.return_value); 
     // remove if old_key exists, returns false otherwise
-    option_t result = hash_table_remove_no_clean(ht, old_key);
+    hash_table_remove_no_clean(ht, old_key);
     if(!result.success)
         return result;
-    return ioopm_hash_table_insert(ht, new_key, result.return_value);     
+    return result;     
 }

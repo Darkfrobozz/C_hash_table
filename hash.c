@@ -582,11 +582,13 @@ ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit,
     if(result.success != REPLACE)
     {
         // if it can not find it
+        ioopm_iterator_destroy(iter);
         return (option_t) {0};
     }
     
     ioopm_iterator_edit(iter, edit, arg);
     elem_t new_v = ioopm_iterator_current_value(iter).return_value;
+    ioopm_iterator_destroy(iter);
     return (option_t) {.return_value = new_v, .success = 1};
 }
 

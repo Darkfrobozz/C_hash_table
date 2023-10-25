@@ -787,8 +787,9 @@ test_stock_hash(void)
     //Trying to refill at a different merch or already existing stock - needs its own logic
     ioopm_hash_table_insert(stock_table, (elem_t) shelf, (elem_t) (void *)(stockvals[index]));
 
-    ioopm_linked_list_append(arr[index]->stock_slots, (elem_t) shelf, 
-                            (elem_t) (void *)stockvals[index]); 
+    ioopm_iterator_t *iter_insert = ioopm_hash_bucket_iter(merch_table, (elem_t) shelf).return_value.p;
+    ioopm_linked_list_append(arr[index]->stock_slots, (elem_t) (void *)iter_insert, 
+                             (elem_t) NULL); 
     
     elem_t m_hashed;
     m_hashed.p = arr[index];

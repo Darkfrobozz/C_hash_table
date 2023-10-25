@@ -1,4 +1,5 @@
 #include "include/extended.h"
+#include "include/iterator.h"
 
 static
 void
@@ -70,6 +71,7 @@ ioopm_merch_create(char *i_name, char *i_desc, int i_price)
   merch->price = i_price;
   merch->hash_stock = 0;
   merch->stock_slots = ioopm_linked_list_create();
+  ioopm_add_cleaners(merch->stock_slots, ioopm_iterator_clear, NULL);
   return merch;
 }
 

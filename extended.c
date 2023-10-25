@@ -104,6 +104,14 @@ ioopm_transform_merch(elem_t *value, void *arg)
 
 //FOR STOCK HASH_TABLE
 
+void
+ioopm_transform_stock(elem_t *value, void *arg)
+{
+  stock_value_t *stock = value->p;
+  int *edit_num = arg;
+  stock->amount = *edit_num;
+}
+
 short
 ioopm_stock_cmp(elem_t shelf_hash, elem_t shelf_fetch)
 {
@@ -131,8 +139,11 @@ ioopm_clean_stock(elem_t *value, void *arg)
     free(val);
 }
 
-stock_value_t
+stock_value_t *
 ioopm_stock_value_create(int i_amount, merch_t *i_merch)
 {
-  return (stock_value_t) { .amount = i_amount, .merch = i_merch};
+  stock_value_t *new_stock = calloc(1, sizeof(stock_value_t));
+  new_stock->amount = i_amount;
+  new_stock->merch = i_merch;
+  return new_stock;
 }

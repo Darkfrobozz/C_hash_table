@@ -50,7 +50,7 @@ ioopm_merch_create(char *name, char *desc, int price);
  * @param i_merch
  * @return stock_value_t 
  */
-stock_value_t
+stock_value_t *
 ioopm_stock_value_create(int i_amount, merch_t *i_merch);
 
 int
@@ -90,3 +90,25 @@ ioopm_clean_merch(elem_t *key, void *arg);
 
 void
 ioopm_clean_strings(elem_t *key, void *arg);
+
+/**
+ * @brief Cleaning up stock
+ * 
+ * @param value 
+ * @param arg 
+ */
+void
+ioopm_clean_stock(elem_t *value, void *arg);
+
+
+/**
+ * @brief Transforming stock frequency!
+ * 
+ * @param value 
+ * @param arg
+ * Frequency 
+ */
+void
+ioopm_transform_stock(elem_t *value, void *arg);
+
+

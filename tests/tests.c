@@ -765,10 +765,10 @@ test_stock_hash(void)
   ioopm_stock_cmp, no_buckets);
 
   ioopm_hash_add_cleaner(merch_table, NULL, ioopm_clean_merch);
-  ioopm_hash_add_cleaner(stock_table, ioopm_clean_strings, NULL);
+  ioopm_hash_add_cleaner(stock_table, ioopm_clean_strings, ioopm_clean_stock);
 
   merch_t *arr[25];
-  stock_value_t stockvals[25];
+  stock_value_t *stockvals[25];
 
   //filling merch table with merch A, B, C, D...
   //creating a stock value for them
@@ -785,10 +785,10 @@ test_stock_hash(void)
     stockvals[index] = ioopm_stock_value_create(index, arr[index]);
 
     //Trying to refill at a different merch or already existing stock - needs its own logic
-    ioopm_hash_table_insert(stock_table, (elem_t) shelf, (elem_t) (void *)(stockvals + index));
+    ioopm_hash_table_insert(stock_table, (elem_t) shelf, (elem_t) (void *)(stockvals[index]));
 
     ioopm_linked_list_append(arr[index]->stock_slots, (elem_t) shelf, 
-                            (elem_t) (void *)(stockvals + index)); 
+                            (elem_t) (void *)stockvals[index]); 
     
     elem_t m_hashed;
     m_hashed.p = arr[index];

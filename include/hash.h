@@ -179,3 +179,14 @@ ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit,
 /// @return option_t, contains adress to value of node 
 option_t
 ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key);
+
+
+/**
+ * @brief Getting iterator initiated at key given
+ * 
+ * @param ht 
+ * @param key 
+ * @return option_t 
+ */
+option_t
+ioopm_hash_bucket_iter(ioopm_hash_table_t *ht, elem_t key);

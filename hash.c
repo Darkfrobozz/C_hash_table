@@ -573,6 +573,24 @@ ioopm_evaluate_hash(ioopm_hash_table_t *ht)
 }
 
 option_t
+ioopm_hash_bucket_iter(ioopm_hash_table_t *ht, elem_t key)
+{
+    ioopm_iterator_t *iter = get_bucket_iter(ht, applying_hash_func(ht, key));
+    elem_t iter_element;
+    iter_element.p = iter;
+    option_t result = iterate_find_key(iter, ht->cf, key);
+    if(result.success != REPLACE)
+    {
+        ioopm_iterator_destroy(iter);
+        result.success = 0;
+        return result;
+    }
+    result.return_value = iter_element;
+    return result;
+
+}
+
+option_t
 ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit, 
                 elem_t key, void *arg)
 {

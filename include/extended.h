@@ -5,7 +5,6 @@
 //Store data types
 typedef struct merchandise merch_t;
 typedef struct customer customer_t;
-typedef struct shopping_cart s_cart_t;
 typedef struct stock_value stock_value_t;
 
 
@@ -25,11 +24,6 @@ struct stock_value
     merch_t *merch;
 };
 
-struct shopping_cart
-{
-    int user_id;
-    ioopm_list_t *shopping_list;
-};
 
 
 /**

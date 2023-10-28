@@ -2,6 +2,13 @@
 #include "include/iterator.h"
 
 static
+int
+mod(int x, int n)
+{
+    return (x % n + n) % n;
+}
+
+static
 void
 switch_string(char **location, char *change)
 {
@@ -33,7 +40,7 @@ int
 hash_char(char b, void *arg)
 { 
   int *buckets = arg;
-  int merch_first_letter = b % ASCII_SIZ;
+  int merch_first_letter = mod(b, ASCII_SIZ);
 
   if(merch_first_letter > *buckets)
   {
@@ -148,4 +155,16 @@ ioopm_stock_value_create(int i_amount, merch_t *i_merch)
   new_stock->amount = i_amount;
   new_stock->merch = i_merch;
   return new_stock;
+}
+
+short
+ioopm_s_cmp(elem_t s_hash, elem_t s_fetch)
+{
+  return string_compare(s_hash.normal_string, s_fetch.normal_string);
+}
+
+int
+ioopm_s_hash(elem_t string, void *arg)
+{
+  return hash_char(string.normal_string[0], arg);
 }

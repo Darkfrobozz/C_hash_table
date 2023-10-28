@@ -106,3 +106,8 @@ void
 ioopm_transform_stock(elem_t *value, void *arg);
 
 
+short
+ioopm_s_cmp(elem_t s_hash, elem_t s_fetch);
+
+int
+ioopm_s_hash(elem_t string, void *arg);

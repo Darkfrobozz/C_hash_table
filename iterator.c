@@ -38,6 +38,14 @@ iterator_init(ioopm_iterator_t *iter)
     iter->dummied = false;
     return true;
 }
+static
+void
+ioopm_iterator_list_clear(elem_t *value, void *arg)
+{
+    ioopm_iterator_t *iter = value->p;
+    free(iter);
+    *value = (elem_t) NULL;
+}
 
 ioopm_iterator_t *
 ioopm_list_iterator(ioopm_list_t *list)
@@ -49,7 +57,7 @@ ioopm_list_iterator(ioopm_list_t *list)
     if(!(list->iterator_list))
     {
         list->iterator_list = ioopm_linked_list_create();
-        ioopm_add_cleaners(list->iterator_list, ioopm_iterator_clear, NULL);
+        ioopm_add_cleaners(list->iterator_list, ioopm_iterator_list_clear, NULL);
     }
     ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter, (elem_t) NULL);
     iter->datastructure = list;
@@ -225,15 +233,14 @@ ioopm_iterator_current_key(ioopm_iterator_t *iter)
     node_t *node = iter->current_adress;
     return (option_t) {.success = 1, .return_value = node->key};
 }
-
 void
-ioopm_iterator_clear(elem_t *value, void *arg)
+ioopm_iter_apply_destroy(elem_t *value, void *arg)
 {
-    //DOES NOT FREE ITER AT THE LIST
     ioopm_iterator_t *iter = value->p;
-    free(iter);
-    *value = (elem_t) NULL;
+    ioopm_iterator_destroy(iter);
 }
+
+
 
 void
 ioopm_iter_destroy_list(ioopm_iterator_t *iter)

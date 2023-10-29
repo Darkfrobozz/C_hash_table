@@ -89,11 +89,6 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter);
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter);
 
-/// @brief Clears.
-/// @param value 
-/// @param arg
-void
-ioopm_iterator_clear(elem_t *value, void *arg);
 
 /// @brief Destroy...
 /// @param iter
@@ -105,3 +100,12 @@ ioopm_iter_destroy_list(ioopm_iterator_t *iter);
 /// @return size of...
 size_t
 ioopm_iter_list_siz(ioopm_iterator_t *iter);
+
+/**
+ * @brief Turns iterator destroy into an apply function
+ * 
+ * @param value 
+ * @param arg 
+ */
+void
+ioopm_iter_apply_destroy(elem_t *value, void *arg);

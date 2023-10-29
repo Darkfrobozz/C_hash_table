@@ -5,25 +5,26 @@
 #include <string.h>
 #include <assert.h>
 
-//Common and error handling data types
+
+// Common and error handling data types
 typedef union elem elem_t;
 typedef struct option option_t;
 
-//Function types
+
+// Function types
 typedef int(*hashing_func)(elem_t key, void *arg);
 typedef short(*compare_func)(elem_t node_key, elem_t key_fetched);
 typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 
 
-//applies to a nodes value
+// Applies to a nodes value
 typedef bool(*ioopm_pred_value)(elem_t value, void *arg);
 typedef void(*ioopm_transform_value)(elem_t *value, void *arg);
 
-//Used for calculating a value across a function
+
+// Used for calculating a value across a function
 typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
 typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
-
-
 
 
 //Linkedlist types
@@ -38,7 +39,6 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define LEFT 0
 
 
-
 union elem
 {
   /// TODO: update the names of the fields to something better? 
@@ -50,13 +50,11 @@ union elem
   char *normal_string;
   void *p;
   size_t siz;
-  /// other choices certainly possible
+  /// Other choices certainly possible
 };
 
-/**
- * @brief Used to return the sucess or fail of an operation a value that has nothing to do with
- *
- */
+
+// Used to return the fail or sucess along with the value of an operation. 
 struct option
 {
   elem_t return_value;

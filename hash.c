@@ -402,13 +402,6 @@ ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
         to_remove.success = 0; 
     }
 
-    if(ioopm_iter_list_siz(iter) == 0)
-    {
-        //This will destroy iterator aswell!!
-        ioopm_iter_destroy_list(iter);
-        ht->buckets[index] = NULL;
-        return to_remove;
-    }
 
     ioopm_iterator_destroy(iter);
     return to_remove;

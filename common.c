@@ -2,7 +2,64 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-// Compare
+static
+int
+mod(int x, int n)
+{
+    return (x % n + n) % n;
+}
+
+static
+short
+string_compare(char *hash_string, char *fetched_string)
+{
+  int result = strcmp(hash_string, fetched_string);
+
+  if(!result)
+    return REPLACE;
+  if(result > 0)
+    return INSERT_PREVIOUS;
+  
+  return MOVE_ON;
+}
+
+static
+int
+hash_char(char b, void *arg)
+{ 
+  int *buckets = arg;
+  int merch_first_letter = mod(b, ASCII_SIZ);
+
+  if(merch_first_letter > *buckets)
+  {
+    merch_first_letter = *buckets - 1;
+  }
+
+  return merch_first_letter;
+}
+
+// String Hashing
+short
+ioopm_string_compare(elem_t key_hash, elem_t key_fetch)
+{
+  return string_compare(key_hash.normal_string, key_fetch.normal_string);
+}
+
+int 
+ioopm_string_hash(elem_t key, void *arg)
+{
+    return hash_char(key.normal_string[0], arg);
+}
+
+
+//Int hashing
+int
+ioopm_int_hash(elem_t key, void *arg)
+{
+    int *mod = arg;
+    return key.i % (*mod);
+}
+
 short
 ioopm_int_compare(elem_t key_hash, elem_t key_fetch)
 {
@@ -17,57 +74,6 @@ ioopm_int_compare(elem_t key_hash, elem_t key_fetch)
     //insert prior to this command
     return INSERT_PREVIOUS;
 }
-
-short
-ioopm_string_compare(elem_t key_hash, elem_t key_fetch)
-{
-  unsigned char *key_in_hash = key_hash.string;
-  unsigned char *key_fetched = key_fetch.string;
-  if(!key_in_hash && !key_fetched)
-  {
-    return REPLACE;
-  }
-  if(!key_fetched)
-    return INSERT_PREVIOUS;
-  if(!key_in_hash)
-    return MOVE_ON;
-  //while they are equal.
-  while (*key_in_hash)
-  {
-    //"AC" "A"
-    if(!(*key_fetched))
-      return INSERT_PREVIOUS;
-    // "AC" "AB"
-    if(*key_in_hash > *key_fetched)
-      return INSERT_PREVIOUS;
-    //"AB" "AC"
-    if(*key_in_hash < *key_fetched)
-      return MOVE_ON;
-    key_in_hash++;
-    key_fetched++;
-  }
-
-  // "" ""
-  if(*key_in_hash == *key_fetched)
-    return REPLACE;
-  //ABB ABBA
-  return MOVE_ON;
-}
-
-int 
-ioopm_string_hash(elem_t key, void *arg)
-{
-    int index = (int) (*(key.string));
-    return index - ASCII_GARBAGE;
-}
-
-int
-ioopm_int_hash(elem_t key, void *arg)
-{
-    int *mod = arg;
-    return key.i % (*mod);
-}
-
 
 //OTHERS
 int 
@@ -123,18 +129,11 @@ biggest_siz(elem_t c_siz, elem_t f_siz)
   return c_siz;
 }
 
+//Cleaning func
 void
-ioopm_print_string(elem_t *key, void *arg)
+ioopm_clean_strings(elem_t *value, void *arg)
 {
-  unsigned char *string = (*key).string;
-  if(string)
-    printf("%s: ", string);
+    char *string = value->normal_string;
+    assert(string);
+    free(string);
 }
-
-void
-ioopm_print_number(elem_t *value, void *arg)
-{
-  printf("%d\n", value->i);
-}
-
-

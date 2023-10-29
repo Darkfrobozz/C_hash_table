@@ -125,12 +125,6 @@ void
 ioopm_increment_int(elem_t *value, void *arg);
 
 
-/**
- * @brief Used to clean one value at a time
- * 
- * @param value pointer to value to clean
- * @param arg 
- */
+//Cleaning
 void
-ioopm_clean_value_strings(elem_t *value, void *arg);
-
+ioopm_clean_strings(elem_t *value, void *arg);

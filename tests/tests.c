@@ -1,6 +1,5 @@
 #include <CUnit/Basic.h>
 #include "../include/hash.h"
-#include "../include/extended.h"
 #include "../include/iterator.h"
 #include <stdlib.h>
 #define arr_siz 100

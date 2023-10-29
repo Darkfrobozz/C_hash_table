@@ -229,6 +229,7 @@ ioopm_iterator_current_key(ioopm_iterator_t *iter)
 void
 ioopm_iterator_clear(elem_t *value, void *arg)
 {
+    //DOES NOT FREE ITER AT THE LIST
     ioopm_iterator_t *iter = value->p;
     free(iter);
     *value = (elem_t) NULL;

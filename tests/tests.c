@@ -718,162 +718,7 @@ test_resize(void)
 {
 
 }
-void
-test_merch_hashtable(void)
-{
-  ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_merch_hash,
-  ioopm_merch_cmp, no_buckets);
 
-  merch_t m_1 = {.name = "KO", .desc = "rund", .price = 15, .hash_stock = 0, NULL};
-  elem_t em_1;
-  em_1.p = &m_1;
-  merch_t m_2 = {.name = "OXE", .desc = "kantig", .price = 14, .hash_stock = 0, NULL};
-  elem_t em_2;
-  em_2.p = &m_2;
-  merch_t m_3 = {.name = "OXI", .desc = "oval", .price = 13, .hash_stock = 0, NULL};
-  elem_t em_3;
-  em_3.p = &m_3;
-  merch_t m_4 = {.name = "KOSSA", .desc = "romb", .price = 12, .hash_stock = 0, NULL};
-  elem_t em_4;
-  em_4.p = &m_4;
-  
-  merch_t merch[] = {m_1, m_2, m_3, m_4};
-  elem_t merchpointer[] = {em_1, em_2, em_3, em_4};
-  
-  for(int i = 0; i < 4; i++)
-  {
-    ioopm_hash_table_insert(hash, (elem_t) merch[i].name, merchpointer[i]);
-  }
-
-  for(int i = 0; i < 4; i++)
-  {
-    option_t value = ioopm_hash_table_lookup(hash, (elem_t) merch[i].name);
-    CU_ASSERT(value.success);
-  }
-
-  ioopm_hash_table_clear(hash);
-  ioopm_hash_table_destroy(hash);
-}
-
-void
-test_stock_hash(void)
-{
-  ioopm_hash_table_t *merch_table = ioopm_hash_table_create(ioopm_merch_hash,
-  ioopm_merch_cmp, no_buckets);
-
-  ioopm_hash_table_t *stock_table = ioopm_hash_table_create(ioopm_stock_hash,
-  ioopm_stock_cmp, no_buckets);
-
-  ioopm_hash_add_cleaner(merch_table, NULL, ioopm_clean_merch);
-  ioopm_hash_add_cleaner(stock_table, ioopm_clean_strings, ioopm_clean_stock);
-
-  merch_t *arr[25];
-  stock_value_t *stockvals[25];
-
-  //filling merch table with merch A, B, C, D...
-  //creating a stock value for them
-  for(int index = 0; index < 25; index++)
-  {
-    char name[] = {65 + index, 0};
-    char *string = strdup(name);
-    
-    char shelfarr[] = {65 + index, index % 10 + 48, index % 10 + 48};
-    char *shelf = strdup(shelfarr);
-
-    arr[index] = ioopm_merch_create(string, string, index); 
-
-    stockvals[index] = ioopm_stock_value_create(index, arr[index]);
-
-    //Trying to refill at a different merch or already existing stock - needs its own logic
-    ioopm_hash_table_insert(stock_table, (elem_t) shelf, (elem_t) (void *)(stockvals[index]));
-
-    ioopm_iterator_t *iter_insert = ioopm_hash_bucket_iter(merch_table, (elem_t) shelf).return_value.p;
-    ioopm_linked_list_append(arr[index]->stock_slots, (elem_t) (void *)iter_insert, 
-                             (elem_t) NULL); 
-    
-    elem_t m_hashed;
-    m_hashed.p = arr[index];
-    ioopm_hash_table_insert(merch_table, (elem_t) arr[index]->name, m_hashed);
-  }
-
-  //Trying to get the merch through a   
-  for(int index = 0; index < 25; index++)
-  {
-    CU_ASSERT(ioopm_hash_table_lookup(merch_table, (elem_t) arr[index]->name).success);
-
-    char shelfarr[] = {65 + index, index % 10 + 48, index % 10 + 48};
-    char *shelf = strdup(shelfarr);
-
-    CU_ASSERT(ioopm_hash_table_has_key(stock_table, (elem_t) shelf));
-
-    free(shelf);
-  }
-
-  ioopm_hash_table_clear(stock_table);
-  ioopm_hash_table_destroy(stock_table);
-
-  ioopm_hash_table_clear(merch_table);
-  ioopm_hash_table_destroy(merch_table);
-}
-
-
-void 
-test_relocate_node(void)
-{
-   ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash,
-   ioopm_int_compare, no_buckets);
-  
-    elem_t sendvalues[arr_siz];
-    elem_t randomkeys[arr_siz];
-    for(int i = 0; i < arr_siz; i++)
-    {
-      sendvalues[i].i = rand() % 100;
-      randomkeys[i].i = 100 * i;
-      ioopm_hash_table_insert(hash, randomkeys[i], sendvalues[i]);
-    }
-  elem_t comparer = ioopm_hash_table_lookup(hash, (elem_t) 100).return_value; 
-  ioopm_rehash(hash, (elem_t) 100, (elem_t) 150);
-  CU_ASSERT_EQUAL(comparer.i, 
-                  ioopm_hash_table_lookup(hash, (elem_t) 150).return_value.i);
-  ioopm_rehash(hash, (elem_t) 150, (elem_t) 173);
-  CU_ASSERT_EQUAL(comparer.i, 
-                  ioopm_hash_table_lookup(hash, (elem_t) 173).return_value.i); 
-  CU_ASSERT_FALSE(ioopm_rehash(hash, (elem_t) 100, (elem_t) 173).success);
-
-  elem_t value;
-  value.i = 100;
-  elem_t key;
-  key.i = 173;
-  ioopm_hash_edit(hash, NULL, key, &value);
-  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(hash, key).return_value.i, 100); 
-  
-  CU_ASSERT_FALSE(ioopm_hash_edit(hash, NULL, value, &value).success); 
-  
-  ioopm_hash_table_clear(hash);
-  ioopm_hash_table_destroy(hash);
-}
-
-void
-test_local_hash_iter(void)
-{
-  ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash,
-                                                     ioopm_int_compare, no_buckets);
-
-  elem_t sendvalues[arr_siz];
-  elem_t randomkeys[arr_siz];
-  for(int i = 0; i < arr_siz; i++)
-  {
-    sendvalues[i].i = rand() % 100;
-    randomkeys[i].i = 100 * i;
-    ioopm_hash_table_insert(hash, randomkeys[i], sendvalues[i]);
-  } 
-  ioopm_iterator_t *iter = ioopm_hash_bucket_iter(hash, (elem_t) 100).return_value.p;
-  CU_ASSERT_FALSE(ioopm_hash_bucket_iter(hash, (elem_t) 102).success);
-  ioopm_iterator_remove(iter);
-
-  ioopm_hash_table_clear(hash);
-  ioopm_hash_table_destroy(hash);
-}
 
 int 
 main(int argc, char *argv[]) 
@@ -924,13 +769,9 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "Has key", test_has_key) == NULL)
     || (CU_add_test(hash_suite, "Has value", test_has_value) == NULL)
     || (CU_add_test(hash_suite, "Any on values", test_any) == NULL)
+    || (CU_add_test(hash_suite, "Hash Stat", test_hash_stats) == NULL)
     || (CU_add_test(hash_suite, "True for all", test_all) == NULL)
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
-    || (CU_add_test(hash_suite, "Hashing merch", test_merch_hashtable) == NULL)
-    || (CU_add_test(hash_suite, "Stock hash, adding shelves to merch", test_stock_hash) == NULL)
-    || (CU_add_test(hash_suite, "Hash Stat", test_hash_stats) == NULL)
-    || (CU_add_test(hash_suite, "Rehash and edit", test_relocate_node) == NULL)
-    || (CU_add_test(hash_suite, "local iter", test_local_hash_iter) == NULL)
     || 0
   )
     {

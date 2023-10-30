@@ -739,6 +739,77 @@ test_add_array_iter(void)
   
 }
 
+void
+test_edit_array_iter(void)
+{
+  array_t *arr = ioopm_array(sizeof(int), 5, ioopm_to_int);
+  ioopm_iterator_t *iter = ioopm_array_iterator(arr);
+  int integers[] = {0, 5, 6, 7, 8};
+  int i = 0;
+  do
+  {
+    ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
+    i++;
+  } while (ioopm_iterator_next(iter).success);
+
+  ioopm_iterator_reset(iter);
+  i = 0;
+  do
+  {
+    CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i]);
+    i++;
+  } while (ioopm_iterator_next(iter).success);
+
+
+  ioopm_array_destroy(arr); 
+ 
+}
+
+void
+test_array_iter_misc(void)
+{
+  array_t *arr = ioopm_array(sizeof(int), 5, ioopm_to_int);
+  ioopm_iterator_t *iter = ioopm_array_iterator(arr); 
+  int integers[] = {0, 5, 6, 7, 8};
+  int inc = 1;
+  int i = 0;
+  do
+  {
+    ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
+    ioopm_iterator_edit(iter, ioopm_increment_int, (void *) &inc);
+    i++;
+  } while (ioopm_iterator_next(iter).success);
+
+  ioopm_iterator_reset(iter);
+  i = 0;
+  do
+  {
+    CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i] + inc);
+    i++;
+  } while (ioopm_iterator_next(iter).success);
+
+  ioopm_iterator_set(iter, 3);
+  do
+  {
+    ioopm_iterator_remove(iter);
+  } while (ioopm_iterator_next(iter).success);
+
+  ioopm_iterator_reset(iter);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+  ioopm_iterator_next(iter);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 6);
+  ioopm_iterator_next(iter);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 7);
+  ioopm_iterator_next(iter);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 0);
+  ioopm_iterator_next(iter);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 0);
+
+  CU_ASSERT_EQUAL(ioopm_iter_db_siz(iter), 5);
+  ioopm_iter_destroy_db(iter);
+
+}
+
 
 int 
 main(int argc, char *argv[]) 
@@ -795,7 +866,9 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "True for all", test_all) == NULL)
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
     || (CU_add_test(array_suite, "Unit test: INIT array", test_init_array) == NULL)
-    || (CU_add_test(array_suite, "Unit test: Iter in array", test_add_array_iter) == NULL)
+    || (CU_add_test(array_suite, "Unit test: Iter move in array", test_add_array_iter) == NULL)
+    || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
+    || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove", test_array_iter_misc) == NULL)
     || 0
   )
     {

@@ -242,7 +242,7 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
 {
     option_t result = {.success = MOVE_ON, .return_value = (elem_t) 0};
     //TODO CREATE ITERATOR INSTEAD
-    if (ioopm_iter_list_siz(iter) == 0)
+    if (ioopm_iter_db_siz(iter) == 0)
         return result;
     do
     {

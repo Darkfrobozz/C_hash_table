@@ -13,11 +13,10 @@ typedef struct iterator ioopm_iterator_t;
 ioopm_iterator_t *
 ioopm_list_iterator(ioopm_list_t *list);
 
-/**
- * @brief Construct a new ioopm array iterator object
- * 
- * @param array The array object, see common.h
- */
+
+/// @brief Creates an iterator over a given array structure
+/// @param array Array structure to iterate over
+/// @return Pointer to iterator positioned at index 0 
 ioopm_iterator_t *
 ioopm_array_iterator(array_t *array);
 
@@ -67,15 +66,6 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 option_t 
 ioopm_iterator_remove(ioopm_iterator_t *iter);
 
-/// @brief Inserts a new value to the right.
-/// @param iter the iterator
-/// @param element the element to be inserted
-/// @param dir whether to insert to the right or left of current node, 
-/// note that this is irrelevant in empty list
-option_t 
-ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, 
-                      short dir);
-
 /// @brief Reposition the iterator at the start of the underlying list.
 /// @param iter the iterator
 void 
@@ -98,23 +88,38 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter);
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter);
 
+// General db methods
 
 /// @brief Destroy...
 /// @param iter
 void
-ioopm_iter_destroy_list(ioopm_iterator_t *iter);
+ioopm_iter_destroy_db(ioopm_iterator_t *iter);
 
 /// @brief Destroy...
 /// @param iter
 /// @return size of...
 size_t
-ioopm_iter_list_siz(ioopm_iterator_t *iter);
+ioopm_iter_db_siz(ioopm_iterator_t *iter);
 
-/**
- * @brief Turns iterator destroy into an apply function
- * 
- * @param value 
- * @param arg 
- */
+//Array ONLY
+bool
+ioopm_iterator_set(ioopm_iterator_t *iter, int index);
+
+//List ONLY
+
+/// @brief Inserts a new value to the right.
+/// @param iter the iterator
+/// @param element the element to be inserted
+/// @param dir whether to insert to the right or left of current node, 
+/// note that this is irrelevant in empty list
+option_t 
+ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, 
+                      short dir);
+
+
+/// @brief Applies iter destroy, transformation function used when
+/// listing iterator outside of a list's iterator list
+/// @param value 
+/// @param arg 
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg);

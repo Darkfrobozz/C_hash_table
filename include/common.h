@@ -19,6 +19,7 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 
 // Applies to a nodes value
 typedef bool(*ioopm_pred_value)(elem_t value, void *arg);
+//This transform thing is interesting but feels clunky..
 typedef void(*ioopm_transform_value)(elem_t *value, void *arg);
 
 

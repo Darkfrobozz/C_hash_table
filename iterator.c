@@ -38,6 +38,7 @@ iterator_init(ioopm_iterator_t *iter)
     iter->dummied = false;
     return true;
 }
+
 static
 void
 ioopm_iterator_list_clear(elem_t *value, void *arg)
@@ -47,25 +48,46 @@ ioopm_iterator_list_clear(elem_t *value, void *arg)
     *value = (elem_t) NULL;
 }
 
+static
+void
+ioopm_iterator(ioopm_iterator_t *iter, ioopm_list_t **iterator_list, 
+               void *first_element, void *data)
+{
+    iter->datastructure = data;
+    iter->current_adress = first_element;
+    if(!(*iterator_list))
+    {        
+        *iterator_list = ioopm_linked_list_create();
+        ioopm_add_cleaners(*iterator_list, ioopm_iterator_list_clear, NULL);
+    }
+    ioopm_linked_list_append(*iterator_list, 
+                            (elem_t) (void *) iter, (elem_t) NULL);
+
+}
+
+
 ioopm_iterator_t *
 ioopm_list_iterator(ioopm_list_t *list)
 {
-
     ioopm_iterator_t *iter = calloc(1, sizeof(ioopm_iterator_t));
-    iter->current_adress = list->first;
-    void *added_iter = iter;
-    if(!(list->iterator_list))
-    {
-        list->iterator_list = ioopm_linked_list_create();
-        ioopm_add_cleaners(list->iterator_list, ioopm_iterator_list_clear, NULL);
-    }
-    ioopm_linked_list_append(list->iterator_list, (elem_t) added_iter, (elem_t) NULL);
-    iter->datastructure = list;
     iter->type = list_iter;
+    ioopm_iterator(iter, &(list->iterator_list), list->first, list);
+
     iter->dummied = true;
-    iterator_init(iter); 
     return iter;
 }
+
+ioopm_iterator_t *
+ioopm_array_iterator(array_t *array)
+{
+    ioopm_iterator_t *iter = calloc(1, sizeof(ioopm_iterator_t));
+    iter->type = array_iter;
+    ioopm_iterator(iter, &(array->iterator_list), array->p_first_element, array);
+
+    iter->dummied = false;
+    return iter;
+}
+
 
 void 
 ioopm_iterator_destroy(ioopm_iterator_t *iter)
@@ -73,10 +95,12 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter)
     if(iter->type == list_iter)
     {
         ioopm_list_t *list = iter->datastructure;
+        //This will be circular
         ioopm_filter_all(list->iterator_list, ioopm_equals_adress, iter);
     }
 }
-
+//This is used in list
+//We can create an iterator for pipe
 void 
 ioopm_inform_removal(elem_t *value, void *removed_node)
 {
@@ -97,23 +121,31 @@ ioopm_inform_removal(elem_t *value, void *removed_node)
         }
     }
 }
+
 static
 bool 
 ioopm_iterator_has(ioopm_iterator_t *iter, short dir_command)
 {
-    if(!iterator_init(iter)) 
-        return false;
     node_t *node = iter->current_adress;
+    array_t *array = iter->datastructure;
+
+    if(iter->type == list_iter && !iterator_init(iter)) 
+        return false;
+
 
     if(dir_command == LEFT)
     {
-        if(node->previous->previous)
+        if(iter->type == list_iter && node->previous->previous)
+            return true;
+        else if(iter->type == array_iter && (node != array->p_first_element))
             return true;
 
         return false;
     } 
 
-    if(node->next->next)
+    if(iter->type == list_iter && node->next->next)
+        return true;
+    else if(iter->type == array_iter && node != array->p_last_element)
         return true;
     
     return false;

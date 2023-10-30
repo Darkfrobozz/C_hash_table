@@ -1,6 +1,7 @@
 #include <CUnit/Basic.h>
 #include "../include/hash.h"
 #include "../include/iterator.h"
+#include "../include/array.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -712,10 +713,22 @@ test_hash_stats(void)
   ioopm_hash_table_clear(hash);
   ioopm_hash_table_destroy(hash);
 }
-void
-test_resize(void)
-{
 
+void
+test_init_array(void)
+{
+  array_t *arr = ioopm_array(4, 8);
+  ioopm_array_destroy(arr);
+}
+
+void
+test_add_array_iter(void)
+{
+  array_t *arr = ioopm_array(sizeof(int), 8);
+  ioopm_iterator_t *iter = ioopm_array_iterator(arr);
+  CU_ASSERT_FALSE(ioopm_iterator_has_prev(iter));
+  CU_ASSERT(ioopm_iterator_has_next(iter));
+  ioopm_array_destroy(arr);
 }
 
 
@@ -730,8 +743,10 @@ main(int argc, char *argv[])
   // We then create an empty test suite and specify the name and
   // the init and cleanup functions
   CU_pSuite list_suite = CU_add_suite("Testing linked list", init_suite, clean_suite);
-  CU_pSuite hash_suite = CU_add_suite("My awesome hash suite", init_suite, clean_suite);
-  if (hash_suite == NULL) {
+  CU_pSuite array_suite = CU_add_suite("Testing array suite", init_suite, clean_suite);
+  CU_pSuite pipeline_suite = CU_add_suite("Testing pipeline suite", init_suite, clean_suite);
+  CU_pSuite hash_suite = CU_add_suite("Testing hash suite", init_suite, clean_suite);
+  if (hash_suite == NULL || array_suite == NULL || list_suite == NULL || pipeline_suite == NULL) {
       // If the test suite could not be added, tear down CUnit and exit
       CU_cleanup_registry();
       return CU_get_error();
@@ -771,6 +786,8 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "Hash Stat", test_hash_stats) == NULL)
     || (CU_add_test(hash_suite, "True for all", test_all) == NULL)
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
+    || (CU_add_test(array_suite, "Unit test: INIT array", test_init_array) == NULL)
+    || (CU_add_test(array_suite, "Unit test: Iter in array", test_add_array_iter) == NULL)
     || 0
   )
     {
@@ -801,6 +818,16 @@ main(int argc, char *argv[])
         if(!strcmp("list", argv[i]))
         {
           CU_basic_run_suite(list_suite);
+          continue;
+        }
+        if(!strcmp("array", argv[i]))
+        {
+          CU_basic_run_suite(array_suite);
+          continue;
+        }
+        if(!strcmp("pipe", argv[i]))
+        {
+          CU_basic_run_suite(pipeline_suite);
           continue;
         }
         if(!strcmp("hash", argv[i]))

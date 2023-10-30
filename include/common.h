@@ -21,12 +21,13 @@ typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
 typedef bool(*ioopm_pred_value)(elem_t value, void *arg);
 //This transform thing is interesting but feels clunky..
 typedef void(*ioopm_transform_value)(elem_t *value, void *arg);
+//Used to typecast from general structure
+typedef elem_t(*type_cast)(void *arg);
 
 
 // Used for calculating a value across a function
 typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
 typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
-
 
 //Linkedlist types
 
@@ -37,7 +38,7 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define DEL 127
 #define ASCII_SIZ 256
 #define RIGHT 1
-#define LEFT 0
+#define LEFT -1
 
 
 union elem {
@@ -124,3 +125,7 @@ ioopm_increment_int(elem_t *value, void *arg);
 //Cleaning
 void
 ioopm_clean_strings(elem_t *value, void *arg);
+
+//Type casting
+elem_t
+ioopm_to_int(void *arg);

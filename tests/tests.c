@@ -717,18 +717,26 @@ test_hash_stats(void)
 void
 test_init_array(void)
 {
-  array_t *arr = ioopm_array(4, 8);
+  array_t *arr = ioopm_array(4, 8, NULL);
   ioopm_array_destroy(arr);
 }
 
 void
 test_add_array_iter(void)
 {
-  array_t *arr = ioopm_array(sizeof(int), 8);
+  array_t *arr = ioopm_array(sizeof(int), 2, ioopm_to_int);
   ioopm_iterator_t *iter = ioopm_array_iterator(arr);
   CU_ASSERT_FALSE(ioopm_iterator_has_prev(iter));
   CU_ASSERT(ioopm_iterator_has_next(iter));
+  ioopm_iterator_next(iter);
+  CU_ASSERT(ioopm_iterator_has_prev(iter));
+  CU_ASSERT_FALSE(ioopm_iterator_has_next(iter));
+
+
+
+  //Clean up
   ioopm_array_destroy(arr);
+  
 }
 
 

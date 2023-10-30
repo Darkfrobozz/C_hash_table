@@ -3,15 +3,16 @@
 #include "iterator.h"
 
 array_t *
-ioopm_array(size_t element_siz, size_t array_siz)
+ioopm_array(size_t element_siz, size_t array_siz, type_cast caster)
 {
     array_t *new_array = calloc(1, sizeof(array_t));
     void *new_data = calloc(array_siz, element_siz);
-    void *last = (char *) new_data + (array_siz * element_siz - 1);
+    void *last = (char *) new_data + ((array_siz - 1) * element_siz);
     new_array->p_first_element = new_data;
     new_array->p_last_element = last; 
     new_array->chunk_siz = element_siz;
-    new_array->chunk_amount = array_siz;
+    new_array->elements = array_siz;
+    new_array->cast = caster;
     return new_array;
 }
 

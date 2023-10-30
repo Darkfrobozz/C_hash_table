@@ -22,15 +22,18 @@ struct list
 };
 
 struct array {
-  //For example int is chunk size 4
+  //sizes
     size_t chunk_siz;
-  //For example int[9], chunk amount is 9
-    size_t chunk_amount;
+    size_t elements;
+  //pointers
     void *p_last_element;
     void *p_first_element;
   //if destroyed it needs to update its iterators...
     ioopm_list_t *iterator_list;
+  //functions
+    type_cast cast;
     ioopm_transform_value clean_value;
+  
 };
 
 /**

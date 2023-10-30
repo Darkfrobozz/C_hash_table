@@ -12,7 +12,7 @@ typedef struct array array_t;
  * @return array_t* 
  */
 array_t *
-ioopm_array(size_t element_siz, size_t array_siz);
+ioopm_array(size_t element_siz, size_t array_siz, type_cast caster);
 
 /**
  * @brief  

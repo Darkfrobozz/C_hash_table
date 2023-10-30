@@ -137,3 +137,11 @@ ioopm_clean_strings(elem_t *value, void *arg)
     assert(string);
     free(string);
 }
+
+//
+elem_t
+ioopm_to_int(void *arg)
+{
+  int *result = arg;
+  return (elem_t) *result;
+}

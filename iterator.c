@@ -8,7 +8,7 @@ struct iterator
 {
     enum itertypes type;
     void *datastructure;
-    void *current_adress;
+    void *c_adress;
     bool dummied;
 };
 
@@ -22,7 +22,7 @@ struct iterator
  */
 static
 bool 
-iterator_init(ioopm_iterator_t *iter)
+iterator_list_init(ioopm_iterator_t *iter)
 {
     assert(iter);
     if(!(iter->dummied))
@@ -32,9 +32,9 @@ iterator_init(ioopm_iterator_t *iter)
     if(ioopm_linked_list_is_empty(list))
         return false;
     //check 
-    node_t *node = iter->current_adress;
+    node_t *node = iter->c_adress;
 
-    iter->current_adress = node->next;
+    iter->c_adress = node->next;
     iter->dummied = false;
     return true;
 }
@@ -54,7 +54,7 @@ ioopm_iterator(ioopm_iterator_t *iter, ioopm_list_t **iterator_list,
                void *first_element, void *data)
 {
     iter->datastructure = data;
-    iter->current_adress = first_element;
+    iter->c_adress = first_element;
     if(!(*iterator_list))
     {        
         *iterator_list = ioopm_linked_list_create();
@@ -82,23 +82,32 @@ ioopm_array_iterator(array_t *array)
 {
     ioopm_iterator_t *iter = calloc(1, sizeof(ioopm_iterator_t));
     iter->type = array_iter;
-    ioopm_iterator(iter, &(array->iterator_list), array->p_first_element, array);
+    ioopm_iterator(iter, &(array->iterator_list), 
+                   array->p_first_element, array);
 
-    iter->dummied = false;
     return iter;
 }
-
 
 void 
 ioopm_iterator_destroy(ioopm_iterator_t *iter)
 {
-    if(iter->type == list_iter)
-    {
-        ioopm_list_t *list = iter->datastructure;
-        //This will be circular
-        ioopm_filter_all(list->iterator_list, ioopm_equals_adress, iter);
-    }
+    switch(iter->type){
+        case list_iter:
+        {
+            ioopm_list_t *list = iter->datastructure;
+            ioopm_filter_all(list->iterator_list, ioopm_equals_adress, iter);
+            break;
+        }
+
+        case array_iter:
+        {
+            array_t *arr = iter->datastructure;
+            ioopm_filter_all(arr->iterator_list, ioopm_equals_adress, iter);
+            break;
+        }
+    } 
 }
+
 //This is used in list
 //We can create an iterator for pipe
 void 
@@ -110,45 +119,56 @@ ioopm_inform_removal(elem_t *value, void *removed_node)
     elem_t adress_removed;
     adress_removed.p = removed_node;
 
-    if(ioopm_equals_adress(adress_removed, iter->current_adress))
+    if(ioopm_equals_adress(adress_removed, iter->c_adress))
     {
         if(iter->type == list_iter)
         {
-            node_t *current_adress = iter->current_adress;
-            iter->current_adress = current_adress->previous;
-            if(!(current_adress->previous->previous))
+            node_t *c_adress = iter->c_adress;
+            iter->c_adress = c_adress->previous;
+            if(!(c_adress->previous->previous))
                 iter->dummied = true;
         }
     }
 }
 
+/**
+ * @brief Controls iter direction possibilities
+ * 
+ * @param iter 
+ * @param dir 
+ * @return true 
+ * @return false 
+ */
 static
 bool 
-ioopm_iterator_has(ioopm_iterator_t *iter, short dir_command)
+ioopm_iterator_has(ioopm_iterator_t *iter, short dir)
 {
-    node_t *node = iter->current_adress;
-    array_t *array = iter->datastructure;
 
-    if(iter->type == list_iter && !iterator_init(iter)) 
-        return false;
+    switch (iter->type) {
+        case list_iter:
+        {
+            node_t *node = iter->c_adress;
+            if(!iterator_list_init(iter)) 
+                return false;        
+            if(dir == LEFT && node->previous->previous)
+                return true;
+            else if(dir == RIGHT && node->next->next)
+                return true;
+            return false;
+        }
 
-
-    if(dir_command == LEFT)
-    {
-        if(iter->type == list_iter && node->previous->previous)
-            return true;
-        else if(iter->type == array_iter && (node != array->p_first_element))
-            return true;
-
-        return false;
-    } 
-
-    if(iter->type == list_iter && node->next->next)
-        return true;
-    else if(iter->type == array_iter && node != array->p_last_element)
-        return true;
-    
-    return false;
+        case array_iter:
+        {
+            array_t *array = iter->datastructure;
+            if(dir == LEFT && (iter->c_adress != array->p_first_element))
+                return true;
+            else if(dir == RIGHT && iter->c_adress != array->p_last_element)
+                return true;
+            return false;
+        }
+        default:
+        assert(false);
+    }
 
 }
 
@@ -164,18 +184,49 @@ ioopm_iterator_has_prev(ioopm_iterator_t *iter)
     return ioopm_iterator_has(iter, LEFT);
 }
 
+/**
+ * @brief Moves c_adress based on type and linear direction
+ * 
+ * @param type 
+ * @param c_adress 
+ * @param data 
+ * @param dir 
+ */
+static
+void
+ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
+{
+    void *data = iter->datastructure; 
+    void *c_adress = iter->c_adress;
+    switch(iter->type){
+        case list_iter:
+        if(dir == RIGHT)
+            iter->c_adress = ((node_t *) c_adress)->next; 
+        else
+            iter->c_adress = ((node_t *) c_adress)->previous; 
+        
+        break;
+
+        case array_iter:
+            iter->c_adress = (char *) c_adress 
+                             + dir * (((array_t *) data)->chunk_siz);
+                            
+        break;
+        default:
+        assert(false);
+    }
+}
+
 option_t 
 ioopm_iterator_next(ioopm_iterator_t *iter)
 {
     option_t result = {0};
 
-    if(!iterator_init(iter)) 
-        return result; //making sure that if the list ain't empty we will be on a valid spot.
+    //Checking if have next
     if(!ioopm_iterator_has_next(iter))
         return result;
     
-    node_t *node = iter->current_adress;
-    iter->current_adress = node->next;    
+    ioopm_move_c_adress(iter, RIGHT);
 
     return ioopm_iterator_current_value(iter); //if next is dummy node
 }
@@ -185,14 +236,11 @@ ioopm_iterator_previous(ioopm_iterator_t *iter)
 {
     option_t result = {0};
 
-    if(!iterator_init(iter)) 
-        return result; 
-    //making sure that if the list ain't empty we will be on a valid spot.
+    //Checking if has prev
     if(!ioopm_iterator_has_prev(iter))
         return result;
     
-    node_t *node = iter->current_adress;
-    iter->current_adress = node->previous;
+    ioopm_move_c_adress(iter, LEFT); 
     
     return ioopm_iterator_current_value(iter);
 }
@@ -205,15 +253,15 @@ ioopm_iterator_edit(ioopm_iterator_t *iter, ioopm_transform_value transformation
     //we need to free data we replace..
     ioopm_edit_node_value(list, 
                           transformation, 
-                          (node_t *) iter->current_adress, arg);
+                          (node_t *) iter->c_adress, arg);
 }
 
 option_t 
 ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
 {
     option_t result = {0};
-    bool ans = iterator_init(iter);
-    node_t *to_send = iter->current_adress;
+    bool ans = iterator_list_init(iter);
+    node_t *to_send = iter->c_adress;
     
     //if list is empty just insert
     if((dir == LEFT) && ans)
@@ -222,7 +270,7 @@ ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short di
     result = ioopm_insert_node(to_send, value, 
                       key, (ioopm_list_t  *) iter->datastructure);
     
-    iter->current_adress = to_send->next;
+    iter->c_adress = to_send->next;
     
     return result;
 }
@@ -231,10 +279,10 @@ ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short di
 option_t 
 ioopm_iterator_remove(ioopm_iterator_t *iter)
 {
-    if(!iterator_init(iter)) 
+    if(!iterator_list_init(iter)) 
         return (option_t) {0};
     return ioopm_remove_node((ioopm_list_t *) iter->datastructure, 
-                             (node_t *) iter->current_adress);
+                             (node_t *) iter->c_adress);
 }
 
 void 
@@ -243,27 +291,52 @@ ioopm_iterator_reset(ioopm_iterator_t *iter)
     ioopm_list_t *list = iter->datastructure;
 
     if(!ioopm_linked_list_is_empty(list))
-    iter->current_adress = list->first;
+    iter->c_adress = list->first;
     iter->dummied = true;
-    iterator_init(iter);
+    iterator_list_init(iter);
 }
 
 option_t 
 ioopm_iterator_current_value(ioopm_iterator_t *iter)
 {
-    if(!iterator_init(iter)) 
-        return (option_t) {0};
-    node_t *node = iter->current_adress;
-    return (option_t) {.success = 1, .return_value = node->value};
+    switch (iter->type) {
+        case list_iter:
+        {
+            if(!iterator_list_init(iter)) 
+                return (option_t) {0};
+            node_t *node = iter->c_adress;
+            return (option_t) {.success = 1, .return_value = node->value};
+        }
+        case array_iter:
+        {
+            array_t *arr = iter->datastructure;
+            return (option_t) {.success = 1,
+                               .return_value = arr->cast(iter->c_adress)};
+
+        }
+        default:
+        assert(false);
+    }
 }
 
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter)
 {
-    if(!iterator_init(iter)) 
-        return (option_t) {0};
-    node_t *node = iter->current_adress;
-    return (option_t) {.success = 1, .return_value = node->key};
+    option_t result = {0};
+    switch(iter->type){
+        case list_iter:
+        {
+            if(!iterator_list_init(iter)) 
+                return result;
+            node_t *node = iter->c_adress;
+            return (option_t) {.success = 1, .return_value = node->key};
+        }
+        case array_iter:
+            return result;
+        default:
+        assert(false);
+    }
+ 
 }
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg)

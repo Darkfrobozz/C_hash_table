@@ -13,6 +13,7 @@ ioopm_iterator_list_create(void)
 {
     ioopm_list_t *list = ioopm_linked_list_create();
     ioopm_add_cleaners(list, ioopm_iter_apply_destroy, NULL);
+    return list;
 }
 
 ioopm_list_t *

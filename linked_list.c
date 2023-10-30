@@ -1,4 +1,5 @@
 #include "include/nodes.h"
+#include "iterator.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,6 +8,12 @@
 
 typedef void(*handler)(node_t *node, bool *success, void **arg);
 
+ioopm_list_t *
+ioopm_iterator_list_create(void)
+{
+    ioopm_list_t *list = ioopm_linked_list_create();
+    ioopm_add_cleaners(list, ioopm_iter_apply_destroy, NULL);
+}
 
 ioopm_list_t *
 ioopm_linked_list_create(void)

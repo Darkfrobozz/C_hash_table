@@ -26,7 +26,7 @@ struct array {
     size_t chunk_siz;
   //For example int[9], chunk amount is 9
     size_t chunk_amount;
-    elem_t p;
+    void *p_first_element;
   //if destroyed it needs to update its iterators...
     ioopm_list_t *iterator_list;
     ioopm_transform_value clean_value;
@@ -65,3 +65,5 @@ option_t
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, 
                   ioopm_list_t *list);
 
+ioopm_list_t *
+ioopm_iterator_list_create(void);

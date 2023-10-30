@@ -1,5 +1,6 @@
 #pragma once
 #include "linked_list.h"
+#include "array.h"
 
 
 typedef struct iterator ioopm_iterator_t;
@@ -11,6 +12,14 @@ typedef struct iterator ioopm_iterator_t;
 /// @return an iteration positioned at the start of list
 ioopm_iterator_t *
 ioopm_list_iterator(ioopm_list_t *list);
+
+/**
+ * @brief Construct a new ioopm array iterator object
+ * 
+ * @param array The array object, see common.h
+ */
+ioopm_iterator_t *
+ioopm_array_iterator(array_t *array);
 
 /// @brief Checks if there are more elements to iterate over,
 /// checks if the node has a next, if and checks if that next also has a next 

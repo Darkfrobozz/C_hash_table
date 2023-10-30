@@ -2,7 +2,7 @@
 #include "include/nodes.h"
 #include <stdlib.h>
 
-enum itertypes{list_iter, hash_iter};
+enum itertypes{list_iter, array_iter};
 
 struct iterator
 {

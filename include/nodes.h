@@ -21,6 +21,16 @@ struct list
     ioopm_list_t *iterator_list;
 };
 
+struct array {
+  //For example int is chunk size 4
+    size_t chunk_siz;
+  //For example int[9], chunk amount is 9
+    size_t chunk_amount;
+    elem_t p;
+  //if destroyed it needs to update its iterators...
+    ioopm_list_t *iterator_list;
+    ioopm_transform_value clean_value;
+};
 
 /**
  * @brief This edits a nodes value

@@ -39,8 +39,7 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define LEFT 0
 
 
-union elem
-{
+union elem {
   /// TODO: update the names of the fields to something better? 
   int i;
   unsigned int u;
@@ -55,12 +54,10 @@ union elem
 
 
 // Used to return the fail or sucess along with the value of an operation. 
-struct option
-{
+struct option {
   elem_t return_value;
   short success;
 };
-
 
 
 short

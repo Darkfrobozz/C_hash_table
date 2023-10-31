@@ -1,7 +1,9 @@
 #include "include/iterator.h"
+#include "include/pipeline.h"
 #include "include/nodes.h"
 #include <stdlib.h>
 #define START 1
+#define STAY 0
 #define LAST -1
 
 enum itertypes{list_iter, array_iter};
@@ -17,6 +19,37 @@ struct iterator
     //If iterator is on a dummy node
     bool dummied;
 };
+/**
+ * @brief Used to init iterator
+ * 
+ * @param iter 
+ * @param command 
+ * 1 -> Stay
+ * 2 -> Set to list first next
+ * 3 -> set to list last previous
+ */
+static
+void
+iterator_list_set(ioopm_iterator_t *iter, short command)
+{
+ioopm_list_t *list = iter->d_struct;
+
+switch(command){
+    case STAY: 
+    return;
+
+    case START:
+    iter->c_adress = list->first->next;
+    iter->dummied = false;
+    return;
+
+    case LAST:
+    iter->c_adress = list->last->previous;
+    iter->dummied = false;
+    return;        
+}
+}
+
 
 /**
  * @brief Returns whether initiation is successful or not needs to be called
@@ -33,15 +66,13 @@ iterator_list_init(ioopm_iterator_t *iter)
     assert(iter);
     if(!(iter->dummied))
         return true;
-    ioopm_list_t *list = iter->d_struct;
     //check if empty
-    if(ioopm_linked_list_is_empty(list))
+    if(!(ioopm_iter_db_siz(iter)))
         return false;
-    //check 
-    node_t *node = iter->c_adress;
+    
+    //Set to start if it was dummied 
+    iterator_list_set(iter, START);
 
-    iter->c_adress = node->next;
-    iter->dummied = false;
     return true;
 }
 
@@ -120,17 +151,25 @@ void
 ioopm_inform_removal(elem_t *value, void *removed_node)
 {
     
+    //Indexes will be shifted, iters ahead of current iterator
+    //will be wrong! Inform removal should carry both removed_node and index
+    //info
     ioopm_iterator_t *iter = value->p;
-
     elem_t adress_removed;
     adress_removed.p = removed_node;
 
+
+    //This should never be a dummy node so we good
     if(ioopm_equals_adress(adress_removed, iter->c_adress))
     {
         if(iter->type == list_iter)
         {
+
             node_t *c_adress = iter->c_adress;
             iter->c_adress = c_adress->previous;
+
+            if(iter->index)
+                iter->index--;
             if(!(c_adress->previous->previous))
                 iter->dummied = true;
         }
@@ -406,31 +445,51 @@ ioopm_iter_destroy_db(ioopm_iterator_t *iter)
     }
 }
 
-//ONLY 0 and list size is supported for list, iterator has every index
+/**
+ * @brief Find smallest of 
+ * 
+ * @param c_to_g returns STAY 
+ * @param s_to_g returns START
+ * @param e_to_g returns LAST
+ * @return short 
+ */
+short
+static
+three_way_comparator(int c_to_g, int s_to_g, int e_to_g)
+{
+    if(c_to_g < e_to_g)
+    {
+        if(c_to_g < s_to_g)
+            return STAY;
+        return START;
+    }
+    if(s_to_g < e_to_g)
+        return START;
+    return LAST;
+}
+
+
 bool
 ioopm_iterator_set(ioopm_iterator_t *iter, int index)
 {
+    if(iter->index == index)
+        return true;
     //perhaps have this in array
     switch (iter->type) {
         case (list_iter):
         {
             ioopm_list_t *list = iter->d_struct;
             int siz = ioopm_linked_list_size(list);
-            if(siz == 0)
-                return false;
-            if(index == 0)
-            {
-                iter->c_adress = list->first->next;
-                iter->dummied = false;
-                return true;
-            }
-            if(index == siz - 1)
-            {
-                iter->c_adress = list->last->previous;
-                iter->dummied = false;
-                return true;
-            }
-            return false;
+            int c_to_g = abs(iter->index - index);
+            int s_to_g = abs(siz - 1);
+            int e_to_g = abs(siz - 1 - index);
+            bool result = true;
+            if(s_to_g && e_to_g)
+                result = false;
+            
+            iterator_list_set(iter, three_way_comparator(c_to_g, s_to_g, e_to_g));
+            return result;
+
         }
         case (array_iter):
         {    
@@ -468,6 +527,7 @@ iterator_list_add(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
                       key, (ioopm_list_t  *) iter->d_struct);
     
     iter->c_adress = to_send->next;
+    iter->dummied = false;
     
     return result;
 }
@@ -509,4 +569,16 @@ ioopm_iter_apply_destroy(elem_t *value, void *arg)
 
     ioopm_iterator_t *iter = value->p;
     ioopm_iterator_destroy(iter);
+}
+
+//ADVANCED FUNCTIONS
+void
+ioopm_move_iter_index(ioopm_iterator_t *iter, int index)
+{  
+    ioopm_list_t *assembly_list = ioopm_linked_list_create();
+    ioopm_linked_list_append(assembly_list, (elem_t) index, 
+                             (elem_t) (void *) ioopm_fast_index);
+    ioopm_pipeline(iter, assembly_list);
+    ioopm_linked_list_clear(assembly_list);
+    ioopm_linked_list_destroy(assembly_list);
 }

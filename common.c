@@ -83,6 +83,12 @@ add_int_elements(elem_t a, elem_t b)
 }
 
 //pred
+bool
+ioopm_always(elem_t value, void *arg)
+{
+  return true;
+}
+
 bool 
 ioopm_equals_int(elem_t value, void *arg)
 {

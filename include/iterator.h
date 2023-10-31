@@ -1,9 +1,7 @@
 #pragma once
 #include "linked_list.h"
 #include "array.h"
-
-
-typedef struct iterator ioopm_iterator_t;
+#include "pipeline.h"
 
 
 /// @brief Create an iterator for a given list, a cursor pointing at elements.
@@ -99,10 +97,14 @@ ioopm_iter_destroy_db(ioopm_iterator_t *iter);
 size_t
 ioopm_iter_db_siz(ioopm_iterator_t *iter);
 
-/// @brief The first or last for list, any viable index for list
+/// @brief For list this places it as close as possible to the index given
+/// For array this just places it at the index
 /// @param iter 
 /// @param index 
-/// @return 
+/// @return
+/// TRUE if could go to index
+/// FALSE if could not go directly to index, 
+/// This will still place the iterator as close as possible 
 bool
 ioopm_iterator_set(ioopm_iterator_t *iter, int index);
 
@@ -140,3 +142,6 @@ ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key);
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg);
 
+//ADVANCED FUNCTIONS
+void
+ioopm_move_iter_index(ioopm_iterator_t *iter, int index);

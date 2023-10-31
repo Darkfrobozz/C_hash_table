@@ -1,5 +1,6 @@
 #include "include/nodes.h"
 #include "iterator.h"
+#include "pipeline.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -497,4 +498,3 @@ ioopm_element_to_list(elem_t list, elem_t item)
     ioopm_linked_list_append(list_to_add, item, (elem_t) NULL);
     return list;
 }
-

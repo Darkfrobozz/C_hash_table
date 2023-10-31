@@ -9,6 +9,7 @@
 // Common and error handling data types
 typedef union elem elem_t;
 typedef struct option option_t;
+typedef struct iterator ioopm_iterator_t;
 
 
 // Function types
@@ -90,6 +91,9 @@ ioopm_string_hash(elem_t key, void *arg);
 
 
 //Basic pred functions
+bool
+ioopm_always(elem_t value, void *arg);
+
 bool 
 ioopm_equals_int(elem_t value, void *arg);
 

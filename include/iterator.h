@@ -83,8 +83,11 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter);
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter);
 
-// General db methods
+//Location methods
+int
+ioopm_iter_index(ioopm_iterator_t *iter);
 
+// General db methods
 /// @brief Destroy...
 /// @param iter
 void

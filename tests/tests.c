@@ -827,10 +827,12 @@ test_pipelist(void)
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
   ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+  ioopm_linked_list_clear(list);
+  ioopm_linked_list_destroy(list);
 }
 
 void
-test_pipelist(void)
+test_index_pipelist(void)
 {
   ioopm_list_t *list = ioopm_linked_list_create();
   ioopm_linked_list_append(list, (elem_t) 1, (elem_t) NULL);
@@ -839,13 +841,15 @@ test_pipelist(void)
   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
-  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  ioopm_pipeline(iter, NULL, NULL, ioopm_to_first, NULL, -1);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 2);
   ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
   ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
   ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+
+  ioopm_linked_list_clear(list);
   ioopm_linked_list_destroy(list);
 }
 
@@ -908,6 +912,7 @@ main(int argc, char *argv[])
     || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove", test_array_iter_misc) == NULL)
     || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Iter memory move in pipe", test_pipelist) == NULL)
     || 0
   )
     {

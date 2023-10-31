@@ -358,6 +358,12 @@ ioopm_iterator_current_value(ioopm_iterator_t *iter)
     }
 }
 
+int
+ioopm_iter_index(ioopm_iterator_t *iter)
+{
+    return iter->index;
+}
+
 size_t
 ioopm_iter_db_siz(ioopm_iterator_t *iter)
 {

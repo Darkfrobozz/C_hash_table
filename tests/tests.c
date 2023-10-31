@@ -2,6 +2,7 @@
 #include "../include/hash.h"
 #include "../include/iterator.h"
 #include "../include/array.h"
+#include "../include/pipeline.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -300,14 +301,14 @@ void double_iterator()
   send_values[0].i = 3;
   send_values[1].i = 9;
   send_values[2].i = 15;
-  ioopm_iterator_insert(iter_a, send_values[0], (elem_t) NULL, RIGHT);
-  ioopm_iterator_insert(iter_a, send_values[1], (elem_t) NULL, LEFT);
+  ioopm_iterator_insert(iter_a, send_values[0], (elem_t) NULL);
+  ioopm_iterator_prepend(iter_a, send_values[1], (elem_t) NULL);
 
   ioopm_iterator_remove(iter_b);
 
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[1].i);
 
-  ioopm_iterator_insert(iter_b, send_values[2], (elem_t) NULL, RIGHT);
+  ioopm_iterator_insert(iter_b, send_values[2], (elem_t) NULL);
   ioopm_iterator_next(iter_a);
 
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[2].i);
@@ -810,6 +811,43 @@ test_array_iter_misc(void)
 
 }
 
+void
+test_pipelist(void)
+{
+  ioopm_list_t *list = ioopm_linked_list_create();
+  ioopm_linked_list_append(list, (elem_t) 1, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 2, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_iterator_t *iter = ioopm_list_iterator(list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 2);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+}
+
+void
+test_pipelist(void)
+{
+  ioopm_list_t *list = ioopm_linked_list_create();
+  ioopm_linked_list_append(list, (elem_t) 1, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 2, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_iterator_t *iter = ioopm_list_iterator(list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 2);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+  ioopm_pipeline(iter, NULL, NULL, NULL, NULL, 1);
+  ioopm_linked_list_destroy(list);
+}
 
 int 
 main(int argc, char *argv[]) 
@@ -869,6 +907,7 @@ main(int argc, char *argv[])
     || (CU_add_test(array_suite, "Unit test: Iter move in array", test_add_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove", test_array_iter_misc) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
     || 0
   )
     {

@@ -66,11 +66,6 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 option_t 
 ioopm_iterator_remove(ioopm_iterator_t *iter);
 
-/// @brief Reposition the iterator at the start of the underlying list.
-/// @param iter the iterator
-void 
-ioopm_iterator_reset(ioopm_iterator_t *iter);
-
 /// @brief Return the current value from the underlying list.
 /// @param iter the iterator
 /// @return the current value
@@ -101,21 +96,39 @@ ioopm_iter_destroy_db(ioopm_iterator_t *iter);
 size_t
 ioopm_iter_db_siz(ioopm_iterator_t *iter);
 
-//Array ONLY
+/// @brief The first or last for list, any viable index for list
+/// @param iter 
+/// @param index 
+/// @return 
 bool
 ioopm_iterator_set(ioopm_iterator_t *iter, int index);
 
-//List ONLY
+/// @brief Reposition the iterator at the start of the underlying list.
+/// @param iter the iterator
+void 
+ioopm_iterator_reset(ioopm_iterator_t *iter);
+
+
+
+/// @brief Resets iterator to last
+/// @param iter 
+void
+ioopm_iterator_last(ioopm_iterator_t *iter);
+
 
 /// @brief Inserts a new value to the right.
 /// @param iter the iterator
-/// @param element the element to be inserted
-/// @param dir whether to insert to the right or left of current node, 
-/// note that this is irrelevant in empty list
+/// @param value both read and change value
+/// @param key read only 
 option_t 
-ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, 
-                      short dir);
+ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key);
 
+/// @brief Inserts a new value to the left.
+/// @param iter the iterator
+/// @param value both read and change value
+/// @param key read only 
+option_t 
+ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key);
 
 /// @brief Applies iter destroy, transformation function used when
 /// listing iterator outside of a list's iterator list
@@ -123,3 +136,4 @@ ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key,
 /// @param arg 
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg);
+

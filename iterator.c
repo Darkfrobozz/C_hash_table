@@ -1,14 +1,20 @@
 #include "include/iterator.h"
 #include "include/nodes.h"
 #include <stdlib.h>
+#define START 1
+#define LAST -1
 
 enum itertypes{list_iter, array_iter};
 
 struct iterator
 {
     enum itertypes type;
+    //Adresses to relevant structures
     void *d_struct;
     void *c_adress;
+    //What index, start is 0
+    int index;
+    //If iterator is on a dummy node
     bool dummied;
 };
 
@@ -201,15 +207,22 @@ ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
     switch(iter->type){
         case list_iter:
         if(dir == RIGHT)
+        {
             iter->c_adress = ((node_t *) c_adress)->next; 
+            iter->index++;
+        }
         else
+        {
             iter->c_adress = ((node_t *) c_adress)->previous; 
+            iter->index--;
+        }
         
         break;
 
         case array_iter:
             iter->c_adress = (char *) c_adress 
                              + dir * (((array_t *) data)->chunk_siz);
+            iter->index += dir;
                             
         break;
         default:
@@ -299,23 +312,26 @@ ioopm_iterator_remove(ioopm_iterator_t *iter)
         assert(false);
     }
 }
+static
+void
+reset(ioopm_iterator_t *iter, short to_cm)
+{
+    if(to_cm == START)
+        ioopm_iterator_set(iter, 0);
+    if(to_cm == LAST)
+        ioopm_iterator_set(iter, ioopm_iter_db_siz(iter) - 1);
+}
 
 void 
 ioopm_iterator_reset(ioopm_iterator_t *iter)
 {
-    switch (iter->type) {
-        case list_iter:
-        {
-            ioopm_list_t *list = iter->d_struct;
-            iter->c_adress = list->first;
-            iter->dummied = true;
-        }
-        case array_iter:
-        {
-            array_t *arr = iter->d_struct;
-            iter->c_adress = arr->p_first_element;
-        } 
-    }
+    reset(iter, START);
+}
+
+void
+ioopm_iterator_last(ioopm_iterator_t *iter)
+{
+    reset(iter, LAST);
 }
 
 option_t 
@@ -336,6 +352,7 @@ ioopm_iterator_current_value(ioopm_iterator_t *iter)
                                .return_value = arr->cast(iter->c_adress)};
 
         }
+
         default:
         assert(false);
     }
@@ -355,8 +372,8 @@ ioopm_iter_db_siz(ioopm_iterator_t *iter)
         {
             array_t *arr = iter->d_struct;
             return arr->elements;
-        }
-        
+        } 
+
         default:
         assert(false);
     }
@@ -383,23 +400,50 @@ ioopm_iter_destroy_db(ioopm_iterator_t *iter)
     }
 }
 
-//ONLY ARRAY
+//ONLY 0 and list size is supported for list, iterator has every index
 bool
 ioopm_iterator_set(ioopm_iterator_t *iter, int index)
 {
-    array_t *arr;
-    if(iter->type == list_iter)
-        return false;
-    arr = iter->d_struct;
-    if(index < 0 || index >= arr->elements)
-        return false;
-    iter->c_adress = ((char *) arr->p_first_element) + index * arr->chunk_siz;
-    return true;
+    //perhaps have this in array
+    switch (iter->type) {
+        case (list_iter):
+        {
+            ioopm_list_t *list = iter->d_struct;
+            int siz = ioopm_linked_list_size(list);
+            if(siz == 0)
+                return false;
+            if(index == 0)
+            {
+                iter->c_adress = list->first->next;
+                iter->dummied = false;
+                return true;
+            }
+            if(index == siz - 1)
+            {
+                iter->c_adress = list->last->previous;
+                iter->dummied = false;
+                return true;
+            }
+            return false;
+        }
+        case (array_iter):
+        {    
+            array_t *arr = iter->d_struct;
+            if(index < 0 || index >= arr->elements)
+                return false;
+            iter->c_adress = ((char *) arr->p_first_element) + index * arr->chunk_siz;
+            iter->index = index;
+            return true;
+        }
+        default:
+        assert(false);
+    }
 }
 
 //ONLY LIST
-option_t 
-ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
+option_t
+static
+iterator_list_add(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
 {
     option_t result = {0};
     bool ans; 
@@ -422,6 +466,17 @@ ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short di
     return result;
 }
 
+option_t 
+ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key)
+{
+    return iterator_list_add(iter, value, key, RIGHT);
+}
+
+option_t 
+ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key)
+{
+    return iterator_list_add(iter, value, key, LEFT);
+}
 
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter)

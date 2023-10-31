@@ -1,7 +1,6 @@
 #pragma once
 #include "linked_list.h"
 #include "array.h"
-#include "pipeline.h"
 
 
 /// @brief Create an iterator for a given list, a cursor pointing at elements.

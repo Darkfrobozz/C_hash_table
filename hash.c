@@ -361,7 +361,7 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
         case INSERT_PREVIOUS:
         {
             ht->elements++;
-            result = ioopm_iterator_insert(iter, value, key, LEFT);
+            result = ioopm_iterator_prepend(iter, value, key);
             break;
         }
         
@@ -375,7 +375,7 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
         case MOVE_ON:
         {
             ht->elements++;
-            result = ioopm_iterator_insert(iter, value, key, RIGHT);
+            result = ioopm_iterator_insert(iter, value, key);
             break;
         }
     }

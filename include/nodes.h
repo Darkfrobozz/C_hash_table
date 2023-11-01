@@ -1,4 +1,7 @@
+#pragma once
 #include "linked_list.h"
+#include "iterator.h"
+#include "array.h"
 
 
 typedef struct node node_t;
@@ -13,6 +16,7 @@ struct node
 
 struct list
 {
+    size_t chunk_siz;
     size_t size;
     node_t *first; //dummy node
     node_t *last; // dummy node
@@ -26,7 +30,6 @@ struct array {
     size_t chunk_siz;
     size_t elements;
   //pointers
-    elem_t *p_last_element;
     elem_t *p_first_element;
   //if destroyed it needs to update its iterators...
     ioopm_list_t *iterator_list;
@@ -68,5 +71,20 @@ option_t
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, 
                   ioopm_list_t *list);
 
+
 ioopm_list_t *
-ioopm_iterator_list_create(void);
+bond_iter(ioopm_list_t *iter_list, ioopm_iterator_t *iter);
+
+ioopm_list_t *
+list_track_iter(ioopm_list_t *list, ioopm_iterator_t *iter);
+
+ioopm_list_t *
+array_track_iter(array_t *array, ioopm_iterator_t *iter);
+
+/// @brief Applies iter destroy, transformation function used when
+/// listing iterator outside of a list's iterator list
+/// @param value 
+/// @param arg 
+void
+ioopm_iter_apply_destroy(elem_t *value, void *arg);
+

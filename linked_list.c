@@ -1,5 +1,4 @@
 #include "include/nodes.h"
-#include "include/iterator.h"
 #include "include/automaton.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -8,13 +7,46 @@
 #include <string.h>
 
 typedef void(*handler)(node_t *node, bool *success, void **arg);
+static
+void
+bind(node_t *left, node_t *right)
+{
+    left->next = right;
+    right->previous = right;
+}
 
+static
+void
+append_iterator(ioopm_list_t *list, ioopm_iterator_t *iter)
+{
+    if(iter)
+        ioopm_linked_list_append(list, 
+                                 (elem_t) (void *) iter, (elem_t) NULL);
+}
+
+static
 ioopm_list_t *
-ioopm_iterator_list_create(void)
+ioopm_iterator_list_create()
 {
     ioopm_list_t *list = ioopm_linked_list_create();
     ioopm_add_cleaners(list, ioopm_iter_apply_destroy, NULL);
     return list;
+}
+
+ioopm_list_t *
+bond_iter(ioopm_list_t *iter_list, ioopm_iterator_t *iter)
+{
+    if(!iter_list)
+        iter_list = ioopm_iterator_list_create(iter);
+    append_iterator(iter_list, iter);
+    return iter_list;
+}
+
+ioopm_list_t *
+list_track_iter(ioopm_list_t *list, ioopm_iterator_t *iter)
+{
+    list->iterator_list = bond_iter(list->iterator_list, iter);
+    return list->iterator_list;
 }
 
 ioopm_list_t *
@@ -23,12 +55,11 @@ ioopm_linked_list_create(void)
     ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
     node_t *first = calloc(1, sizeof(node_t));
     node_t *last = calloc(1, sizeof(node_t));
-    result->clean_key = NULL;
-    result->clean_value = NULL;
+
     result->first = first;
-    first->next = last;
-    last->previous = first;
     result->last = last;
+    bind(first, last);
+
     return result;
 }
 

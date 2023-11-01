@@ -18,7 +18,6 @@ ioopm_array_set(array_t *arr, size_t array_siz, size_t elem_siz, elem_t *first)
 {
     arr->p_first_element = first;
     arr->chunk_siz = elem_siz;
-    arr->p_last_element = first + (array_siz - 1) * elem_siz;
     arr->elements = array_siz;
 }
 
@@ -26,6 +25,13 @@ void
 ioopm_array_cleaners(array_t *arr, ioopm_transform_value clean_value)
 {
     arr->clean_value = clean_value;
+}
+
+ioopm_list_t *
+array_track_iter(array_t *array, ioopm_iterator_t *iter)
+{
+    array->iterator_list = bond_iter(array->iterator_list, iter);
+    return array->iterator_list;
 }
 
 

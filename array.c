@@ -3,19 +3,24 @@
 #include "iterator.h"
 
 array_t *
-ioopm_array(size_t element_siz, size_t array_siz, type_cast caster)
+ioopm_array_create(size_t element_siz, size_t array_siz)
 {
     array_t *new_array = calloc(1, sizeof(array_t));
     void *new_data = calloc(array_siz, element_siz);
-    void *last = (char *) new_data + ((array_siz - 1) * element_siz);
-    new_array->p_first_element = new_data;
-    new_array->p_last_element = last; 
-    new_array->chunk_siz = element_siz;
-    new_array->elements = array_siz;
-    new_array->cast = caster;
+
+    ioopm_array_set(new_array, array_siz, element_siz, new_data);
+    
     return new_array;
 }
 
+void
+ioopm_array_set(array_t *arr, size_t array_siz, size_t elem_siz, elem_t *first)
+{
+    arr->p_first_element = first;
+    arr->chunk_siz = elem_siz;
+    arr->p_last_element = first + (array_siz - 1) * elem_siz;
+    arr->elements = array_siz;
+}
 
 void
 ioopm_array_cleaners(array_t *arr, ioopm_transform_value clean_value)

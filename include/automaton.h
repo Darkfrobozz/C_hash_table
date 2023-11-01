@@ -1,12 +1,26 @@
 #pragma once
 #include "common.h"
 #include "iterator.h"
-enum builds{til_last, til_start};
 
 
 typedef bool(*transition)(ioopm_iterator_t *iter, 
                           ioopm_iterator_t *assembly_iter,
                           bool prev_result);
+
+
+struct automate {
+    //List of states
+    enum tasks am_task; 
+    size_t s_amounts;
+    state_t *states;
+    size_t mem_amount;
+    elem_t *mem;
+};
+
+struct am_arr {
+    am_t simple_automatons[simple_siz];
+    ioopm_list_t *custom_automatons;
+};
 
 /**
  * @brief The idea is to put a list of iters through an assembly
@@ -29,7 +43,7 @@ typedef bool(*transition)(ioopm_iterator_t *iter,
  */
 ioopm_iterator_t *
 ioopm_run_automaton(ioopm_iterator_t *iter, 
-                    ioopm_list_t *assembly_list);
+                    am_t *automaton);
 
 
 /**

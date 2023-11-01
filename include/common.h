@@ -8,6 +8,7 @@
 
 // Common and error handling data types
 typedef union elem elem_t;
+typedef struct am_arr am_arr_t;
 typedef struct automate am_t;
 typedef struct state state_t;
 typedef struct option option_t;
@@ -18,7 +19,7 @@ typedef struct iterator ioopm_iterator_t;
 typedef int(*hashing_func)(elem_t key, void *arg);
 typedef short(*compare_func)(elem_t node_key, elem_t key_fetched);
 typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
-typedef void(*mem_clean)(void *area);
+typedef void(*mem_clean)(elem_t area);
 
 
 // Applies to a nodes value
@@ -43,7 +44,7 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define ASCII_SIZ 256
 #define RIGHT 1
 #define LEFT -1
-
+#define simple_siz 10
 
 union elem {
   //ELEMENTARY
@@ -63,12 +64,17 @@ union elem {
 };
 
 
+
+
 // Used to return the fail or sucess along with the value of an operation. 
 struct option {
   elem_t return_value;
   short success;
 };
 
+//ENUMS
+enum tasks{go_to_start = 1, 
+           go_to_last, go_to_value, transform_each, remover};
 
 short
 ioopm_int_compare(elem_t a, elem_t b);

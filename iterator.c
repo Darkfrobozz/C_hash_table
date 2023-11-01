@@ -340,7 +340,7 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
                 memcpy(iter->c_adress, arg, arr->chunk_siz);
             else
             {
-                elem_t elem_edit = arr->cast(iter->c_adress);
+                elem_t elem_edit = *((elem_t *)iter->c_adress);
                 transformation(&elem_edit, arg);
                 memcpy(iter->c_adress, &elem_edit, arr->chunk_siz);
             }
@@ -410,9 +410,8 @@ ioopm_iterator_current_value(ioopm_iterator_t *iter)
         }
         case array_iter:
         {
-            array_t *arr = iter->d_struct;
             return (option_t) {.success = 1,
-                               .return_value = arr->cast(iter->c_adress)};
+                               .return_value = *((elem_t *) iter->c_adress)};
 
         }
 
@@ -605,10 +604,11 @@ ioopm_iter_apply_destroy(elem_t *value, void *arg)
 void
 ioopm_move_iter_index(ioopm_iterator_t *iter, int index)
 {  
-    ioopm_list_t *assembly_list = ioopm_linked_list_create();
-    ioopm_linked_list_append(assembly_list, (elem_t) index, 
-                             (elem_t) (void *) ioopm_fast_index);
-    ioopm_run_automaton(iter, assembly_list);
-    ioopm_linked_list_clear(assembly_list);
-    ioopm_linked_list_destroy(assembly_list);
+    ioopm_iterator_set(iter, index);
+    // ioopm_list_t *assembly_list = ioopm_linked_list_create();
+    // ioopm_linked_list_append(assembly_list, (elem_t) index, 
+    //                          (elem_t) (void *) ioopm_fast_index);
+    // ioopm_run_automaton(iter, assembly_list);
+    // ioopm_linked_list_clear(assembly_list);
+    // ioopm_linked_list_destroy(assembly_list);
 }

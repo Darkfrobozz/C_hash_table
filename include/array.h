@@ -12,7 +12,11 @@ typedef struct array array_t;
  * @return array_t* 
  */
 array_t *
-ioopm_array(size_t element_siz, size_t array_siz, type_cast caster);
+ioopm_array_create(size_t element_siz, size_t array_siz);
+
+void
+ioopm_array_set(array_t *arr, size_t array_siz, size_t elem_siz, elem_t *first);
+
 
 /**
  * @brief  
@@ -29,3 +33,4 @@ ioopm_array_cleaners(array_t *array, ioopm_transform_value clean_value);
  */
 void
 ioopm_array_destroy(array_t *array);
+

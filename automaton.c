@@ -1,72 +1,19 @@
-#include "include/automaton.h"
-#include <stdio.h>
-
-struct automate {
-    //List of states
-    ioopm_list_t *states;
-};
-
-struct state {
-    transition s_transiton;
-    mem_clean m_clean;
-};
-
-state_t *
-state_builder(mem_clean i_clean, transition i_trans, 
-              elem_t *args, size_t siz)
-{
-    state_t *n_state = calloc(1, sizeof(state_t));
-    n_state->m_clean = i_clean;
-    n_state->s_transiton = i_trans;
-    return n_state;
-}
-
-bool
-state_adder(ioopm_list_t *am_list, state_t *state, 
-            elem_t *args, size_t siz)
-{
-    //gen arg array, use memset!
-
-    elem_t s_elem;
-    s_elem.state = state;
-    ioopm_linked_list_append(am_list, (elem_t) args, s_elem);
-    return true;
-}
-
-am_t
-ioopm_normal_a_build(ioopm_list_t *automate_list, enum builds to_build)
-{
-
-    switch (to_build){
-        case(til_last): 
-        ioopm_linked_list_append(automate_list, (elem_t) 
-                                 (void *) NULL, (elem_t) 
-                                 (void *) ioopm_assemble_branch); 
-        
-        ioopm_linked_list_append(automate_list, (elem_t) (void *) 0, 
-                                 (elem_t) (void *) ioopm_to_last);
-        break;
-        case(til_start):
-        ioopm_linked_list_append(automate_list, (elem_t) 
-                                 (void *) NULL, (elem_t) 
-                                 (void *) ioopm_assemble_branch); 
-        
-        ioopm_linked_list_append(automate_list, (elem_t) (void *) 0, 
-                                 (elem_t) (void *) ioopm_to_first);
-        break;
-    }
-    return (am_t) {.states = automate_list};
-}
+#include "include/auto_common.h"
+#include "array.h"
+#include "nodes.h"
 
 ioopm_iterator_t *
 ioopm_run_automaton(ioopm_iterator_t *iter, 
-                   ioopm_list_t *automate_list)
+                    am_t *automat)
 {
-    //Does not do anything if no transition here
-    if(!automate_list || ioopm_linked_list_is_empty(automate_list))
-     return iter;
-
-    ioopm_iterator_t *assembly_iter = ioopm_list_iterator(automate_list);
+    if(automat->states == 0)
+        return iter;
+    
+    array_t arr;
+    ioopm_array_set(&arr, automat->s_amounts, 
+                    sizeof(elem_t), (elem_t *) &(automat->states));
+    
+    ioopm_iterator_t *assembly_iter = ioopm_array_iterator(&arr);
     //Go to top of assemble line at end of each loop
     while(ioopm_assemble_continue(iter, assembly_iter, false))
         ioopm_iterator_reset(assembly_iter);
@@ -74,7 +21,7 @@ ioopm_run_automaton(ioopm_iterator_t *iter,
     ioopm_iterator_destroy(assembly_iter);
     return iter;
 }
-
+//states and index
 bool
 ioopm_linear_continue(ioopm_iterator_t *iter, 
                       ioopm_iterator_t *a_iter, bool prev)

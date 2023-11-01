@@ -2,7 +2,7 @@
 #include "../include/hash.h"
 #include "../include/iterator.h"
 #include "../include/array.h"
-#include "../include/pipeline.h"
+#include "../include/automaton.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -790,10 +790,7 @@ test_array_iter_misc(void)
   } while (ioopm_iterator_next(iter).success);
 
   ioopm_iterator_set(iter, 3);
-  do
-  {
-    ioopm_iterator_remove(iter);
-  } while (ioopm_iterator_next(iter).success);
+  while (ioopm_iterator_remove(iter).success);
 
   ioopm_iterator_reset(iter);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
@@ -826,18 +823,18 @@ test_pipelist(void)
   ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-  ioopm_pipeline(iter, assembly_list);
+  ioopm_run_automaton(iter, assembly_list);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
-  ioopm_pipeline(iter, assembly_list2);
+  ioopm_run_automaton(iter, assembly_list2);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
-  ioopm_pipeline(iter, assembly_list);
-  ioopm_pipeline(iter, assembly_list);
+  ioopm_run_automaton(iter, assembly_list);
+  ioopm_run_automaton(iter, assembly_list);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
-  ioopm_pipeline(iter, assembly_list3);
+  ioopm_run_automaton(iter, assembly_list3);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
-  ioopm_pipeline(iter, assembly_list2);
+  ioopm_run_automaton(iter, assembly_list2);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
-  ioopm_pipeline(iter, assembly_list3);
+  ioopm_run_automaton(iter, assembly_list3);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
 
   ioopm_linked_list_clear(list);
@@ -871,11 +868,11 @@ test_pipe_inc(void)
   ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-  ioopm_pipeline(iter, assembly_list);
+  ioopm_run_automaton(iter, assembly_list);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 5);
-  ioopm_pipeline(iter, assembly_list2);
+  ioopm_run_automaton(iter, assembly_list2);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
-  ioopm_pipeline(iter, assembly_list3);
+  ioopm_run_automaton(iter, assembly_list3);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 6);
   ioopm_iterator_next(iter);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 7);
@@ -894,26 +891,76 @@ test_pipe_remove(void)
 {
   ioopm_list_t *list = ioopm_linked_list_create();
   ioopm_list_t *assembly_list = ioopm_linked_list_create();
-  elem_t a_value = (elem_t) 0;
-  elem_t a_key = (elem_t) 0;
-  int index_true = 0;
-  int index_false = -1;
-  void *inc_arg1[] = {ioopm_always, &a_value, ioopm_always, &a_key};
-  void *inc_arg2[] = {&index_true, &index_false};
+  ioopm_linked_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_pipe_remover);
 
-  ioopm_linked_list_append(assembly_list, (elem_t) (void *) inc_arg1, (elem_t) (void *) ioopm_pipe_pred_remove);
-  ioopm_linked_list_append(assembly_list, (elem_t) (void *) inc_arg2, (elem_t) (void *) ioopm_assemble_branch);
   ioopm_linked_list_append(list, (elem_t) 1, (elem_t) NULL);
   ioopm_linked_list_append(list, (elem_t) 2, (elem_t) NULL);
   ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-  ioopm_pipeline(iter, assembly_list);
+  ioopm_run_automaton(iter, assembly_list);
   CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
   ioopm_linked_list_clear(assembly_list);
   ioopm_linked_list_destroy(assembly_list);
   ioopm_linked_list_destroy(list);
 }
+void
+test_pipe_until_true(void)
+{
+  ioopm_list_t *list = ioopm_linked_list_create();
+  ioopm_list_t *assembly_list = ioopm_linked_list_create();
+  int compare_to = 3;
+  int true_branch = 0;
+  int false_branch = 1;
+  void *cmp_arg[] = {ioopm_equals_int, &compare_to, NULL, (void *) 1};
+  void *branch_arg[] = {&true_branch, &false_branch};
+  ioopm_linked_list_append(assembly_list, (elem_t) (void *) cmp_arg, (elem_t) (void *) ioopm_assemble_comparer);
+  ioopm_linked_list_append(assembly_list, (elem_t) (void *) branch_arg, (elem_t) (void *) ioopm_assemble_branch);
+  ioopm_linked_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_to_last);
+  //ADDING STARTERS
+  ioopm_linked_list_append(list, (elem_t) 1, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 2, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 3, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_iterator_t *iter = ioopm_list_iterator(list);
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+  compare_to = 8;
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+  compare_to = 1;
+  ioopm_iterator_reset(iter);
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+  //ADDING MORE THINGS
+  ioopm_linked_list_append(list, (elem_t) 17, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 68, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 5, (elem_t) NULL);
+  ioopm_linked_list_append(list, (elem_t) 9, (elem_t) NULL);
+
+  ioopm_iterator_reset(iter);
+  compare_to = 68;
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 68);
+  ioopm_iterator_reset(iter);
+  compare_to = 17;
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 17);
+  ioopm_iterator_reset(iter);
+  compare_to = 5;
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 5);
+  ioopm_iterator_reset(iter);
+  compare_to = 9;
+  ioopm_run_automaton(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 9);
+
+  ioopm_linked_list_clear(assembly_list);
+  ioopm_linked_list_destroy(assembly_list);
+  ioopm_linked_list_clear(list);
+  ioopm_linked_list_destroy(list);
+}
+
 int 
 main(int argc, char *argv[]) 
 {
@@ -975,6 +1022,7 @@ main(int argc, char *argv[])
     || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
     || (CU_add_test(pipeline_suite, "Unit test: Increment pipe", test_increment) == NULL)
     || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_pipe_until_true) == NULL)
     || 0
   )
     {

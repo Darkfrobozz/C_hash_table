@@ -1,8 +1,10 @@
 #pragma once
 #include "common.h"
 #include "iterator.h"
+enum builds{til_last, til_start};
 
-typedef bool(*assemblers)(ioopm_iterator_t *iter, 
+
+typedef bool(*transition)(ioopm_iterator_t *iter, 
                           ioopm_iterator_t *assembly_iter,
                           bool prev_result);
 
@@ -26,8 +28,21 @@ typedef bool(*assemblers)(ioopm_iterator_t *iter,
  * @return ioopm_iterator_t* 
  */
 ioopm_iterator_t *
-ioopm_pipeline(ioopm_iterator_t *iter, 
-               ioopm_list_t *assembly_list);
+ioopm_run_automaton(ioopm_iterator_t *iter, 
+                    ioopm_list_t *assembly_list);
+
+
+/**
+ * @brief Used in construction of your own assembler
+ * Either returns if it is at end of assembly list or continues
+ * 
+ * @param iter 
+ * @param assembly_list 
+ * @param prev 
+ */
+bool
+ioopm_linear_continue(ioopm_iterator_t *iter, 
+                      ioopm_iterator_t *a_iter, bool prev);
 
 
 //Assembler_control
@@ -50,11 +65,17 @@ ioopm_assemble_continue(ioopm_iterator_t *iter,
  * @brief Branches based on previous
  * THIS CAN BE USED TO FORM THE PIPELINE
  * Backwards branching is possible
+ * Branching to same a_iter node is not possible, however two branches
+ * can make a loop
  * @param iter 
  * @param a_iter 
  * Args:
+ * Index must be such that after index moves the pointer
+ * is in [0, n - 1]
  * index1: Move to this index if true
+ * 0 -> exit, returns false
  * index2: Move to this index if false
+ * 0 -> exit, returns false
  * @param prev 
  * @return true Moves a_iter to some other
  * @return false Moves a_iter to some other
@@ -64,7 +85,31 @@ ioopm_assemble_branch(ioopm_iterator_t *iter,
                       ioopm_iterator_t *a_iter, bool prev);
 
 /**
+ * @brief This ands the input with a compare functions
+ * 
+ * @param iter 
+ * @param a_iter 
+ * ARGS:
+ * || CMP
+ * || IOOPM_pred_value
+ * || VALUE = NULL, ELSE KEY. This is used in cmp
+ * || AND MODE = NULL, ELSE CMP ONLY
+ * @param prev This is used with AND
+ * @return true 
+ * @return false 
+ */
+bool
+ioopm_assemble_comparer(ioopm_iterator_t *iter,
+                        ioopm_iterator_t *a_iter, bool prev);
+
+bool
+ioopm_assemble_NOT(ioopm_iterator_t *iter,
+                   ioopm_iterator_t *a_iter, bool prev);
+
+/**
  * @brief Removes based on pred on both key and value
+ * Sends true if remove possible
+ * otherwise false
  * 
  * @param iter 
  * @param a_iter 
@@ -78,13 +123,17 @@ ioopm_assemble_branch(ioopm_iterator_t *iter,
  * @return false 
  */
 bool
-ioopm_pipe_pred_remove(ioopm_iterator_t *iter, 
+ioopm_pipe_remover(ioopm_iterator_t *iter, 
                     ioopm_iterator_t *a_iter, bool prev);
 
 //SIMPLE EDIT FUNCTIONS
+
 /**
  * @brief Takes as argument a pointer to
  * {Transform function, int *}
+ * Sends always prev
+ * 
+ * 
  * 
  * @param iter 
  * @param a_iter 
@@ -111,3 +160,4 @@ ioopm_to_first(ioopm_iterator_t *iter, ioopm_iterator_t *a_iter, bool prev);
 bool
 ioopm_fast_index(ioopm_iterator_t *iter, 
                  ioopm_iterator_t *a_iter, bool prev);
+

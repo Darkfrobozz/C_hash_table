@@ -17,24 +17,22 @@ ioopm_list_iterator(ioopm_list_t *list);
 ioopm_iterator_t *
 ioopm_array_iterator(array_t *array);
 
-/// @brief Checks if there are more elements to iterate over,
-/// checks if the node has a next, if and checks if that next also has a next 
-/// then there is more non dummy nodes.
-/// @param iter the iterator
+/// @brief Checks if there are more elements to iterate over to right,
+/// @param iter
 /// @return true if there is at least one more element 
 bool 
 ioopm_iterator_has_next(ioopm_iterator_t *iter);
 
-/// @brief
-///
-/// @param
-/// @return
+/// @brief Checks if there are more elements to iterate over to left,
+/// @param iter
+/// @return true if there is at least one more element 
 bool
 ioopm_iterator_has_prev(ioopm_iterator_t *iter);
 
 /// @brief Step the iterator forward one step, return error if at the end.
 /// @param iter the iterator
 /// @return the next element
+/// AND true if could move to next
 option_t 
 ioopm_iterator_next(ioopm_iterator_t *iter);
 
@@ -42,7 +40,8 @@ ioopm_iterator_next(ioopm_iterator_t *iter);
 /// to step to the space before the first element so that we can
 /// insert with the iterator there!
 /// @param iter the iterator
-/// @return the previous element
+/// @return the previous element 
+/// AND true if could move to prev
 option_t 
 ioopm_iterator_previous(ioopm_iterator_t *iter);
 
@@ -50,8 +49,14 @@ ioopm_iterator_previous(ioopm_iterator_t *iter);
 /// If the param is NULL, it means that that param will be nullified
 /// @param iter 
 /// @param transformation  
-/// @param arg In order: value, key or extra args for transformation
-void
+/// @param arg In order: 
+/// value 
+/// key 
+/// OR 
+/// Args for transformation
+/// @return False if db is empty, true else 
+/// And the element if list and pointer to element if array
+option_t
 ioopm_iterator_edit(ioopm_iterator_t *iter, 
                     ioopm_transform_value transformation, 
                     void *arg);

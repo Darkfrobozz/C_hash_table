@@ -8,6 +8,8 @@
 
 // Common and error handling data types
 typedef union elem elem_t;
+typedef struct automate am_t;
+typedef struct state state_t;
 typedef struct option option_t;
 typedef struct iterator ioopm_iterator_t;
 
@@ -16,6 +18,7 @@ typedef struct iterator ioopm_iterator_t;
 typedef int(*hashing_func)(elem_t key, void *arg);
 typedef short(*compare_func)(elem_t node_key, elem_t key_fetched);
 typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
+typedef void(*mem_clean)(void *area);
 
 
 // Applies to a nodes value
@@ -43,16 +46,20 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 
 
 union elem {
-  /// TODO: update the names of the fields to something better? 
+  //ELEMENTARY
   int i;
   unsigned int u;
   bool b;
   float f;
-  unsigned char *string;
+  size_t siz;
+
+  //POINTERS
+
   char *normal_string;
   void *p;
-  size_t siz;
-  /// Other choices certainly possible
+  elem_t *elem_arr;
+  state_t *state;
+  am_t *automaton;
 };
 
 

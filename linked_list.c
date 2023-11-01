@@ -1,6 +1,6 @@
 #include "include/nodes.h"
-#include "iterator.h"
-#include "pipeline.h"
+#include "include/iterator.h"
+#include "include/automaton.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -26,7 +26,7 @@ bool
 ioopm_linear_continue(ioopm_iterator_t *iter, 
                       ioopm_iterator_t *a_iter, bool prev)
 {
-    if(ioopm_iterator_next(a_iter).success)
+    if(ioopm_iterator_next(a_iter))
         return ioopm_assemble_continue(iter, a_iter, prev);
 
     return prev;
@@ -38,11 +38,8 @@ bool
 ioopm_pipe_remover(ioopm_iterator_t *iter, 
                     ioopm_iterator_t *a_iter, bool prev)
 {
-    option_t result = ioopm_iterator_remove(iter);
-
     //Go to next in assembly line
-    return ioopm_linear_continue(iter, a_iter, result.success);
-    
+    return ioopm_linear_continue(iter, a_iter, ioopm_iterator_remove(iter));    
 }
 
 //transform ALL
@@ -84,9 +81,9 @@ ioopm_to_index(ioopm_iterator_t *iter,
         return ioopm_linear_continue(iter, a_iter, false);
 
     //We need to stop here, if first fails, it does not do next so we continue
-    if(c_index < g_index && ioopm_iterator_next(iter).success)
+    if(c_index < g_index && ioopm_iterator_next(iter))
             result = true;
-    else if(ioopm_iterator_previous(iter).success)
+    else if(ioopm_iterator_prev(iter))
             result = true;
     
     return ioopm_linear_continue(iter, a_iter, result);
@@ -138,14 +135,14 @@ ioopm_assemble_branch(ioopm_iterator_t *iter,
         if(*move_true == 0)
             return false;
         //This creates a new list that must be destroyed!!
-        ioopm_move_iter_index(a_iter, i_true);
+        ioopm_iterator_jump(a_iter, i_true);
         return ioopm_assemble_continue(iter, a_iter, prev);
     }
 
     if(*move_false == 0)
         return false;
     
-    ioopm_move_iter_index(a_iter, i_false);
+    ioopm_iterator_jump(a_iter, i_false);
     return ioopm_assemble_continue(iter, a_iter, prev);
 }
 

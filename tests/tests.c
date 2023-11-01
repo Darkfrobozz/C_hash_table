@@ -265,7 +265,8 @@ void test_remove_iterator()
   ioopm_list_t *link = ioopm_linked_list_create();
   ioopm_iterator_t *iter_a = ioopm_list_iterator(link);
 
-  option_t remove_empty = ioopm_iterator_remove(iter_a);
+  option_t remove_empty = ioopm_iterator_current_value(iter_a);
+  CU_ASSERT_FALSE(ioopm_iterator_remove(iter_a));
   CU_ASSERT_FALSE(remove_empty.success);
   
   elem_t send_values[3];
@@ -276,13 +277,14 @@ void test_remove_iterator()
   ioopm_linked_list_append(link, send_values[0], (elem_t) NULL);
   ioopm_linked_list_append(link, send_values[1], (elem_t) NULL);
   ioopm_linked_list_append(link, send_values[2], (elem_t) NULL);
-
-  option_t remove_first = ioopm_iterator_remove(iter_a);
+  option_t remove_first = ioopm_iterator_current_value(iter_a);
+  ioopm_iterator_remove(iter_a);
   CU_ASSERT(remove_first.success);
   CU_ASSERT_EQUAL(remove_first.return_value.i, send_values[0].i);
   
   ioopm_iterator_next(iter_a);
-  option_t remove_third = ioopm_iterator_remove(iter_a);
+  option_t remove_third = ioopm_iterator_current_value(iter_a);
+  ioopm_iterator_remove(iter_a);
   CU_ASSERT(remove_third.success);
   CU_ASSERT_EQUAL(remove_third.return_value.i, send_values[2].i);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[1].i);
@@ -719,14 +721,14 @@ test_hash_stats(void)
 void
 test_init_array(void)
 {
-  array_t *arr = ioopm_array_create(4, 8);
+  array_t *arr = ioopm_array_create(4, 8, ioopm_to_int);
   ioopm_array_destroy(arr);
 }
 
 void
 test_add_array_iter(void)
 {
-  array_t *arr = ioopm_array_create(sizeof(int), 2);
+  array_t *arr = ioopm_array_create(sizeof(int), 2, ioopm_to_int);
   ioopm_iterator_t *iter = ioopm_array_iterator(arr);
   CU_ASSERT_FALSE(ioopm_iterator_has_prev(iter));
   CU_ASSERT(ioopm_iterator_has_next(iter));
@@ -744,7 +746,7 @@ test_add_array_iter(void)
 void
 test_edit_array_iter(void)
 {
-  array_t *arr = ioopm_array_create(sizeof(int), 5);
+  array_t *arr = ioopm_array_create(sizeof(int), 5, ioopm_to_int);
   ioopm_iterator_t *iter = ioopm_array_iterator(arr);
   int integers[] = {0, 5, 6, 7, 8};
   int i = 0;
@@ -752,7 +754,7 @@ test_edit_array_iter(void)
   {
     ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
     i++;
-  } while (ioopm_iterator_next(iter).success);
+  } while (ioopm_iterator_next(iter));
 
   ioopm_iterator_reset(iter);
   i = 0;
@@ -760,7 +762,7 @@ test_edit_array_iter(void)
   {
     CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i]);
     i++;
-  } while (ioopm_iterator_next(iter).success);
+  } while (ioopm_iterator_next(iter));
 
 
   ioopm_array_destroy(arr); 
@@ -770,7 +772,7 @@ test_edit_array_iter(void)
 void
 test_array_iter_misc(void)
 {
-  array_t *arr = ioopm_array_create(sizeof(int), 5);
+  array_t *arr = ioopm_array_create(sizeof(int), 5, ioopm_to_int);
   ioopm_iterator_t *iter = ioopm_array_iterator(arr); 
   int integers[] = {0, 5, 6, 7, 8};
   int inc = 1;
@@ -780,7 +782,7 @@ test_array_iter_misc(void)
     ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
     ioopm_iterator_edit(iter, ioopm_increment_int, (void *) &inc);
     i++;
-  } while (ioopm_iterator_next(iter).success);
+  } while (ioopm_iterator_next(iter));
 
   ioopm_iterator_reset(iter);
   i = 0;
@@ -788,10 +790,10 @@ test_array_iter_misc(void)
   {
     CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i] + inc);
     i++;
-  } while (ioopm_iterator_next(iter).success);
+  } while (ioopm_iterator_next(iter));
 
   ioopm_iterator_set(iter, 3);
-  while (ioopm_iterator_remove(iter).success);
+  while (ioopm_iterator_remove(iter));
 
   ioopm_iterator_reset(iter);
   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);

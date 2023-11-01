@@ -1,24 +1,26 @@
-#include "include/array.h"
 #include "include/nodes.h"
 #include "iterator.h"
 
 array_t *
-ioopm_array_create(size_t element_siz, size_t array_siz)
+ioopm_array_create(size_t element_siz, size_t array_siz, type_cast caster)
 {
     array_t *new_array = calloc(1, sizeof(array_t));
     void *new_data = calloc(array_siz, element_siz);
 
-    ioopm_array_set(new_array, array_siz, element_siz, new_data);
+    ioopm_array_set(new_array, array_siz, element_siz, new_data, caster);
     
     return new_array;
 }
 
 void
-ioopm_array_set(array_t *arr, size_t array_siz, size_t elem_siz, elem_t *first)
+ioopm_array_set(array_t *arr, size_t array_siz, 
+                size_t elem_siz, elem_t *first,
+                type_cast caster)
 {
     arr->p_first_element = first;
     arr->chunk_siz = elem_siz;
     arr->elements = array_siz;
+    arr->caster = caster;
 }
 
 void

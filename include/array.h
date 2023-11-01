@@ -12,10 +12,11 @@ typedef struct array array_t;
  * @return array_t* 
  */
 array_t *
-ioopm_array_create(size_t element_siz, size_t array_siz);
+ioopm_array_create(size_t element_siz, size_t array_siz, type_cast caster);
 
 void
-ioopm_array_set(array_t *arr, size_t array_siz, size_t elem_siz, elem_t *first);
+ioopm_array_set(array_t *arr, size_t array_siz, 
+                size_t elem_siz, elem_t *first, type_cast caster);
 
 
 /**

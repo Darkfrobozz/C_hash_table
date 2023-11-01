@@ -9,12 +9,18 @@
 #define set_last(x) ((x->c_adress) = (list(x)->last->previous))
 #define set_first(x) ((x->c_adress) = (list(x)->last->next))
 #define at(x) (x->c_adress)
+#define cast(x) (array(x)->caster(at(x)))
+
 #define i_next(x, a) (x->index + a)
 #define siz(x) (ioopm_iter_db_siz(x))
 #define chunk(x) (array(x)->chunk_siz)
 #define within(a,x,b) (((x) >= (a)) && ((x) <= (b)))
 #define end_p(x) (siz(x) - 1)
 #define direction(to, x) (to - i_next(x, 0))
+
+#define init_fail(x) (!iterator_init(x))
+#define init_or_index_fail(x, a) (init_fail(x) || !index_within(x, a))
+#define empty(x) (!siz(x))
 
 
 #define START 1
@@ -82,7 +88,7 @@ static
 bool
 iterator_list_set(ioopm_iterator_t *iter, short command)
 {
-if(!(siz(iter)))
+if(empty(iter))
     return false;
 
 switch(command){
@@ -120,17 +126,20 @@ iterator_init(ioopm_iterator_t *iter)
 {
     assert(iter);
     //check if empty
-    if(!(siz(iter)))
+    if(empty(iter))
         return false;
  
     if(!(iter->dummied))
         return true;
    
     //Set to start if it was dummied 
-    iterator_list_set(iter, START);
-    iter->dummied = false;
+    if(iterator_list_set(iter, START))
+    {
+        iter->dummied = false;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 
@@ -150,8 +159,6 @@ ioopm_inform_removal(elem_t *value, void *removed_node)
     //will be wrong! Inform removal should carry both removed_node and index
     //Send index instead for removal!!! Then we can just compare index
     ioopm_iterator_t *iter = value->p;
-    option_t result; 
-
 
     if(!(iter->c_adress == removed_node))
         return;
@@ -223,7 +230,7 @@ bool
 ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
 {
     ioopm_iterator_can_jump(iter, dir);
-    if(!index_within(iter, dir) || !iterator_init(iter))
+    if(init_or_index_fail(iter, dir))
         return false;
     
     switch(iter->type){
@@ -233,7 +240,7 @@ ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
 
         case array_iter:
             //Does this jump right amount?
-            at(iter) = at(iter) + dir * chunk(iter);
+            at(iter) = BYTE(at(iter)) + dir * chunk(iter);
             iter->index += dir;
                             
         break;
@@ -248,19 +255,19 @@ ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
 bool
 ioopm_iterator_can_jump(ioopm_iterator_t *iter, int distance)
 {
-    if(!index_within(iter, distance) || !iterator_init(iter))
+    if(init_or_index_fail(iter, distance))
         return false;
-    return true
+    return true;
 }
 
 bool 
-iterator_has_next(ioopm_iterator_t *iter)
+ioopm_iterator_has_next(ioopm_iterator_t *iter)
 {
     return ioopm_iterator_can_jump(iter, 1);
 }
 
 bool 
-iterator_has_prev(ioopm_iterator_t *iter)
+ioopm_iterator_has_prev(ioopm_iterator_t *iter)
 {
     return ioopm_iterator_can_jump(iter, -1);
 }
@@ -351,24 +358,19 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
                     ioopm_transform_value transformation, 
                     void *arg)
 {
-    if(!iterator_init(iter))
+    if(init_fail(iter))
         return garbage;
     switch(iter->type){
         case list_iter:
-        {
-            //we need to free data we replace..
-            //how do we edit key
-            return ioopm_edit_node_value(list(iter), transformation, 
-                                         node(iter), arg);
-            break;
-        }
+        return ioopm_edit_node_value(list(iter), transformation, 
+                                     node(iter), arg);
 
         case array_iter:
         {
-            elem_t edit = e(arg);
+            elem_t edit = *(e_p(arg));
             if(transformation)
             {
-                edit = *(e_p(at(iter)));
+                edit = cast(iter);
                 transformation(&edit, arg);
             }
             memcpy(at(iter), &edit, chunk(iter));
@@ -384,10 +386,12 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 bool 
 ioopm_iterator_remove(ioopm_iterator_t *iter)
 {
+    if(init_fail(iter)) 
+        return false;
+
     switch (iter->type) {
         case list_iter:
-            if(!iterator_init(iter)) 
-                return false;
+
 
             return ioopm_remove_node(list(iter), node(iter)).success;
 
@@ -418,7 +422,7 @@ option_t
 ioopm_iterator_current_value(ioopm_iterator_t *iter)
 {
     option_t result = {0};
-    if(iterator_init(iter))
+    if(init_fail(iter))
         return result;
     
     switch (iter->type) {
@@ -427,7 +431,7 @@ ioopm_iterator_current_value(ioopm_iterator_t *iter)
         break;
 
         case array_iter:
-        result.return_value = node(iter)->value;
+        result.return_value = cast(iter);
         break;
 
 
@@ -514,7 +518,7 @@ ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key)
 option_t 
 ioopm_iterator_current_key(ioopm_iterator_t *iter)
 {
-    if(!iterator_init(iter)) 
+    if(init_fail(iter)) 
         return garbage;
     
     switch(iter->type){

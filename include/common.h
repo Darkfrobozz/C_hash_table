@@ -49,6 +49,7 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define e(x) ((elem_t)(x))
 #define e_p(x) ((elem_t *)(x))
 
+#define BYTE(x) ((char *)(x))
 #define option(a,b) ((option_t) {.return_value = a, .success = b}) 
 #define garbage ((option_t) {0})
 

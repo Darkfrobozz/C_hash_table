@@ -30,11 +30,12 @@ struct array {
     size_t chunk_siz;
     size_t elements;
   //pointers
-    elem_t *p_first_element;
+    void *p_first_element;
   //if destroyed it needs to update its iterators...
     ioopm_list_t *iterator_list;
   //functions
     ioopm_transform_value clean_value;
+    type_cast caster;
   
 };
 

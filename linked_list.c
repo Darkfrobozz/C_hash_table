@@ -60,7 +60,7 @@ iter_send_updates(ioopm_list_t *iter_list, int index, enum updates update)
 {
     int send_i = index - 1;
     enum updates send_t = update;
-    void *action_info = {&send_t, &send_i};
+    void *action_info[] = {&send_t, &send_i};
     send_update(iter_list, action_info);
 }
 
@@ -125,9 +125,9 @@ clean_data(elem_t *value, elem_t *key,
            ioopm_transform_value clean_key)
 {
     if(clean_key)
-        clean_key(&key, NULL);
+        clean_key(key, NULL);
     if(clean_value)
-        clean_value(&value, NULL);    
+        clean_value(value, NULL);    
 }
 
 
@@ -213,6 +213,7 @@ ioopm_linked_list_get(ioopm_list_t *list, int index)
     if(jump(index))
         result = value();
     destroy();
+    return result;
 }
 
 option_t 
@@ -232,14 +233,14 @@ ioopm_linked_list_remove_at(ioopm_list_t *list, int index)
 
 //FUNCTIONS RELYING OF LIST->FIRST and LIST->LAST
 
-option_t 
+void 
 ioopm_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     ioopm_list_insert(list->first, i_value, i_key, list, -1);
 }
 
 
-option_t 
+void 
 ioopm_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     ioopm_list_insert(list->last, i_value, i_key, list, list->size - 1);

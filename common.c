@@ -158,9 +158,9 @@ ioopm_replace(elem_t *key, void *i_arg)
   void **arg = i_arg;
 
   //Clean past key
-  mem_clean clean = arg[0];
-  clean(*key);
+  ioopm_transform_value clean = arg[0];
+  clean(key, NULL);
 
   //New key
-  *key = adressToElem(arg[1]);
+  *key = adress_to_elem(arg[1]);
 }

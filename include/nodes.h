@@ -78,7 +78,7 @@ ioopm_list_edit(ioopm_list_t *list,
 /// @return
 void
 ioopm_list_remove_at(ioopm_list_t *iterator_list, 
-                  node_t *remove_at_node, int index);
+                     node_t *remove_at_node, int index);
 
 
 /// @brief

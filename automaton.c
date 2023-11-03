@@ -6,20 +6,7 @@ ioopm_iterator_t *
 ioopm_run_automaton(ioopm_iterator_t *iter, 
                     am_t *automat)
 {
-    if(automat->states == 0)
-        return iter;
-    
-    array_t arr;
-    ioopm_array_set(&arr, automat->s_amounts, 
-                    sizeof(elem_t), (elem_t *) &(automat->states));
-    
-    ioopm_iterator_t *assembly_iter = ioopm_array_iterator(&arr);
-    //Go to top of assemble line at end of each loop
-    while(ioopm_assemble_continue(iter, assembly_iter, false))
-        ioopm_iterator_reset(assembly_iter);
-
-    ioopm_iterator_destroy(assembly_iter);
-    return iter;
+    return NULL; 
 }
 //states and index
 bool

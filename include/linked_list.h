@@ -19,7 +19,7 @@ ioopm_linked_list_destroy(ioopm_list_t *list);
 /// @param value the value to be appended
 /// @param key
 /// @return 
-option_t 
+void 
 ioopm_list_append(ioopm_list_t *list, elem_t value, elem_t key);
 
 /// @brief Insert at the front of a linked list in O(1) time.
@@ -27,7 +27,7 @@ ioopm_list_append(ioopm_list_t *list, elem_t value, elem_t key);
 /// @param value the value to be prepended
 /// @param key
 /// @return 
-option_t 
+void 
 ioopm_list_prepend(ioopm_list_t *list, elem_t value, elem_t key);
 
 /// @brief Insert an element into a linked list in O(n) time.

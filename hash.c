@@ -270,7 +270,7 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
             return result;
         }
     }
-    while(ioopm_iterator_next(iter).success);
+    while(ioopm_iterator_next(iter));
     
     return result;
 }

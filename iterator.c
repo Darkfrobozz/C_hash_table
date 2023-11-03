@@ -25,9 +25,6 @@
 #define START 1
 #define STAY 0
 #define LAST -1
-
-enum updates{destroyed, remove_atd, inserted};
-
 enum itertypes{list_iter, array_iter};
 
 struct iterator
@@ -407,9 +404,9 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
         return garbage;
     switch(iter->type){
         case list_iter:
-        ioopm_edit_node_value(list(), transformation, 
-                              node(), arg);
-        return;
+        ioopm_list_edit(list(), transformation, 
+                        node(), arg);
+        return value();
         case array_iter:
         {
             //Fetch arguments
@@ -441,7 +438,7 @@ ioopm_iterator_remove_at(ioopm_iterator_t *iter)
     switch (iter->type) {
         case list_iter:
         ioopm_list_remove_at(list(), node(), i_next(0));
-        return;
+        return true;
 
         case array_iter:
         {

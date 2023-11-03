@@ -8,9 +8,6 @@
 
 // Common and error handling data types
 typedef union elem elem_t;
-typedef struct am_arr am_arr_t;
-typedef struct automate am_t;
-typedef struct state state_t;
 typedef struct option option_t;
 typedef struct iterator ioopm_iterator_t;
 
@@ -18,8 +15,6 @@ typedef struct iterator ioopm_iterator_t;
 // Function types
 typedef int(*hashing_func)(elem_t key, void *arg);
 typedef short(*compare_func)(elem_t node_key, elem_t key_fetched);
-typedef int(*complex_compare)(elem_t node_key, elem_t key_fetched);
-typedef void(*mem_clean)(elem_t area);
 
 
 // Applies to a nodes value
@@ -33,6 +28,12 @@ typedef elem_t(*type_cast)(void *arg);
 // Used for calculating a value across a function
 typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
 typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
+typedef (bool)(*custom_assemble)(ioopm_iterator_t *iter, elem_t *memory);
+
+
+enum pipe_assemblers{transformer, comparer,
+                     remover, controller, mover, breaker, custom};
+
 
 //Linkedlist types
 
@@ -44,7 +45,7 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define ASCII_SIZ 256
 #define RIGHT 1
 #define LEFT -1
-#define simple_siz 10
+#define mem_limit 10
 
 //ELEM MACROS
 #define elem(x) ((elem_t)(x))
@@ -63,14 +64,13 @@ union elem {
   bool b;
   float f;
   size_t siz;
+  enum pipe_assemblers assemble;
 
   //POINTERS
 
   char *normal_string;
   void *p;
   elem_t *elem_arr;
-  state_t *state;
-  am_t *pipeline;
 };
 
 

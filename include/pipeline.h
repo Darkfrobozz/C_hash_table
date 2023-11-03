@@ -2,9 +2,8 @@
 #include "common.h"
 #include "iterator.h"
 
+typedef bool(*custom_assemble)(ioopm_iterator_t *iter, elem_t *memory);
 
-enum pipe_assemblers{transformer, looper, breaker, 
-                     remover, flow_controller, mover};
 
 /**
  * @brief The idea is to put a list of iters through an assembly
@@ -26,8 +25,7 @@ enum pipe_assemblers{transformer, looper, breaker,
  * @return ioopm_iterator_t* 
  */
 ioopm_iterator_t *
-ioopm_run_pipeline(ioopm_iterator_t *iter, 
-                    am_t *pipeline);
+ioopm_run_pipeline(ioopm_iterator_t *iter, void **args);
 
 
 /**

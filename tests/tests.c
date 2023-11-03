@@ -3,7 +3,6 @@
 #include "../include/iterator.h"
 #include "../include/array.h"
 #include "../include/pipeline.h"
-#include "../include/pipeline_builds.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -978,17 +977,6 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_destroy(list);
 // }
 
-void
-test_create_pipeline()
-{
-  am_arr_t am_array = {0};
-  //This should build the remove_atr automat
-  ioopm_build_pipeline(&am_array, remove_atr, NULL);
-  //This destroys all the pipelines
-  ioopm_pipeline_destroy(&am_array);
-
-}
-
 
 int 
 main(int argc, char *argv[]) 
@@ -1056,7 +1044,6 @@ main(int argc, char *argv[])
     // || (CU_add_test(pipeline_suite, "Unit test: Increment pipe", test_increment) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove_at) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_pipe_until_true) == NULL)
-    || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_create_pipeline) == NULL)
     || 0
   )
     {

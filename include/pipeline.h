@@ -3,24 +3,8 @@
 #include "iterator.h"
 
 
-typedef bool(*transition)(ioopm_iterator_t *iter, 
-                          ioopm_iterator_t *assembly_iter,
-                          bool prev_result);
-
-
-struct automate {
-    //List of states
-    enum tasks am_task; 
-    size_t s_amounts;
-    state_t *states;
-    size_t mem_amount;
-    elem_t *mem;
-};
-
-struct am_arr {
-    am_t simple_pipelines[simple_siz];
-    ioopm_list_t *custom_pipelines;
-};
+enum pipe_assemblers{transformer, looper, breaker, 
+                     remover, flow_controller, mover};
 
 /**
  * @brief The idea is to put a list of iters through an assembly

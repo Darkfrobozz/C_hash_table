@@ -82,10 +82,6 @@ struct option {
   short success;
 };
 
-//ENUMS
-enum tasks{go_to_start = 1, 
-           go_to_last, go_to_value, transform_each, remover};
-
 short
 ioopm_int_compare(elem_t a, elem_t b);
 

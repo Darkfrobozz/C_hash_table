@@ -238,18 +238,18 @@ void test_iterator_has_next()
   ioopm_iterator_next(iter3);
   ioopm_iterator_next(iter3);
   CU_ASSERT_FALSE(ioopm_iterator_has_next(iter3));
-  received_values[0] = ioopm_iterator_current_value(iter1).return_value;
-  received_values[1] = ioopm_iterator_current_value(iter2).return_value;
-  received_values[2] = ioopm_iterator_current_value(iter3).return_value;
+  received_values[0] = ioopm_iterator_value_at(iter1).return_value;
+  received_values[1] = ioopm_iterator_value_at(iter2).return_value;
+  received_values[2] = ioopm_iterator_value_at(iter3).return_value;
 
   CU_ASSERT_EQUAL(received_values[0].i, 5);
   CU_ASSERT_EQUAL(received_values[1].i, 9);
   CU_ASSERT_EQUAL(received_values[2].i, 15);
   ioopm_linked_list_remove(link, 0);
-  received_values[0] = ioopm_iterator_current_value(iter1).return_value;
+  received_values[0] = ioopm_iterator_value_at(iter1).return_value;
   CU_ASSERT_EQUAL(received_values[0].i, 9);
   ioopm_linked_list_remove(link, 1);
-  received_values[2] = ioopm_iterator_current_value(iter3).return_value;
+  received_values[2] = ioopm_iterator_value_at(iter3).return_value;
   CU_ASSERT_EQUAL(received_values[2].i, 9);
 
   ioopm_iterator_destroy(iter1);
@@ -265,7 +265,7 @@ void test_remove_iterator()
   ioopm_list_t *link = ioopm_linked_list_create();
   ioopm_iterator_t *iter_a = ioopm_list_iterator(link);
 
-  option_t remove_empty = ioopm_iterator_current_value(iter_a);
+  option_t remove_empty = ioopm_iterator_value_at(iter_a);
   CU_ASSERT_FALSE(ioopm_iterator_remove(iter_a));
   CU_ASSERT_FALSE(remove_empty.success);
   
@@ -277,17 +277,17 @@ void test_remove_iterator()
   ioopm_linked_list_append(link, send_values[0], (elem_t) NULL);
   ioopm_linked_list_append(link, send_values[1], (elem_t) NULL);
   ioopm_linked_list_append(link, send_values[2], (elem_t) NULL);
-  option_t remove_first = ioopm_iterator_current_value(iter_a);
+  option_t remove_first = ioopm_iterator_value_at(iter_a);
   ioopm_iterator_remove(iter_a);
   CU_ASSERT(remove_first.success);
   CU_ASSERT_EQUAL(remove_first.return_value.i, send_values[0].i);
   
   ioopm_iterator_next(iter_a);
-  option_t remove_third = ioopm_iterator_current_value(iter_a);
+  option_t remove_third = ioopm_iterator_value_at(iter_a);
   ioopm_iterator_remove(iter_a);
   CU_ASSERT(remove_third.success);
   CU_ASSERT_EQUAL(remove_third.return_value.i, send_values[2].i);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[1].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[1].i);
   ioopm_iterator_destroy(iter_a);
   ioopm_linked_list_clear(link);
   ioopm_linked_list_destroy(link);
@@ -309,16 +309,16 @@ void double_iterator()
 
   ioopm_iterator_remove(iter_b);
 
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[0].i);
 
   ioopm_iterator_insert(iter_b, send_values[2], (elem_t) NULL);
   ioopm_iterator_next(iter_a);
 
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_a).return_value.i, send_values[2].i);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_b).return_value.i, send_values[2].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[2].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[2].i);
 
   ioopm_iterator_remove(iter_a);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter_b).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[0].i);
 
   ioopm_iterator_destroy(iter_a);
   ioopm_iterator_destroy(iter_b);
@@ -760,7 +760,7 @@ test_edit_array_iter(void)
   i = 0;
   do
   {
-    CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i]);
+    CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i,integers[i]);
     i++;
   } while (ioopm_iterator_next(iter));
 
@@ -788,7 +788,7 @@ test_array_iter_misc(void)
   i = 0;
   do
   {
-    CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i,integers[i] + inc);
+    CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i,integers[i] + inc);
     i++;
   } while (ioopm_iterator_next(iter));
 
@@ -796,15 +796,15 @@ test_array_iter_misc(void)
   while (ioopm_iterator_remove(iter));
 
   ioopm_iterator_reset(iter);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
   ioopm_iterator_next(iter);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 6);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 6);
   ioopm_iterator_next(iter);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 7);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 7);
   ioopm_iterator_next(iter);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 0);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 0);
   ioopm_iterator_next(iter);
-  CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 0);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 0);
 
   CU_ASSERT_EQUAL(ioopm_iter_db_siz(iter), 5);
   ioopm_iter_destroy_db(iter);
@@ -827,18 +827,18 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
 //   ioopm_run_automaton(iter, assembly_list2);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
 //   ioopm_run_automaton(iter, assembly_list);
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
 //   ioopm_run_automaton(iter, assembly_list3);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 //   ioopm_run_automaton(iter, assembly_list2);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
 //   ioopm_run_automaton(iter, assembly_list3);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 
 //   ioopm_linked_list_clear(list);
 //   ioopm_linked_list_destroy(list);
@@ -872,13 +872,13 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 5);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 5);
 //   ioopm_run_automaton(iter, assembly_list2);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 //   ioopm_run_automaton(iter, assembly_list3);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 6);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 6);
 //   ioopm_iterator_next(iter);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 7);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 7);
 
 //   ioopm_linked_list_clear(list);
 //   ioopm_linked_list_destroy(list);
@@ -927,14 +927,14 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 3);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 //   compare_to = 8;
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 4);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
 //   compare_to = 1;
 //   ioopm_iterator_reset(iter);
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 1);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
 //   //ADDING MORE THINGS
 //   ioopm_linked_list_append(list, (elem_t) 17, (elem_t) NULL);
 //   ioopm_linked_list_append(list, (elem_t) 68, (elem_t) NULL);
@@ -944,19 +944,19 @@ test_array_iter_misc(void)
 //   ioopm_iterator_reset(iter);
 //   compare_to = 68;
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 68);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 68);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 17;
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 17);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 17);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 5;
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 5);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 5);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 9;
 //   ioopm_run_automaton(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_current_value(iter).return_value.i, 9);
+//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 9);
 
 //   ioopm_linked_list_clear(assembly_list);
 //   ioopm_linked_list_destroy(assembly_list);

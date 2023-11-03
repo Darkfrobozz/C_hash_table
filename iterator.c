@@ -419,7 +419,7 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
                 transformation(&edit, arg);
             }
             memcpy(at(iter), &edit, chunk(iter));
-            return ioopm_iterator_current_value(iter);
+            return ioopm_iterator_value_at(iter);
         }
 
         default:
@@ -463,7 +463,7 @@ ioopm_iterator_last(ioopm_iterator_t *iter)
 }
 
 option_t 
-ioopm_iterator_current_value(ioopm_iterator_t *iter)
+ioopm_iterator_value_at(ioopm_iterator_t *iter)
 {
     option_t result = {0};
     if(init_fail(iter))
@@ -560,7 +560,7 @@ ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key)
 }
 
 option_t 
-ioopm_iterator_current_key(ioopm_iterator_t *iter)
+ioopm_iterator_key_at(ioopm_iterator_t *iter)
 {
     if(init_fail(iter)) 
         return garbage;

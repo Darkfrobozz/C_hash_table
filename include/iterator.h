@@ -106,13 +106,13 @@ ioopm_iterator_remove(ioopm_iterator_t *iter);
 /// @param iter the iterator
 /// @return the current value
 option_t 
-ioopm_iterator_current_value(ioopm_iterator_t *iter);
+ioopm_iterator_value_at(ioopm_iterator_t *iter);
 
 /// @brief Return the current key from the underlying list.
 /// @param iter the iterator
 /// @return the current key
 option_t 
-ioopm_iterator_current_key(ioopm_iterator_t *iter);
+ioopm_iterator_key_at(ioopm_iterator_t *iter);
 
 //DESTROY ITER
 /// @brief Destroy the iterator and return its resources.

@@ -47,7 +47,7 @@ bool
 ioopm_pipe_transform(ioopm_iterator_t *iter, 
                     ioopm_iterator_t *a_iter, bool prev)
 {    
-    void **args = ioopm_iterator_current_value(a_iter).return_value.p; 
+    void **args = ioopm_iterator_value_at(a_iter).return_value.p; 
 
     ioopm_transform_value t_func = args[0];
     ioopm_iterator_edit(iter, t_func, args[1]);
@@ -61,7 +61,7 @@ bool
 ioopm_fast_index(ioopm_iterator_t *iter, 
                  ioopm_iterator_t *a_iter, bool prev)
 {
-    ioopm_iterator_set(iter, ioopm_iterator_current_value(a_iter).return_value.i);
+    ioopm_iterator_set(iter, ioopm_iterator_value_at(a_iter).return_value.i);
     return ioopm_to_index(iter, a_iter, prev);
 }
 
@@ -70,7 +70,7 @@ ioopm_to_index(ioopm_iterator_t *iter,
                ioopm_iterator_t *a_iter, bool prev)
 {
     int c_index = ioopm_iter_index(iter);
-    int g_index = ioopm_iterator_current_value(a_iter).return_value.i;
+    int g_index = ioopm_iterator_value_at(a_iter).return_value.i;
     bool result = false;
 
     if(g_index < 0 || g_index > ioopm_iter_db_siz(iter))
@@ -114,7 +114,7 @@ ioopm_assemble_continue(ioopm_iterator_t *iter,
                         ioopm_iterator_t *a_iter,
                         bool prev)
 {
-    elem_t a_elem = ioopm_iterator_current_key(a_iter).return_value;
+    elem_t a_elem = ioopm_iterator_key_at(a_iter).return_value;
     transition a_func = (transition) a_elem.p;
     assert(a_func);
     return a_func(iter, a_iter, prev);
@@ -124,7 +124,7 @@ bool
 ioopm_assemble_branch(ioopm_iterator_t *iter, 
                       ioopm_iterator_t *a_iter, bool prev)
 {
-    void **arg = ioopm_iterator_current_value(a_iter).return_value.p;
+    void **arg = ioopm_iterator_value_at(a_iter).return_value.p;
     int *move_true = arg[0];
     int i_true =  ioopm_iter_index(a_iter) + *move_true;
     int *move_false = arg[1];
@@ -150,10 +150,10 @@ bool
 ioopm_assemble_comparer(ioopm_iterator_t *iter,
                         ioopm_iterator_t *a_iter, bool prev)
 {
-    void **arg = ioopm_iterator_current_value(a_iter).return_value.p;
+    void **arg = ioopm_iterator_value_at(a_iter).return_value.p;
     ioopm_pred_value cmp = arg[0]; 
-    option_t key_result = ioopm_iterator_current_value(iter);
-    option_t value_result = ioopm_iterator_current_value(iter);
+    option_t key_result = ioopm_iterator_value_at(iter);
+    option_t value_result = ioopm_iterator_value_at(iter);
     bool result = false;
 
     if(arg[3])
@@ -173,7 +173,7 @@ bool
 ioopm_assemble_NOT(ioopm_iterator_t *iter,
                    ioopm_iterator_t *a_iter, bool prev)
 {
-    void *arg = ioopm_iterator_current_value(a_iter).return_value.p;
+    void *arg = ioopm_iterator_value_at(a_iter).return_value.p;
     if(arg)
         return !prev;
     return ioopm_linear_continue(iter, a_iter, !prev);

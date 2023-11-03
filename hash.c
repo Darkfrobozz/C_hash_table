@@ -246,7 +246,7 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
         return result;
     do
     {
-        option_t current_key = ioopm_iterator_current_key(iter);
+        option_t current_key = ioopm_iterator_key_at(iter);
         
         if(!current_key.success)
             continue;
@@ -258,7 +258,7 @@ iterate_find_key(ioopm_iterator_t *iter, compare_func cf, elem_t key)
             //This does not work either at first block, if we try to insert after deleting
             //we will be inserting after the element/order will be wrong
             result.success = REPLACE;
-            result.return_value = ioopm_iterator_current_value(iter).return_value;
+            result.return_value = ioopm_iterator_value_at(iter).return_value;
             return result;
         }
         //this is for insertion prior to element, this also means
@@ -368,7 +368,7 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
         case REPLACE:
         {
             ioopm_iterator_edit(iter, NULL, &value);
-            result = ioopm_iterator_current_value(iter);
+            result = ioopm_iterator_value_at(iter);
             break;
         }
         
@@ -598,7 +598,7 @@ ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit,
     }
     
     ioopm_iterator_edit(iter, edit, arg);
-    elem_t new_v = ioopm_iterator_current_value(iter).return_value;
+    elem_t new_v = ioopm_iterator_value_at(iter).return_value;
     ioopm_iterator_destroy(iter);
     return (option_t) {.return_value = new_v, .success = 1};
 }

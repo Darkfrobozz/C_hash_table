@@ -13,8 +13,8 @@
 #define remove(x) ioopm_iterator_remove(x)
 #define jump(x,a) ioopm_iterator_jump(x,a)
 #define edit(x,y,z) ioopm_iterator_edit(x,y,z)
-#define value(x) ioopm_iterator_current_value(x)
-#define key(x) ioopm_iterator_current_key(x)
+#define value(x) ioopm_iterator_value_at(x)
+#define key(x) ioopm_iterator_key_at(x)
 
 typedef struct node node_t;
 

@@ -194,14 +194,14 @@ ioopm_linked_list_insert(ioopm_list_t *list, int index,
                          elem_t i_value, elem_t i_key)
 {
     option_t result = {0};
-    create_in(list);
+    create_in();
 
-    if(jump(iter, index))
+    if(jump(index))
     {
-        insert(iter, i_value, i_key); 
-        result = value(iter);
+        insert(i_value, i_key); 
+        result = value();
     }
-    destroy(iter);
+    destroy();
     return result;
 }
 
@@ -209,10 +209,10 @@ option_t
 ioopm_linked_list_get(ioopm_list_t *list, int index)
 {
     option_t result = {0};
-    create_in(list);
-    if(jump(iter, index))
-        result = value(iter);
-    destroy(iter);
+    create_in();
+    if(jump(index))
+        result = value();
+    destroy();
 }
 
 option_t 
@@ -220,30 +220,29 @@ ioopm_linked_list_remove(ioopm_list_t *list, int index)
 {
 
     option_t result = {0};
-    create_in(list);
-    if(jump(iter,index))
+    create_in();
+    if(jump(index))
     {
-        result = value(iter);
-        remove(iter);
+        result = value();
+        remove();
     }
-    destroy(iter);
-
+    destroy();
     return result;
 }
 
-//COMFORT FUNCTIONS
+//FUNCTIONS RELYING OF LIST->FIRST and LIST->LAST
+
 option_t 
 ioopm_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    return ioopm_linked_list_insert(list, list->size, 
-                                    i_value, i_key);    
+    ioopm_list_insert(list->first, i_value, i_key, list, -1);
 }
 
 
 option_t 
 ioopm_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    return ioopm_linked_list_insert(list, 0, i_value, i_key);
+    ioopm_list_insert(list->last, i_value, i_key, list, list->size - 1);
 }
 
 size_t 

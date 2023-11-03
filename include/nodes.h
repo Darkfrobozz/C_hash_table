@@ -4,17 +4,20 @@
 #include "array.h"
 
 //Iterator init macros
-#define destroy(x) ioopm_iterator_destroy(x)
-#define create_in(x) ioopm_iterator_t *iter = ioopm_list_iterator(x)
+#define destroy() ioopm_iterator_destroy(iter)
+#define create_in() ioopm_iterator_t *iter = ioopm_list_iterator(list)
 
 //Iterator move macros
-#define insert(x,y,z) ioopm_iterator_insert(x,y,z)
-#define prepend(x,y,z) ioopm_iterator_prepend(x,y,z)
-#define remove(x) ioopm_iterator_remove(x)
-#define jump(x,a) ioopm_iterator_jump(x,a)
-#define edit(x,y,z) ioopm_iterator_edit(x,y,z)
-#define value(x) ioopm_iterator_value_at(x)
-#define key(x) ioopm_iterator_key_at(x)
+#define insert(y,z) ioopm_iterator_insert(iter,y,z)
+#define prepend(y,z) ioopm_iterator_prepend(iter,y,z)
+#define remove() ioopm_iterator_remove(iter)
+#define jumpable(a) ioopm_iterator_can_jump(iter,a)
+#define jump(a) ioopm_iterator_jump(iter,a)
+#define edit(y,z) ioopm_iterator_edit(iter,y,z)
+#define value() ioopm_iterator_value_at(iter)
+#define key() ioopm_iterator_key_at(iter)
+#define next() ioopm_iterator_jump(iter,1)
+#define prev() ioopm_iterator_jump(iter,-1)
 
 typedef struct node node_t;
 

@@ -7,7 +7,7 @@
 #define array(x) ((array_t *)(x->d_struct))
 
 #define set_last(x) ((x->c_adress) = (list(x)->last->previous))
-#define set_first(x) ((x->c_adress) = (list(x)->last->next))
+#define set_first(x) ((x->c_adress) = (list(x)->first->next))
 #define at(x) (x->c_adress)
 #define cast(x) (array(x)->caster(at(x)))
 
@@ -22,10 +22,11 @@
 #define init_or_index_fail(x, a) (init_fail(x) || !index_within(x, a))
 #define empty(x) (!siz(x))
 
-
 #define START 1
 #define STAY 0
 #define LAST -1
+
+enum updates{destroyed, removed, inserted};
 
 enum itertypes{list_iter, array_iter};
 
@@ -150,26 +151,70 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter)
     ioopm_filter_all(iter->iterator_list, ioopm_equals_adress, iter); 
 }
 
+void
+static
+remove_update(ioopm_iterator_t *iter, void *info)
+{
+    int index = *((int *)info);
+    if(i_next(iter, 0) < index)
+        return; 
+    //If it is empty then we will be dummied no matter what
+    if(siz(iter) == 1)
+    {
+        iter->dummied = true;
+        return;
+    }
+    //If index is bigger then we fall back one block
+    if(i_next(iter, 0) > index)
+        iter->index--;
+    else 
+    {
+        //If the index is equal then the determined behaviour is
+        //To fall back one step
+        if(ioopm_iterator_prev(iter))
+            return;
+        //However
+        //If we can't go to prev we must go forward or we will be deleted
+        ioopm_iterator_next(iter);
+    }
+}
+
+static
+void
+insert_update(ioopm_iterator_t *iter, void *info)
+{
+    int index = *((int *) info);
+    if(i_next(iter, 0) < index)
+        return;
+    //If equal then the index is not affected
+    if(iter->index == index)
+        return;
+    //since a node is inserted between the two the index will increase
+    //This is because only the end point db_siz is dynamic!!
+    //The starting point is static 0
+    iter->index++;
+}
+
 //This is used in list
 //We can create an iterator for pipe
 void 
-ioopm_inform_removal(elem_t *value, void *removed_node)
+ioopm_update_iterators(elem_t *value, void *action_info)
 {
-    //Indexes will be shifted, iters ahead of current iterator
-    //will be wrong! Inform removal should carry both removed_node and index
-    //Send index instead for removal!!! Then we can just compare index
+    int *info = action_info;
+    enum updates update = info[0];
+    action_info++;
     ioopm_iterator_t *iter = value->p;
 
-    if(!(iter->c_adress == removed_node))
-        return;
-    
-    assert(ioopm_iter_db_siz(iter)); 
-
-    if(ioopm_iterator_prev(iter))
-        return;
-
-    if(!ioopm_iterator_next(iter))
-        iter->dummied = true;
+    switch (update) {
+        //This is irrelevant as of now..
+        case destroyed:
+        return ioopm_iterator_destroy(iter);
+        //Logic for sending updates is not established
+        case removed:
+        return remove_update(iter, action_info);
+        case inserted:
+        return insert_update(iter, action_info);
+    }
 }
 
 /**
@@ -391,9 +436,8 @@ ioopm_iterator_remove(ioopm_iterator_t *iter)
 
     switch (iter->type) {
         case list_iter:
-
-
-            return ioopm_remove_node(list(iter), node(iter)).success;
+        ioopm_list_remove(list(iter), node(iter), i_next(iter,0));
+        return;
 
         case array_iter:
         {

@@ -179,3 +179,12 @@ ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key);
 //ADVANCED FUNCTIONS
 void
 ioopm_move_iter_index(ioopm_iterator_t *iter, int index);
+
+
+/**
+ * @brief Powerful but with the wrong info it will totally corrupt
+ * the iterators
+ * 
+ */
+void 
+ioopm_update_iterators(elem_t *value, void *action_info);

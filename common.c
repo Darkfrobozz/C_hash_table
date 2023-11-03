@@ -151,3 +151,16 @@ ioopm_to_int(void *arg)
   int *result = arg;
   return (elem_t) *result;
 }
+
+void
+ioopm_replace(elem_t *key, void *i_arg)
+{
+  void **arg = i_arg;
+
+  //Clean past key
+  mem_clean clean = arg[0];
+  clean(*key);
+
+  //New key
+  *key = adressToElem(arg[1]);
+}

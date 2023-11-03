@@ -46,8 +46,11 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 #define LEFT -1
 #define simple_siz 10
 
-#define e(x) ((elem_t)(x))
-#define e_p(x) ((elem_t *)(x))
+//ELEM MACROS
+#define elem(x) ((elem_t)(x))
+#define elemAdress(x) ((elem_t *)(x))
+#define adressToElem(x) *(elemAdress(x))
+
 
 #define BYTE(x) ((char *)(x))
 #define option(a,b) ((option_t) {.return_value = a, .success = b}) 
@@ -133,6 +136,9 @@ biggest_siz(elem_t c_siz, elem_t f_siz);
 
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item);
+
+void
+ioopm_replace(elem_t *key, void *arg);
 
 // printing functions
 void

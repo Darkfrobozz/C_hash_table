@@ -6,7 +6,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+//List macros
+#define send_update(x,y) ioopm_linked_list_apply_to_all(x, ioopm_update_iterators, y)
+
+
 typedef void(*handler)(node_t *node, bool *success, void **arg);
+
 static
 void
 bind(node_t *left, node_t *right)
@@ -47,6 +52,16 @@ list_track_iter(ioopm_list_t *list, ioopm_iterator_t *iter)
 {
     list->iterator_list = bond_iter(list->iterator_list, iter);
     return list->iterator_list;
+}
+
+static
+void
+iter_send_updates(ioopm_list_t *iter_list, int index, enum updates update)
+{
+    int send_i = index - 1;
+    enum updates send_t = update;
+    void *action_info = {&send_t, &send_i};
+    send_update(iter_list, action_info);
 }
 
 ioopm_list_t *
@@ -91,8 +106,7 @@ contract(node_t *node)
     //making sure nodes exist
     assert(prev_node);
     assert(next_node);
-    prev_node->next = next_node;
-    next_node->previous = prev_node;
+    bind(prev_node, next_node);
 }
 
 
@@ -106,139 +120,123 @@ contract(node_t *node)
  */
 static
 void
-clean_data(node_t *node_to_clean, ioopm_transform_value clean_value, 
+clean_data(elem_t *value, elem_t *key, 
+           ioopm_transform_value clean_value, 
            ioopm_transform_value clean_key)
 {
-    assert(node_to_clean);
     if(clean_key)
-    {
-        elem_t key = node_to_clean->key;
         clean_key(&key, NULL);
-    }
-
-
     if(clean_value)
-    {
-        elem_t value = node_to_clean->value;
-        clean_value(&value, NULL);
-    } 
-    
-    free(node_to_clean);
+        clean_value(&value, NULL);    
 }
 
-/**
- * @brief Responsible for traversing the list either from last node or first node 
- * 
- * @param starting_node - The last or first dummy node.
- * @param start_index - The start or the end.
- * @param dir Decides whether we are moving left or right in a linked list
- * @param goal_index Minus one of the index given by the user 
- * since we want to find the previous node
- * 
- * @return node_t* A pointer to the previous node
- */
-static
-node_t *
-traverse_list(node_t *starting_node, int start_index, int dir, int goal_index)
+
+//BIG THREE SIDE EFFECTS GIVEN A NODE
+
+void
+ioopm_list_insert(node_t *prev_node, elem_t i_value, 
+                 elem_t i_key, ioopm_list_t *list, 
+                 int index)
 {
-    while(start_index != goal_index)
-    {
-        if(dir == -1)
-        {
-            starting_node = starting_node->previous;
-        }
+    node_t *next_node = prev_node->next;
+    node_t *insert = calloc(1, sizeof(node_t));
+    insert->value = i_value;
+    insert->key = i_key;
+
+    bind(prev_node, insert);    
+    bind(insert, next_node);    
     
-        if(dir == 1)
-        {
-            starting_node = starting_node->next;
-        }
+    iter_send_updates(list->iterator_list, index, inserted);
 
-        start_index = start_index + dir;
-    }
-    return starting_node;
-
+    list->size++;
 }
 
-
-/// @brief Find the previous node of a node at a specific index and tells traverse list how to do its job
-/// @param list
-/// @param index
-static
-node_t *
-find_previous_node(ioopm_list_t *list, int index)
+void
+ioopm_list_edit(ioopm_list_t *list, 
+                ioopm_transform_value edit_function, 
+                node_t *node_edit, void *arg)
 {
+    elem_t *to_edit = &(node_edit->value);
+    //EDITING
+    if(edit_function)
+        return edit_function(to_edit, arg);
 
-    if(index <= (list->size / 2))
-    {
-        return traverse_list(list->first, -1, 1, index - 1);
-    }
+    //IN CASE NO EDIT DEFAULTS TO REPLACE
 
-    return traverse_list(list->last, list->size, -1, index - 1);
-
+    //Here we clean up before replacing.
+    void *args[] = {arg, list->clean_value};
+    ioopm_replace(to_edit, args);
 }
 
+void 
+ioopm_list_remove(ioopm_list_t *list, node_t *remove_node, int index)
+{
+    //informing iterators
+    iter_send_updates(list->iterator_list, index, removed);
+
+    //contracting, this should never be a non existent node.
+    contract(remove_node);
+    
+    //clean the value of nodes
+    clean_data(&remove_node->value, &remove_node->key, 
+               list->clean_value, list->clean_key);
+
+    //Free the node
+    free(remove_node);
+
+    //Decrease size
+    list->size--;
+}
+
+//USES PREXISTING LOGIC
+option_t 
+ioopm_linked_list_insert(ioopm_list_t *list, int index, 
+                         elem_t i_value, elem_t i_key)
+{
+    option_t result = {0};
+    create_in(list);
+
+    if(jump(iter, index))
+    {
+        insert(iter, i_value, i_key); 
+        result = value(iter);
+    }
+    destroy(iter);
+    return result;
+}
 
 option_t 
 ioopm_linked_list_get(ioopm_list_t *list, int index)
 {
     option_t result = {0};
-    if(list == NULL || index < 0 || index >= list->size)
+    create_in(list);
+    if(jump(iter, index))
+        result = value(iter);
+    destroy(iter);
+}
+
+option_t 
+ioopm_linked_list_remove(ioopm_list_t *list, int index)
+{
+
+    option_t result = {0};
+    create_in(list);
+    if(jump(iter,index))
     {
-        return result;
+        result = value(iter);
+        remove(iter);
     }
-
-    node_t *prev_node = find_previous_node(list, index);
-
-    result.return_value = prev_node->next->value;
-    result.success = 1;
+    destroy(iter);
 
     return result;
-
 }
 
-option_t 
-ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
-{
-    node_t *insert = calloc(1, sizeof(node_t));
-    insert->value = i_value;
-    insert->key = i_key;
-
-
-    //can we abstract this?
-    node_t *next_node = prev_node->next;
-
-    prev_node->next = insert;
-    next_node->previous = insert;
-    insert->next = next_node;
-    insert->previous = prev_node;
-
-    list->size++;
-    return (option_t) {.return_value = i_value, .success = 1};    
-}
-
-option_t 
-ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t i_value, elem_t i_key)
-{
-    option_t result = {.return_value = i_value, .success = 0};
-    if(index > list->size || index < 0)
-    {
-
-        return result;
-    }
-
-    node_t *prev_node = find_previous_node(list, index);
-    
-    return ioopm_insert_node(prev_node, i_value, i_key, list);
-}
-
-
+//COMFORT FUNCTIONS
 option_t 
 ioopm_linked_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    int index = list->size;
-    
-    return ioopm_linked_list_insert(list, index, i_value, i_key);
-    
+    return ioopm_linked_list_insert(list, list->size, 
+                                    i_value, i_key);    
 }
 
 
@@ -260,77 +258,17 @@ ioopm_linked_list_is_empty(ioopm_list_t *list)
     return (list->size == 0);
 }
 
-
-option_t
-ioopm_edit_node_value(ioopm_list_t *list, 
-                      ioopm_transform_value edit_function, 
-                      node_t *node_edit, void *arg)
-{
-    if(edit_function)
-    {
-        edit_function(&(node_edit->value), arg);
-
-        //return edited value
-        return (option_t) {.return_value = node_edit->value,
-                           .success = 1};
-    }
-    //Here we clean up before replacing.
-    if(list->clean_value)
-        list->clean_value(&(node_edit->value), NULL);
-
-    elem_t *replace_value = arg;
-    node_edit->value = *replace_value;
-    return (option_t) {.return_value = node_edit->value,
-                       .success = 1};
-}
-
-option_t 
-ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
-{
-    option_t result = {0};
-
-
-    if(!(list->clean_value))
-        result.return_value = remove_node->value;
-
-    //informing iterators
-    ioopm_linked_list_apply_to_all(list->iterator_list, ioopm_inform_removal, remove_node);
-
-    //contracting, this should never be a non existent node.
-    contract(remove_node);
-    
-    //clean the value of nodes
-    clean_data(remove_node, list->clean_value, list->clean_key);
-
-    list->size--;
-
-    result.success = 1;
-
-    return result; 
-}
-
-option_t 
-ioopm_linked_list_remove(ioopm_list_t *list, int index)
-{
-
-    option_t result = {0};
-    if(index >= list->size || index < 0 || list->size == 0)
-    {
-        return result;
-    }
-
-    node_t *remove_node = find_previous_node(list, index)->next;
-    
-    result = ioopm_remove_node(list, remove_node);
-
-    return result;
-}
-
 ioopm_list_t *
 ioopm_get_iterator(ioopm_list_t *list)
 {
     return list->iterator_list;
 }
+
+
+//PIPELINE FUNCTIONS NOT READY TO REPLACE
+//Pipeline uses old logic so index is not a center point which is a
+//huge issue
+
 /**
  * @brief Handler function to apply a predicate function
  * 
@@ -410,6 +348,7 @@ static
 void 
 filter(node_t *remove_node, bool *success, void **arg)
 {
+    //This does not track index...
     ioopm_pred_value pred = arg[0];
     ioopm_list_t *list = arg[1];
     //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
@@ -419,9 +358,10 @@ filter(node_t *remove_node, bool *success, void **arg)
         contract(remove_node);
 
         //clean the data of the node so that the heap can be reused
-        clean_data(remove_node, list->clean_value, list->clean_key);
+        clean_data(&(remove_node->value), &(remove_node->key), 
+                   list->clean_value, list->clean_key);
 
-       (list->size)--;
+       list->size--;
     }
 }
 
@@ -529,3 +469,5 @@ ioopm_element_to_list(elem_t list, elem_t item)
     ioopm_linked_list_append(list_to_add, item, (elem_t) NULL);
     return list;
 }
+
+

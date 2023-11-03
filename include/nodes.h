@@ -3,6 +3,18 @@
 #include "iterator.h"
 #include "array.h"
 
+//Iterator init macros
+#define destroy(x) ioopm_iterator_destroy(x)
+#define create_in(x) ioopm_iterator_t *iter = ioopm_list_iterator(x)
+
+//Iterator move macros
+#define insert(x,y,z) ioopm_iterator_insert(x,y,z)
+#define prepend(x,y,z) ioopm_iterator_prepend(x,y,z)
+#define remove(x) ioopm_iterator_remove(x)
+#define jump(x,a) ioopm_iterator_jump(x,a)
+#define edit(x,y,z) ioopm_iterator_edit(x,y,z)
+#define value(x) ioopm_iterator_current_value(x)
+#define key(x) ioopm_iterator_current_key(x)
 
 typedef struct node node_t;
 
@@ -39,6 +51,8 @@ struct array {
   
 };
 
+enum updates{destroyed, removed, inserted};
+
 /**
  * @brief This edits a nodes value
  * 
@@ -49,18 +63,20 @@ struct array {
  * Else add possible arguments for edit function
  * @return New node and success of operation 
  */
-option_t
-ioopm_edit_node_value(ioopm_list_t *list, 
-                      ioopm_transform_value edit, 
-                      node_t *node_edit, void *arg);
+void
+ioopm_list_edit(ioopm_list_t *list, 
+                ioopm_transform_value edit, 
+                node_t *node_edit, void *arg);
 
 
 /// @brief
 /// @param iterator_list
 /// @param remove_node
 /// @return
-option_t 
-ioopm_remove_node(ioopm_list_t *iterator_list, node_t *remove_node);
+void
+ioopm_list_remove(ioopm_list_t *iterator_list, 
+                  node_t *remove_node, int index);
+
 
 /// @brief
 /// @param prev_node
@@ -68,11 +84,14 @@ ioopm_remove_node(ioopm_list_t *iterator_list, node_t *remove_node);
 /// @param i_key
 /// @param list
 /// @return 
-option_t 
-ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, 
-                  ioopm_list_t *list);
+void
+ioopm_list_insert(node_t *prev_node, elem_t i_value, 
+                  elem_t i_key, ioopm_list_t *list, 
+                  int index);
 
 
+
+//Setting up tracking for update system
 ioopm_list_t *
 bond_iter(ioopm_list_t *iter_list, ioopm_iterator_t *iter);
 
@@ -82,10 +101,10 @@ list_track_iter(ioopm_list_t *list, ioopm_iterator_t *iter);
 ioopm_list_t *
 array_track_iter(array_t *array, ioopm_iterator_t *iter);
 
+
 /// @brief Applies iter destroy, transformation function used when
 /// listing iterator outside of a list's iterator list
 /// @param value 
 /// @param arg 
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg);
-

@@ -25,7 +25,7 @@ void
 append_iterator(ioopm_list_t *list, ioopm_iterator_t *iter)
 {
     if(iter)
-        ioopm_linked_list_append(list, 
+        ioopm_list_append(list, 
                                  (elem_t) (void *) iter, (elem_t) NULL);
 }
 
@@ -233,7 +233,7 @@ ioopm_linked_list_remove(ioopm_list_t *list, int index)
 
 //COMFORT FUNCTIONS
 option_t 
-ioopm_linked_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
+ioopm_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     return ioopm_linked_list_insert(list, list->size, 
                                     i_value, i_key);    
@@ -241,7 +241,7 @@ ioopm_linked_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 
 
 option_t 
-ioopm_linked_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
+ioopm_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
     return ioopm_linked_list_insert(list, 0, i_value, i_key);
 }
@@ -311,11 +311,11 @@ append_node(node_t *node, bool *take_key, void **arg)
     ioopm_list_t *list = *arg;
     if(*take_key)
     {
-        ioopm_linked_list_append(list, node->key, node->value);
+        ioopm_list_append(list, node->key, node->value);
         return;
     }
 
-    ioopm_linked_list_append(list, node->value, node->key);
+    ioopm_list_append(list, node->value, node->key);
 }
 
 void 
@@ -466,7 +466,7 @@ ioopm_element_to_list(elem_t list, elem_t item)
 {
 
     ioopm_list_t *list_to_add = list.p;
-    ioopm_linked_list_append(list_to_add, item, (elem_t) NULL);
+    ioopm_list_append(list_to_add, item, (elem_t) NULL);
     return list;
 }
 

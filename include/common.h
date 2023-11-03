@@ -48,8 +48,8 @@ typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 
 //ELEM MACROS
 #define elem(x) ((elem_t)(x))
-#define elemAdress(x) ((elem_t *)(x))
-#define adressToElem(x) *(elemAdress(x))
+#define elem_adress(x) ((elem_t *)(x))
+#define adress_to_elem(x) *(elem_adress(x))
 
 
 #define BYTE(x) ((char *)(x))
@@ -138,7 +138,7 @@ elem_t
 ioopm_element_to_list(elem_t list, elem_t item);
 
 void
-ioopm_replace(elem_t *key, void *arg);
+ioopm_replace(elem_t *value, void *arg);
 
 // printing functions
 void

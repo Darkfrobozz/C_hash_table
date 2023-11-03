@@ -23,7 +23,7 @@ clear_til_last(am_t *automat, elem_t *args)
 //     elem_t *argsreal[2] = {1, 5};
 //     ioopm_list_t *assembly_list = ioopm_linked_list_create();
 //     void *inc_arg[] = {t_func, *arg};
-//     ioopm_linked_list_append(assembly_list, 
+//     ioopm_list_append(assembly_list, 
 //                             (elem_t) (void *) inc_arg, 
 //                             (elem_t) (void *) ioopm_pipe_transform);
 //     return assembly_list; 
@@ -38,11 +38,11 @@ until_true(ioopm_pred_value comparer, void **arg)
     int false_branch = 1;
     void *cmp_arg[] = {comparer, arg[0], NULL, arg[1]};
     void *branch_arg[] = {&true_branch, &false_branch};
-    ioopm_linked_list_append(assembly_list, (elem_t) (void *) cmp_arg, 
+    ioopm_list_append(assembly_list, (elem_t) (void *) cmp_arg, 
                              (elem_t) (void *) ioopm_assemble_comparer);
-    ioopm_linked_list_append(assembly_list, (elem_t) (void *) branch_arg, 
+    ioopm_list_append(assembly_list, (elem_t) (void *) branch_arg, 
                              (elem_t) (void *) ioopm_assemble_branch);
-    ioopm_linked_list_append(assembly_list, (elem_t) (void *) 0, 
+    ioopm_list_append(assembly_list, (elem_t) (void *) 0, 
                              (elem_t) (void *) ioopm_to_last);
 }
 

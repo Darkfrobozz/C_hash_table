@@ -20,7 +20,7 @@ ioopm_linked_list_destroy(ioopm_list_t *list);
 /// @param key
 /// @return 
 option_t 
-ioopm_linked_list_append(ioopm_list_t *list, elem_t value, elem_t key);
+ioopm_list_append(ioopm_list_t *list, elem_t value, elem_t key);
 
 /// @brief Insert at the front of a linked list in O(1) time.
 /// @param list the linked list that will be prepended to
@@ -28,7 +28,7 @@ ioopm_linked_list_append(ioopm_list_t *list, elem_t value, elem_t key);
 /// @param key
 /// @return 
 option_t 
-ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value, elem_t key);
+ioopm_list_prepend(ioopm_list_t *list, elem_t value, elem_t key);
 
 /// @brief Insert an element into a linked list in O(n) time.
 /// The valid values of index are [0,n] for a list of n elements,

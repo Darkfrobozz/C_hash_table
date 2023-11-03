@@ -407,17 +407,21 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
         return garbage;
     switch(iter->type){
         case list_iter:
-        return ioopm_edit_node_value(list(iter), transformation, 
-                                     node(iter), arg);
-
+        ioopm_edit_node_value(list(iter), transformation, 
+                              node(iter), arg);
+        return;
         case array_iter:
         {
-            elem_t edit = *(e_p(arg));
+            //Fetch arguments
+            elem_t edit = adress_to_elem(arg);
+
             if(transformation)
             {
                 edit = cast(iter);
                 transformation(&edit, arg);
             }
+
+            //Actual replacing happens here!
             memcpy(at(iter), &edit, chunk(iter));
             return ioopm_iterator_value_at(iter);
         }
@@ -536,13 +540,13 @@ iterator_list_add(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
         return result;
     
     //If left node previous to insert should be previous of this node
+    //THIS FAILS IF AT FIRST BUT INSERT STILLS NEEDS TO KNOW TO GO TO PREV???
     if(dir == LEFT)
         ioopm_iterator_prev(iter);
- 
-    result = ioopm_insert_node(node(iter), value, key, list(iter));
 
-    //The node inserted is always after previous node
-    ioopm_iterator_next(iter);
+    //special handling for -1?
+    ioopm_list_insert(node(iter), value, 
+                      key, list(iter), i_next(iter, 0));
      
     return result;
 }

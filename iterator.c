@@ -26,7 +26,7 @@
 #define STAY 0
 #define LAST -1
 
-enum updates{destroyed, removed, inserted};
+enum updates{destroyed, remove_atd, inserted};
 
 enum itertypes{list_iter, array_iter};
 
@@ -153,7 +153,7 @@ ioopm_iterator_destroy(ioopm_iterator_t *iter)
 
 void
 static
-remove_update(ioopm_iterator_t *iter, void *info)
+remove_at_update(ioopm_iterator_t *iter, void *info)
 {
     int index = *((int *)info);
     if(i_next(0) < index)
@@ -210,8 +210,8 @@ ioopm_update_iterators(elem_t *value, void *action_info)
         case destroyed:
         return destroy();
         //Logic for sending updates is not established
-        case removed:
-        return remove_update(iter, action_info);
+        case remove_atd:
+        return remove_at_update(iter, action_info);
         case inserted:
         return insert_update(iter, action_info);
     }
@@ -433,14 +433,14 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 }
 
 bool 
-ioopm_iterator_remove(ioopm_iterator_t *iter)
+ioopm_iterator_remove_at(ioopm_iterator_t *iter)
 {
     if(init_fail()) 
         return false;
 
     switch (iter->type) {
         case list_iter:
-        ioopm_list_remove(list(), node(), i_next(0));
+        ioopm_list_remove_at(list(), node(), i_next(0));
         return;
 
         case array_iter:

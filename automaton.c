@@ -35,11 +35,11 @@ ioopm_linear_continue(ioopm_iterator_t *iter,
 
 // Remove all 
 bool
-ioopm_pipe_remover(ioopm_iterator_t *iter, 
+ioopm_pipe_remove_atr(ioopm_iterator_t *iter, 
                     ioopm_iterator_t *a_iter, bool prev)
 {
     //Go to next in assembly line
-    return ioopm_linear_continue(iter, a_iter, ioopm_iterator_remove(iter));    
+    return ioopm_linear_continue(iter, a_iter, ioopm_iterator_remove_at(iter));    
 }
 
 //transform ALL

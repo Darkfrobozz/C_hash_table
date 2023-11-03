@@ -124,7 +124,7 @@ void test_link_get()
   
 }
 
-void test_link_remove()
+void test_link_remove_at()
 {
   ioopm_list_t *link = ioopm_linked_list_create();
   elem_t send_values[test_array_siz];
@@ -132,7 +132,7 @@ void test_link_remove()
   {
     send_values[i].i = i;
     ioopm_list_prepend(link, send_values[i], (elem_t) NULL);
-    CU_ASSERT_EQUAL(ioopm_linked_list_remove(link, 0).return_value.i, i);
+    CU_ASSERT_EQUAL(ioopm_linked_list_remove_at(link, 0).return_value.i, i);
   }
   CU_ASSERT_EQUAL(ioopm_linked_list_size(link), 0);
   ioopm_linked_list_clear(link);
@@ -245,10 +245,10 @@ void test_iterator_has_next()
   CU_ASSERT_EQUAL(received_values[0].i, 5);
   CU_ASSERT_EQUAL(received_values[1].i, 9);
   CU_ASSERT_EQUAL(received_values[2].i, 15);
-  ioopm_linked_list_remove(link, 0);
+  ioopm_linked_list_remove_at(link, 0);
   received_values[0] = ioopm_iterator_value_at(iter1).return_value;
   CU_ASSERT_EQUAL(received_values[0].i, 9);
-  ioopm_linked_list_remove(link, 1);
+  ioopm_linked_list_remove_at(link, 1);
   received_values[2] = ioopm_iterator_value_at(iter3).return_value;
   CU_ASSERT_EQUAL(received_values[2].i, 9);
 
@@ -260,14 +260,14 @@ void test_iterator_has_next()
 
 }
 
-void test_remove_iterator()
+void test_remove_at_iterator()
 {
   ioopm_list_t *link = ioopm_linked_list_create();
   ioopm_iterator_t *iter_a = ioopm_list_iterator(link);
 
-  option_t remove_empty = ioopm_iterator_value_at(iter_a);
-  CU_ASSERT_FALSE(ioopm_iterator_remove(iter_a));
-  CU_ASSERT_FALSE(remove_empty.success);
+  option_t remove_at_empty = ioopm_iterator_value_at(iter_a);
+  CU_ASSERT_FALSE(ioopm_iterator_remove_at(iter_a));
+  CU_ASSERT_FALSE(remove_at_empty.success);
   
   elem_t send_values[3];
   send_values[0].i = 3;
@@ -277,16 +277,16 @@ void test_remove_iterator()
   ioopm_list_append(link, send_values[0], (elem_t) NULL);
   ioopm_list_append(link, send_values[1], (elem_t) NULL);
   ioopm_list_append(link, send_values[2], (elem_t) NULL);
-  option_t remove_first = ioopm_iterator_value_at(iter_a);
-  ioopm_iterator_remove(iter_a);
-  CU_ASSERT(remove_first.success);
-  CU_ASSERT_EQUAL(remove_first.return_value.i, send_values[0].i);
+  option_t remove_at_first = ioopm_iterator_value_at(iter_a);
+  ioopm_iterator_remove_at(iter_a);
+  CU_ASSERT(remove_at_first.success);
+  CU_ASSERT_EQUAL(remove_at_first.return_value.i, send_values[0].i);
   
   ioopm_iterator_next(iter_a);
-  option_t remove_third = ioopm_iterator_value_at(iter_a);
-  ioopm_iterator_remove(iter_a);
-  CU_ASSERT(remove_third.success);
-  CU_ASSERT_EQUAL(remove_third.return_value.i, send_values[2].i);
+  option_t remove_at_third = ioopm_iterator_value_at(iter_a);
+  ioopm_iterator_remove_at(iter_a);
+  CU_ASSERT(remove_at_third.success);
+  CU_ASSERT_EQUAL(remove_at_third.return_value.i, send_values[2].i);
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[1].i);
   ioopm_iterator_destroy(iter_a);
   ioopm_linked_list_clear(link);
@@ -307,7 +307,7 @@ void double_iterator()
   ioopm_iterator_insert(iter_a, send_values[0], (elem_t) NULL);
   ioopm_iterator_prepend(iter_a, send_values[1], (elem_t) NULL);
 
-  ioopm_iterator_remove(iter_b);
+  ioopm_iterator_remove_at(iter_b);
 
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[0].i);
 
@@ -317,7 +317,7 @@ void double_iterator()
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[2].i);
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[2].i);
 
-  ioopm_iterator_remove(iter_a);
+  ioopm_iterator_remove_at(iter_a);
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[0].i);
 
   ioopm_iterator_destroy(iter_a);
@@ -328,7 +328,7 @@ void double_iterator()
 
 
 void 
-test_create_remove(void) 
+test_create_remove_at(void) 
 {
     ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash,
     ioopm_int_compare, no_buckets);
@@ -412,7 +412,7 @@ test_insert_overwrite(void)
 
 //ASSIGNMENTSTEP4 and 5
 void
-test_remove(void)
+test_remove_at(void)
 {
     ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash,
     ioopm_int_compare, no_buckets);
@@ -428,7 +428,7 @@ test_remove(void)
     for(int i = 0; i < arr_siz; i++)
     {
       int index = rand() % arr_siz;
-      option_t result = ioopm_hash_table_remove(hash, randomkeys[index]);
+      option_t result = ioopm_hash_table_remove_at(hash, randomkeys[index]);
       if(result.success)
       CU_ASSERT_EQUAL(result.return_value.i, sendvalues[index].i);
 
@@ -793,7 +793,7 @@ test_array_iter_misc(void)
   } while (ioopm_iterator_next(iter));
 
   ioopm_iterator_set(iter, 3);
-  while (ioopm_iterator_remove(iter));
+  while (ioopm_iterator_remove_at(iter));
 
   ioopm_iterator_reset(iter);
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
@@ -890,11 +890,11 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_destroy(assembly_list3);
 // }
 // void
-// test_pipe_remove(void)
+// test_pipe_remove_at(void)
 // {
 //   ioopm_list_t *list = ioopm_linked_list_create();
 //   ioopm_list_t *assembly_list = ioopm_linked_list_create();
-//   ioopm_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_pipe_remover);
+//   ioopm_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_pipe_remove_atr);
 
 //   ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
 //   ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
@@ -968,8 +968,8 @@ void
 test_create_automaton()
 {
   am_arr_t am_array = {0};
-  //This should build the remover automat
-  ioopm_build_automaton(&am_array, remover, NULL);
+  //This should build the remove_atr automat
+  ioopm_build_automaton(&am_array, remove_atr, NULL);
   //This destroys all the automatons
   ioopm_automaton_destroy(&am_array);
 
@@ -1004,7 +1004,7 @@ main(int argc, char *argv[])
   if (
     (CU_add_test(list_suite, "Create and destroy linked lists", test_list_init) == NULL) 
     || (CU_add_test(list_suite, "Linked list insertion", test_link_insert) == NULL) 
-    || (CU_add_test(list_suite, "Linked list removal", test_link_remove) == NULL) 
+    || (CU_add_test(list_suite, "Linked list removal", test_link_remove_at) == NULL) 
     || (CU_add_test(list_suite, "List contains test", test_list_contains) == NULL) 
     || (CU_add_test(list_suite, "List true for all", test_list_all) == NULL) 
     || (CU_add_test(list_suite, "List incrementing", test_increment) == NULL) 
@@ -1012,13 +1012,13 @@ main(int argc, char *argv[])
     || (CU_add_test(list_suite, "List prepend function", test_link_prepend) == NULL) 
     || (CU_add_test(list_suite, "Create iterator over list", test_create_iterator) == NULL) 
     || (CU_add_test(list_suite, "Iter move in list", test_iterator_has_next) == NULL) 
-    || (CU_add_test(list_suite, "Remove element with iterator", test_remove_iterator) == NULL) 
-    || (CU_add_test(list_suite, "Insert and remove with iterator", double_iterator) == NULL) 
-    || (CU_add_test(hash_suite, "create test", test_create_remove) == NULL) 
+    || (CU_add_test(list_suite, "Remove element with iterator", test_remove_at_iterator) == NULL) 
+    || (CU_add_test(list_suite, "Insert and remove_at with iterator", double_iterator) == NULL) 
+    || (CU_add_test(hash_suite, "create test", test_create_remove_at) == NULL) 
     || (CU_add_test(hash_suite, "Lookup test", test_lookup) == NULL) 
     || (CU_add_test(hash_suite, "insert test", test_insert) == NULL)
     || (CU_add_test(hash_suite, "insert test overwrite", test_insert_overwrite) == NULL)
-    || (CU_add_test(hash_suite, "remove test", test_remove) == NULL)
+    || (CU_add_test(hash_suite, "remove_at test", test_remove_at) == NULL)
     || (CU_add_test(hash_suite, "size check test", test_size) == NULL)
     || (CU_add_test(hash_suite, "Check if empty test", test_empty) == NULL)
     || (CU_add_test(hash_suite, "Clearing test", test_clear) == NULL)
@@ -1033,10 +1033,10 @@ main(int argc, char *argv[])
     || (CU_add_test(array_suite, "Unit test: INIT array", test_init_array) == NULL)
     || (CU_add_test(array_suite, "Unit test: Iter move in array", test_add_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
-    || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove", test_array_iter_misc) == NULL)
+    || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove_at", test_array_iter_misc) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Increment pipe", test_increment) == NULL)
-    // || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove) == NULL)
+    // || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove_at) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_pipe_until_true) == NULL)
     || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_create_automaton) == NULL)
     || 0

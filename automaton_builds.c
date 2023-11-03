@@ -8,11 +8,11 @@ static
 void
 clear_til_last(am_t *automat, elem_t *args)
 {
-    elem_t remove_state[1] = {(elem_t) 0};
+    elem_t remove_at_state[1] = {(elem_t) 0};
     //This needs to move one bac
     elem_t branch_state[3] = {(elem_t) 2,(elem_t) -1,(elem_t) 0};
-    elem_t *argsreal[2] = {remove_state, branch_state};
-    transition actions[2] = {ioopm_pipe_remover, ioopm_assemble_branch};
+    elem_t *argsreal[2] = {remove_at_state, branch_state};
+    transition actions[2] = {ioopm_pipe_remove_atr, ioopm_assemble_branch};
     ioopm_automaton_settings(5, automat->states, argsreal, actions, true);
 }
 
@@ -121,7 +121,7 @@ ioopm_build_automaton(am_arr_t *am,
     
     am_t *new = am->simple_automatons + d_job;
     switch (d_job) {
-        case remover:
+        case remove_atr:
         allocating_automat(new, 1);
         clear_til_last(new, args);
         break;

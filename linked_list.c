@@ -169,20 +169,20 @@ ioopm_list_edit(ioopm_list_t *list,
 }
 
 void 
-ioopm_list_remove(ioopm_list_t *list, node_t *remove_node, int index)
+ioopm_list_remove_at(ioopm_list_t *list, node_t *remove_at_node, int index)
 {
     //informing iterators
-    iter_send_updates(list->iterator_list, index, removed);
+    iter_send_updates(list->iterator_list, index, remove_atd);
 
     //contracting, this should never be a non existent node.
-    contract(remove_node);
+    contract(remove_at_node);
     
     //clean the value of nodes
-    clean_data(&remove_node->value, &remove_node->key, 
+    clean_data(&remove_at_node->value, &remove_at_node->key, 
                list->clean_value, list->clean_key);
 
     //Free the node
-    free(remove_node);
+    free(remove_at_node);
 
     //Decrease size
     list->size--;
@@ -216,7 +216,7 @@ ioopm_linked_list_get(ioopm_list_t *list, int index)
 }
 
 option_t 
-ioopm_linked_list_remove(ioopm_list_t *list, int index)
+ioopm_linked_list_remove_at(ioopm_list_t *list, int index)
 {
 
     option_t result = {0};
@@ -224,7 +224,7 @@ ioopm_linked_list_remove(ioopm_list_t *list, int index)
     if(jump(index))
     {
         result = value();
-        remove();
+        remove_at();
     }
     destroy();
     return result;
@@ -339,25 +339,25 @@ ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value,
 /**
  * @brief Function to actually test whether to filter out each node
  * 
- * @param remove_node 
+ * @param remove_at_node 
  * @param success 
  * @param arg 
  */
 static
 void 
-filter(node_t *remove_node, bool *success, void **arg)
+filter(node_t *remove_at_node, bool *success, void **arg)
 {
     //This does not track index...
     ioopm_pred_value pred = arg[0];
     ioopm_list_t *list = arg[1];
     //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
-    if(!pred || pred(remove_node->value, arg[2]))
+    if(!pred || pred(remove_at_node->value, arg[2]))
     {    
-        //contract to isolate remove node
-        contract(remove_node);
+        //contract to isolate remove_at node
+        contract(remove_at_node);
 
         //clean the data of the node so that the heap can be reused
-        clean_data(&(remove_node->value), &(remove_node->key), 
+        clean_data(&(remove_at_node->value), &(remove_at_node->key), 
                    list->clean_value, list->clean_key);
 
        list->size--;

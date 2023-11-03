@@ -122,7 +122,7 @@ ioopm_assemble_NOT(ioopm_iterator_t *iter,
 
 /**
  * @brief Removes based on pred on both key and value
- * Sends true if remove possible
+ * Sends true if remove_at possible
  * otherwise false
  * 
  * @param iter 
@@ -137,7 +137,7 @@ ioopm_assemble_NOT(ioopm_iterator_t *iter,
  * @return false 
  */
 bool
-ioopm_pipe_remover(ioopm_iterator_t *iter, 
+ioopm_pipe_remove_atr(ioopm_iterator_t *iter, 
                     ioopm_iterator_t *a_iter, bool prev);
 
 //SIMPLE EDIT FUNCTIONS

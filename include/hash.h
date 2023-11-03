@@ -41,12 +41,12 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value);
 option_t 
 ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key);
 
-/// @brief remove any mapping from key to a value
+/// @brief remove_at any mapping from key to a value
 /// @param ht hash table operated upon
-/// @param key key to remove
+/// @param key key to remove_at
 /// @return the value mapped to by key and whether it succeeded
 option_t 
-ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key);
+ioopm_hash_table_remove_at(ioopm_hash_table_t *ht, elem_t key);
 
 
 ///UTILS

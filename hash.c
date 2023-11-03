@@ -336,11 +336,11 @@ ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
 
 static
 void
-hash_remove_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
+hash_remove_at_node(ioopm_iterator_t *iter, ioopm_hash_table_t *ht, bool success)
 {
     if(success == REPLACE)
     {
-       ioopm_iterator_remove(iter);
+       ioopm_iterator_remove_at(iter);
        ht->elements--;
     }
 }
@@ -388,23 +388,23 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
 }
 
 option_t
-ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
+ioopm_hash_table_remove_at(ioopm_hash_table_t *ht, elem_t key)
 {
     int index = applying_hash_func(ht, key);
     ioopm_iterator_t *iter = get_bucket_iter(ht, index);
     
-    option_t to_remove = iterate_find_key(iter, ht->cf, key);
+    option_t to_remove_at = iterate_find_key(iter, ht->cf, key);
         
-    hash_remove_node(iter, ht, to_remove.success);
+    hash_remove_at_node(iter, ht, to_remove_at.success);
 
-    if(to_remove.success != REPLACE)
+    if(to_remove_at.success != REPLACE)
     {
-        to_remove.success = 0; 
+        to_remove_at.success = 0; 
     }
 
 
     ioopm_iterator_destroy(iter);
-    return to_remove;
+    return to_remove_at;
 }
 
 size_t
@@ -527,7 +527,7 @@ size_list(ioopm_hash_table_t *ht)
 
 static
 option_t
-hash_table_remove_no_clean(ioopm_hash_table_t *ht, elem_t key)
+hash_table_remove_at_no_clean(ioopm_hash_table_t *ht, elem_t key)
 {
     // save clening functions for key and value
     void *value_cleaner = ht->clean_value;
@@ -536,8 +536,8 @@ hash_table_remove_no_clean(ioopm_hash_table_t *ht, elem_t key)
     // disable cleaning functions for know
     ioopm_hash_add_cleaner(ht, key_cleaner, NULL);
     
-    // remove
-    option_t result = ioopm_hash_table_remove(ht, key);
+    // remove_at
+    option_t result = ioopm_hash_table_remove_at(ht, key);
 
     // enable 
     ioopm_hash_add_cleaner(ht, key_cleaner, value_cleaner);
@@ -606,11 +606,11 @@ ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit,
 option_t
 ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key)
 {
-    //get content from current then remove old
+    //get content from current then remove_at old
     option_t result = ioopm_hash_table_lookup(ht, old_key);
     ioopm_hash_table_insert(ht, new_key, result.return_value); 
-    // remove if old_key exists, returns false otherwise
-    hash_table_remove_no_clean(ht, old_key);
+    // remove_at if old_key exists, returns false otherwise
+    hash_table_remove_at_no_clean(ht, old_key);
     if(!result.success)
         return result;
     return result;     

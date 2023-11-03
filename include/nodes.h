@@ -10,7 +10,7 @@
 //Iterator move macros
 #define insert(y,z) ioopm_iterator_insert(iter,y,z)
 #define prepend(y,z) ioopm_iterator_prepend(iter,y,z)
-#define remove() ioopm_iterator_remove(iter)
+#define remove_at() ioopm_iterator_remove_at(iter)
 #define jumpable(a) ioopm_iterator_can_jump(iter,a)
 #define jump(a) ioopm_iterator_jump(iter,a)
 #define edit(y,z) ioopm_iterator_edit(iter,y,z)
@@ -54,7 +54,7 @@ struct array {
   
 };
 
-enum updates{destroyed, removed, inserted};
+enum updates{destroyed, remove_atd, inserted};
 
 /**
  * @brief This edits a nodes value
@@ -74,11 +74,11 @@ ioopm_list_edit(ioopm_list_t *list,
 
 /// @brief
 /// @param iterator_list
-/// @param remove_node
+/// @param remove_at_node
 /// @return
 void
-ioopm_list_remove(ioopm_list_t *iterator_list, 
-                  node_t *remove_node, int index);
+ioopm_list_remove_at(ioopm_list_t *iterator_list, 
+                  node_t *remove_at_node, int index);
 
 
 /// @brief

@@ -95,9 +95,9 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 /// @brief Remove the current element from the underlying list, 
 /// jumps to the previous one.
 /// @param iter the iterator
-/// @return If remove was successful or that was the last to remove
+/// @return If remove_at was successful or that was the last to remove_at
 bool 
-ioopm_iterator_remove(ioopm_iterator_t *iter);
+ioopm_iterator_remove_at(ioopm_iterator_t *iter);
 
 
 //VALUE GETTERS

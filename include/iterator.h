@@ -151,14 +151,14 @@ ioopm_iterator_set(ioopm_iterator_t *iter, int index);
 
 /// @brief Reposition the iterator at the start of the underlying list.
 /// @param iter the iterator
-void 
+bool
 ioopm_iterator_reset(ioopm_iterator_t *iter);
 
 
 
 /// @brief Resets iterator to last
 /// @param iter 
-void
+bool
 ioopm_iterator_last(ioopm_iterator_t *iter);
 
 

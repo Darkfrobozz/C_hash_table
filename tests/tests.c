@@ -2,8 +2,8 @@
 #include "../include/hash.h"
 #include "../include/iterator.h"
 #include "../include/array.h"
-#include "../include/automaton.h"
-#include "../include/automaton_builds.h"
+#include "../include/pipeline.h"
+#include "../include/pipeline_builds.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -43,16 +43,16 @@ void test_link_insert()
   send_values[1].i = 7;
   send_values[2].i = 5;
 
-  ioopm_linked_list_insert(test_link, 0, send_values[0], (elem_t) NULL);
+  ioopm_list_append(test_link, send_values[0], (elem_t) NULL);
   received_values[0] = ioopm_linked_list_get(test_link, 0);
   CU_ASSERT_EQUAL(received_values[0].return_value.i, 5);
 
-  ioopm_linked_list_insert(test_link, 1, send_values[1], (elem_t) NULL);
+  ioopm_list_append(test_link, send_values[1], (elem_t) NULL);
   received_values[1] = ioopm_linked_list_get(test_link, 1);
   CU_ASSERT_EQUAL(received_values[1].return_value.i, 7);
 
   ioopm_linked_list_insert(test_link, 0, send_values[2], (elem_t) NULL);
-  received_values[2] = ioopm_linked_list_get(test_link, 0);
+  received_values[2] = ioopm_linked_list_get(test_link, 1);
   CU_ASSERT_EQUAL(received_values[2].return_value.i, 5);
 
   ioopm_linked_list_clear(test_link);
@@ -309,7 +309,7 @@ void double_iterator()
 
   ioopm_iterator_remove_at(iter_b);
 
-  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_a).return_value.i, send_values[1].i);
 
   ioopm_iterator_insert(iter_b, send_values[2], (elem_t) NULL);
   ioopm_iterator_next(iter_a);
@@ -318,7 +318,7 @@ void double_iterator()
   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[2].i);
 
   ioopm_iterator_remove_at(iter_a);
-  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[0].i);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter_b).return_value.i, send_values[1].i);
 
   ioopm_iterator_destroy(iter_a);
   ioopm_iterator_destroy(iter_b);
@@ -326,6 +326,20 @@ void double_iterator()
   ioopm_linked_list_destroy(link);
 }
 
+void test_clearing_iterators()
+{
+  ioopm_list_t *link = ioopm_linked_list_create();
+  ioopm_iterator_t *iter_a = ioopm_list_iterator(link);
+  ioopm_iterator_t *iter_b = ioopm_list_iterator(link);
+  ioopm_list_iterator(link);
+  ioopm_list_iterator(link);
+  ioopm_list_iterator(link);
+  ioopm_list_iterator(link);
+  ioopm_list_iterator(link);
+
+  ioopm_linked_list_clear(link);
+  ioopm_linked_list_destroy(link);
+}
 
 void 
 test_create_remove_at(void) 
@@ -826,18 +840,18 @@ test_array_iter_misc(void)
 //   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
 //   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
-//   ioopm_run_automaton(iter, assembly_list2);
+//   ioopm_run_pipeline(iter, assembly_list2);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
-//   ioopm_run_automaton(iter, assembly_list);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
-//   ioopm_run_automaton(iter, assembly_list3);
+//   ioopm_run_pipeline(iter, assembly_list3);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
-//   ioopm_run_automaton(iter, assembly_list2);
+//   ioopm_run_pipeline(iter, assembly_list2);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
-//   ioopm_run_automaton(iter, assembly_list3);
+//   ioopm_run_pipeline(iter, assembly_list3);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 
 //   ioopm_linked_list_clear(list);
@@ -871,11 +885,11 @@ test_array_iter_misc(void)
 //   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
 //   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 5);
-//   ioopm_run_automaton(iter, assembly_list2);
+//   ioopm_run_pipeline(iter, assembly_list2);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
-//   ioopm_run_automaton(iter, assembly_list3);
+//   ioopm_run_pipeline(iter, assembly_list3);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 6);
 //   ioopm_iterator_next(iter);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 7);
@@ -901,7 +915,7 @@ test_array_iter_misc(void)
 //   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
 //   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
 //   ioopm_linked_list_clear(assembly_list);
 //   ioopm_linked_list_destroy(assembly_list);
@@ -926,14 +940,14 @@ test_array_iter_misc(void)
 //   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
 //   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
 //   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 //   compare_to = 8;
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
 //   compare_to = 1;
 //   ioopm_iterator_reset(iter);
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
 //   //ADDING MORE THINGS
 //   ioopm_list_append(list, (elem_t) 17, (elem_t) NULL);
@@ -943,19 +957,19 @@ test_array_iter_misc(void)
 
 //   ioopm_iterator_reset(iter);
 //   compare_to = 68;
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 68);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 17;
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 17);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 5;
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 5);
 //   ioopm_iterator_reset(iter);
 //   compare_to = 9;
-//   ioopm_run_automaton(iter, assembly_list);
+//   ioopm_run_pipeline(iter, assembly_list);
 //   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 9);
 
 //   ioopm_linked_list_clear(assembly_list);
@@ -965,13 +979,13 @@ test_array_iter_misc(void)
 // }
 
 void
-test_create_automaton()
+test_create_pipeline()
 {
   am_arr_t am_array = {0};
   //This should build the remove_atr automat
-  ioopm_build_automaton(&am_array, remove_atr, NULL);
-  //This destroys all the automatons
-  ioopm_automaton_destroy(&am_array);
+  ioopm_build_pipeline(&am_array, remove_atr, NULL);
+  //This destroys all the pipelines
+  ioopm_pipeline_destroy(&am_array);
 
 }
 
@@ -986,11 +1000,14 @@ main(int argc, char *argv[])
 
   // We then create an empty test suite and specify the name and
   // the init and cleanup functions
+  CU_pSuite iter_suite = CU_add_suite("Testing iters suite", init_suite, clean_suite);
   CU_pSuite list_suite = CU_add_suite("Testing linked list", init_suite, clean_suite);
   CU_pSuite array_suite = CU_add_suite("Testing array suite", init_suite, clean_suite);
   CU_pSuite pipeline_suite = CU_add_suite("Testing pipeline suite", init_suite, clean_suite);
   CU_pSuite hash_suite = CU_add_suite("Testing hash suite", init_suite, clean_suite);
-  if (hash_suite == NULL || array_suite == NULL || list_suite == NULL || pipeline_suite == NULL) {
+  if (hash_suite == NULL || array_suite == NULL 
+      || list_suite == NULL || pipeline_suite == NULL
+      || iter_suite == NULL) {
       // If the test suite could not be added, tear down CUnit and exit
       CU_cleanup_registry();
       return CU_get_error();
@@ -1034,11 +1051,12 @@ main(int argc, char *argv[])
     || (CU_add_test(array_suite, "Unit test: Iter move in array", test_add_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove_at", test_array_iter_misc) == NULL)
+    || (CU_add_test(iter_suite, "Unit test clearing allocated iters", test_clearing_iterators) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Increment pipe", test_increment) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove_at) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_pipe_until_true) == NULL)
-    || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_create_automaton) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_create_pipeline) == NULL)
     || 0
   )
     {
@@ -1066,6 +1084,11 @@ main(int argc, char *argv[])
     {
       for(int i = 1; i < argc; i++)
       {
+        if(!strcmp("iter", argv[i]))
+        {
+          CU_basic_run_suite(iter_suite);
+          continue;
+        }
         if(!strcmp("list", argv[i]))
         {
           CU_basic_run_suite(list_suite);

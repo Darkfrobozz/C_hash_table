@@ -1,4 +1,4 @@
-#include "include/automaton.h"
+#include "include/pipeline.h"
 #include "include/nodes.h"
 #include <stdlib.h>
 //MACROS
@@ -12,15 +12,14 @@
 #define cast() (array()->caster(at()))
 
 #define i_next(a) (iter->index + a)
-#define siz() (ioopm_iter_db_siz(iter))
+#define siz() ((int)(ioopm_iter_db_siz(iter)))
 #define chunk() (array()->chunk_siz)
 #define within(a,x,b) (((x) >= (a)) && ((x) <= (b)))
 #define end_p() (siz() - 1)
 #define direction(to) (to - i_next(0))
-
-#define init_fail() (!iterator_init(iter))
-#define init_or_index_fail(a) (init_fail() || !index_within(iter, a))
+#define init_fail(a) (!(iter_init(iter, a)))
 #define empty() (!siz())
+#define force_list_move(a) move_c_adress_list(iter, a)
 
 #define START 1
 #define STAY 0
@@ -36,9 +35,10 @@ struct iterator
     //What index, start is 0
     int index;
     //If iterator is on a dummy node
-    bool dummied;
     ioopm_list_t *iterator_list;
 };
+
+
 
 static
 void
@@ -46,7 +46,8 @@ tracking_list(ioopm_iterator_t *iter, ioopm_list_t *list)
 {
     iter->type = list_iter;
     iter->d_struct = list;
-    iter->dummied = true;
+    iter->c_adress = list->first;
+    iter->index = -1;
     iter->iterator_list = list_track_iter(list, iter);
 }
 
@@ -109,83 +110,69 @@ switch(command){
 return true;
 }
 
-
-/**
- * @brief Returns whether initiation is successful or not needs to be called
- * because we allow creation of cursor over empty lists.
- * Moves to first element.
- * @param iter 
- * @return true rest of program should execute
- * @return false no execute
- */
-static
-bool 
-iterator_init(ioopm_iterator_t *iter)
-{
-    assert(iter);
-    //check if empty
-    if(empty())
-        return false;
- 
-    if(!(iter->dummied))
-        return true;
-   
-    //Set to start if it was dummied 
-    if(iterator_list_set(iter, START))
-    {
-        iter->dummied = false;
-        return true;
-    }
-
-    return false;
-}
-
-
-
 void 
 ioopm_iterator_destroy(ioopm_iterator_t *iter)
 {
     ioopm_filter_all(iter->iterator_list, ioopm_equals_adress, iter); 
 }
 
+
+//FORCED MOVEMENT
+static
+void
+move_c_adress_list(ioopm_iterator_t *iter, short dir)
+{
+    if(dir == 0)
+        return;
+
+    assert(at());
+
+    if(dir > 0 && i_next(0) > -1)
+    {
+        at() = node()->next; 
+        iter->index++;
+        dir--;
+        return move_c_adress_list(iter, dir);
+    } 
+    
+    if(dir < 0 && i_next(0) < siz())
+    {
+        iter->c_adress = node()->previous; 
+        iter->index--;
+        dir++;
+        return move_c_adress_list(iter, dir);
+    }
+}
+
 void
 static
-remove_at_update(ioopm_iterator_t *iter, void *info)
+remove_at_update(ioopm_iterator_t *iter, int index)
 {
-    int index = *((int *)info);
-    if(i_next(0) < index)
-        return; 
-    //If it is empty then we will be dummied no matter what
-    if(siz() == 1)
-    {
-        iter->dummied = true;
-        return;
-    }
-    //If index is bigger then we fall back one block
+    //Check if we need to move iterator
+    if(i_next(0) == index) 
+        if(!prev())
+            if(!next())
+                move_c_adress_list(iter, -1);
+    
+    //We fall back one index if the index is bigger and
+    //all that equal are pushed away from node in question
     if(i_next(0) > index)
-        iter->index--;
-    else 
-    {
-        //If the index is equal then the determined behaviour is
-        //To fall back one step
-        if(prev())
-            return;
-        //However
-        //If we can't go to prev we must go forward or we will be deleted
-        next();
-    }
+        iter->index--; 
 }
 
 static
 void
-insert_update(ioopm_iterator_t *iter, void *info)
+insert_update(ioopm_iterator_t *iter, int index)
 {
-    int index = *((int *) info);
-    if(i_next(0) < index)
+    if(i_next(0) == -1)
+    {
+        reset();
         return;
-    //If equal then the index is not affected
-    if(iter->index == index)
+    }
+
+    if(i_next(0) <= index)
         return;
+    
     //since a node is inserted between the two the index will increase
     //This is because only the end point db_siz is dynamic!!
     //The starting point is static 0
@@ -197,8 +184,8 @@ insert_update(ioopm_iterator_t *iter, void *info)
 void 
 ioopm_update_iterators(elem_t *value, void *action_info)
 {
-    int *info = action_info;
-    enum updates update = info[0];
+    int **args = action_info; 
+    enum updates update = *(args[0]);
     action_info++;
     ioopm_iterator_t *iter = value->p;
 
@@ -207,15 +194,16 @@ ioopm_update_iterators(elem_t *value, void *action_info)
         case destroyed:
         return destroy();
         //Logic for sending updates is not established
-        case remove_atd:
-        return remove_at_update(iter, action_info);
+        case has_removed:
+        return remove_at_update(iter, *(args[1]));
         case inserted:
-        return insert_update(iter, action_info);
+        return insert_update(iter, *(args[1]));
     }
 }
 
+
 /**
- * @brief Controls iter direction possibilities
+ * @brief This is to initialize and ctrl movement
  * 
  * @param iter 
  * @param dir 
@@ -223,45 +211,24 @@ ioopm_update_iterators(elem_t *value, void *action_info)
  * @return false 
  */
 static
-bool 
-index_within(ioopm_iterator_t *iter, short dir)
+bool
+iter_init(ioopm_iterator_t *iter, short dir)
 {
-    if(within(0, i_next(dir), end_p()))
-        return true;
-    return false;
-}
-
-
-
-
-static
-void
-move_c_adress_list(ioopm_iterator_t *iter, short dir)
-{
-    if(dir == 0)
-        return;
-
-    assert(at());
-
-    if(dir > 0)
-    {
-        at() = node()->next; 
-        iter->index++;
-        dir--;
-        return move_c_adress_list(iter, dir);
-    } 
+    //If it is not in bounds, we should be resetting here
+    if(!within(0, i_next(0), end_p()))
+        reset();
     
-    if(dir < 0)
-    {
-        iter->c_adress = node()->previous; 
-        iter->index--;
-        dir++;
-        return move_c_adress_list(iter, dir);
-    }
-}
+    //If empty this always be false and since we reset
+    //We should now be able to use the actual direction commanded
+    //To properly evaluate whether we can jump there
+    if(!within(0, i_next(dir), end_p()))
+        return false;
 
+    return true;
+}
 /**
  * @brief Moves c_adress based on type and linear direction
+ * This is the public version of move_c_adress
  * 
  * @param type 
  * @param c_adress 
@@ -269,35 +236,34 @@ move_c_adress_list(ioopm_iterator_t *iter, short dir)
  * @param dir 
  */
 bool
-ioopm_move_c_adress(ioopm_iterator_t *iter, short dir)
+ioopm_move_iterator(ioopm_iterator_t *iter, short dir)
 {
-    jumpable(dir);
-    if(init_or_index_fail(dir))
+    if(init_fail(dir))
         return false;
-    
+
     switch(iter->type){
         case list_iter:
         move_c_adress_list(iter, dir); 
         break;
 
         case array_iter:
-            //Does this jump right amount?
-            at() = BYTE(at()) + dir * chunk();
-            iter->index += dir;
+        at() = BYTE(at()) + dir * chunk();
+        iter->index += dir;
                             
         break;
         default:
         assert(false);
     }
+
     return true;
 }
 
 
-
+//This is just for public convenience!
 bool
 ioopm_iterator_can_jump(ioopm_iterator_t *iter, int distance)
 {
-    if(init_or_index_fail(distance))
+    if(init_fail(distance))
         return false;
     return true;
 }
@@ -315,7 +281,8 @@ ioopm_iterator_has_prev(ioopm_iterator_t *iter)
 }
 
 /**
- * @brief Find smallest of 
+ * @brief There are three ways to set the cursor in
+ * O(1) time, this abuses that
  * 
  * @param c_to_g returns STAY 
  * @param s_to_g returns START
@@ -377,10 +344,19 @@ ioopm_iterator_jump(ioopm_iterator_t *iter, int distance)
     if(!jumpable(distance))
         return false;
     
-    if(iter->type == list_iter)
+    int temp = iter->index;
+    //This is to do fast jumps abusing the doubly 
+    //linked nature of the list 
+    //This is redudant if distance is lower than 1
+    if(iter->type == list_iter && distance > 1)
         ioopm_iterator_set(iter, i_next(distance));
+
+    //If index is updated by set we need to update distance
+    if(temp != i_next(0))
+        distance = (temp + distance) - i_next(0); 
     
-    return ioopm_move_c_adress(iter, distance);
+    //This is what actually moves this bad boi
+    return ioopm_move_iterator(iter, distance);
 }
 
 bool
@@ -400,8 +376,11 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
                     ioopm_transform_value transformation, 
                     void *arg)
 {
-    if(init_fail())
+    //Here it means that we when not even moving are not in the
+    //right place
+    if(init_fail(0))
         return garbage;
+
     switch(iter->type){
         case list_iter:
         ioopm_list_edit(list(), transformation, 
@@ -432,7 +411,7 @@ ioopm_iterator_edit(ioopm_iterator_t *iter,
 bool 
 ioopm_iterator_remove_at(ioopm_iterator_t *iter)
 {
-    if(init_fail()) 
+    if(init_fail(0)) 
         return false;
 
     switch (iter->type) {
@@ -451,24 +430,24 @@ ioopm_iterator_remove_at(ioopm_iterator_t *iter)
     }
 }
 
-void 
+bool 
 ioopm_iterator_reset(ioopm_iterator_t *iter)
 {
-    ioopm_iterator_set(iter, 0);
+    return ioopm_iterator_set(iter, 0);
 }
 
-void
+bool
 ioopm_iterator_last(ioopm_iterator_t *iter)
 {
-    ioopm_iterator_set(iter, ioopm_iter_db_siz(iter) - 1);
+    return ioopm_iterator_set(iter, ioopm_iter_db_siz(iter) - 1);
 }
 
 option_t 
 ioopm_iterator_value_at(ioopm_iterator_t *iter)
 {
     option_t result = {0};
-    if(init_fail())
-        return result;
+    if(init_fail(0))
+        return garbage;
     
     switch (iter->type) {
         case list_iter:
@@ -490,6 +469,8 @@ ioopm_iterator_value_at(ioopm_iterator_t *iter)
 int
 ioopm_iter_index(ioopm_iterator_t *iter)
 {
+    if(init_fail(0))
+        return 0;
     return iter->index;
 }
 
@@ -534,20 +515,30 @@ option_t
 iterator_list_add(ioopm_iterator_t *iter, elem_t value, elem_t key, short dir)
 {
     option_t result = {0};
+    int temp;
+
     if(iter->type == array_iter)
         return result;
     
     //If left node previous to insert should be previous of this node
+    //Forcing backwards movement Notice move_c_adress
     if(dir == LEFT)
-    {
-        if(!i_next(0))
-            ioopm_list_prepend(list(), value, key);
-        prev();
-    }
-
+        force_list_move(-1);
+    
+    temp = iter->index;
     ioopm_list_insert(node(), value, 
                       key, list(), i_next(0));
-     
+    
+    //Handling special case exception
+    if(temp == -1)
+        return result; 
+    
+
+    if(dir == RIGHT)
+        next();
+    else
+        prev();
+
     return result;
 }
 
@@ -555,6 +546,7 @@ option_t
 ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key)
 {
     return iterator_list_add(iter, value, key, RIGHT);
+
 }
 
 option_t 
@@ -566,7 +558,7 @@ ioopm_iterator_prepend(ioopm_iterator_t *iter, elem_t value, elem_t key)
 option_t 
 ioopm_iterator_key_at(ioopm_iterator_t *iter)
 {
-    if(init_fail()) 
+    if(init_fail(0)) 
         return garbage;
     
     switch(iter->type){
@@ -584,7 +576,6 @@ ioopm_iterator_key_at(ioopm_iterator_t *iter)
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg)
 {
-
     ioopm_iterator_t *iter = value->p;
-    destroy();
+    free(iter);
 }

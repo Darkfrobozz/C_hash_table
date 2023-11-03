@@ -1,5 +1,5 @@
 #include "include/nodes.h"
-#include "include/automaton.h"
+#include "include/pipeline.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,16 +17,7 @@ void
 bind(node_t *left, node_t *right)
 {
     left->next = right;
-    right->previous = right;
-}
-
-static
-void
-append_iterator(ioopm_list_t *list, ioopm_iterator_t *iter)
-{
-    if(iter)
-        ioopm_list_append(list, 
-                                 (elem_t) (void *) iter, (elem_t) NULL);
+    right->previous = left;
 }
 
 static
@@ -43,7 +34,7 @@ bond_iter(ioopm_list_t *iter_list, ioopm_iterator_t *iter)
 {
     if(!iter_list)
         iter_list = ioopm_iterator_list_create(iter);
-    append_iterator(iter_list, iter);
+    ioopm_list_append(iter_list, (elem_t) (void *) iter, (elem_t) NULL);
     return iter_list;
 }
 
@@ -58,7 +49,7 @@ static
 void
 iter_send_updates(ioopm_list_t *iter_list, int index, enum updates update)
 {
-    int send_i = index - 1;
+    int send_i = index;
     enum updates send_t = update;
     void *action_info[] = {&send_t, &send_i};
     send_update(iter_list, action_info);
@@ -91,12 +82,7 @@ ioopm_linked_list_destroy(ioopm_list_t *list)
     free(list);
 }
 
-/**
- * @brief Contracts list around a node
- * 
- * @param node Point to contract around 
- */
-static
+
 void
 contract(node_t *node)
 {    
@@ -146,9 +132,9 @@ ioopm_list_insert(node_t *prev_node, elem_t i_value,
     bind(prev_node, insert);    
     bind(insert, next_node);    
     
-    iter_send_updates(list->iterator_list, index, inserted);
-
     list->size++;
+
+    iter_send_updates(list->iterator_list, index, inserted);
 }
 
 void
@@ -172,7 +158,7 @@ void
 ioopm_list_remove_at(ioopm_list_t *list, node_t *remove_at_node, int index)
 {
     //informing iterators
-    iter_send_updates(list->iterator_list, index, remove_atd);
+    iter_send_updates(list->iterator_list, index, has_removed);
 
     //contracting, this should never be a non existent node.
     contract(remove_at_node);
@@ -236,14 +222,14 @@ ioopm_linked_list_remove_at(ioopm_list_t *list, int index)
 void 
 ioopm_list_append(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    ioopm_list_insert(list->first, i_value, i_key, list, -1);
+    ioopm_list_insert(list->last->previous, i_value, i_key, list, list->size - 1);
 }
 
 
 void 
 ioopm_list_prepend(ioopm_list_t *list, elem_t i_value, elem_t i_key)
 {
-    ioopm_list_insert(list->last, i_value, i_key, list, list->size - 1);
+    ioopm_list_insert(list->first, i_value, i_key, list, -1);
 }
 
 size_t 
@@ -263,6 +249,9 @@ ioopm_get_iterator(ioopm_list_t *list)
 {
     return list->iterator_list;
 }
+
+
+//IT IS ABOUT TIME
 
 
 //PIPELINE FUNCTIONS NOT READY TO REPLACE
@@ -354,14 +343,8 @@ filter(node_t *remove_at_node, bool *success, void **arg)
     //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
     if(!pred || pred(remove_at_node->value, arg[2]))
     {    
-        //contract to isolate remove_at node
-        contract(remove_at_node);
-
-        //clean the data of the node so that the heap can be reused
-        clean_data(&(remove_at_node->value), &(remove_at_node->key), 
-                   list->clean_value, list->clean_key);
-
-       list->size--;
+        //This should use this
+        ioopm_list_remove_at(list, remove_at_node, 0);
     }
 }
 
@@ -449,7 +432,16 @@ ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra)
 {
     bool success;
     void *arg[] = {pred, list, extra};
-    pipeline(list, &success, filter, arg);
+    //Special case to end recursion with pipeline
+
+    if(list->size == 1)
+    {
+        if(pred && !pred(list->first->next->value, extra))
+            return; 
+        ioopm_list_remove_at(list, list->first->next, 0);
+    } else
+        pipeline(list, &success, filter, arg);
+
 }
 
 

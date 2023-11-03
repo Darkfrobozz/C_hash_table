@@ -70,7 +70,7 @@ union elem {
   void *p;
   elem_t *elem_arr;
   state_t *state;
-  am_t *automaton;
+  am_t *pipeline;
 };
 
 
@@ -84,7 +84,7 @@ struct option {
 
 //ENUMS
 enum tasks{go_to_start = 1, 
-           go_to_last, go_to_value, transform_each, remove_atr};
+           go_to_last, go_to_value, transform_each, remover};
 
 short
 ioopm_int_compare(elem_t a, elem_t b);

@@ -18,8 +18,8 @@ struct automate {
 };
 
 struct am_arr {
-    am_t simple_automatons[simple_siz];
-    ioopm_list_t *custom_automatons;
+    am_t simple_pipelines[simple_siz];
+    ioopm_list_t *custom_pipelines;
 };
 
 /**
@@ -42,8 +42,8 @@ struct am_arr {
  * @return ioopm_iterator_t* 
  */
 ioopm_iterator_t *
-ioopm_run_automaton(ioopm_iterator_t *iter, 
-                    am_t *automaton);
+ioopm_run_pipeline(ioopm_iterator_t *iter, 
+                    am_t *pipeline);
 
 
 /**

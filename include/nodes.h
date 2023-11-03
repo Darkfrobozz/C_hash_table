@@ -18,6 +18,7 @@
 #define key() ioopm_iterator_key_at(iter)
 #define next() ioopm_iterator_jump(iter,1)
 #define prev() ioopm_iterator_jump(iter,-1)
+#define reset() ioopm_iterator_reset(iter)
 
 typedef struct node node_t;
 
@@ -54,7 +55,7 @@ struct array {
   
 };
 
-enum updates{destroyed, remove_atd, inserted};
+enum updates{destroyed, has_removed, inserted};
 
 /**
  * @brief This edits a nodes value

@@ -46,12 +46,12 @@ ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value,
 /// @brief Remove an element from a linked list in O(n) time. This complexity
 /// will also scale with number of iterators. That is because it has to 
 /// inform them that an action has been taken otherwise
-/// they will not know if their node is remove_atd.
+/// they will not know if their node is has_removed.
 /// The valid values of index are [0,n-1] for a list of n elements,
 /// where 0 means the first element and n-1 means the last element.
 /// @param list the linked list
 /// @param index the position in the list
-/// @return the value remove_atd
+/// @return the value has_removed
 option_t 
 ioopm_linked_list_remove_at(ioopm_list_t *list, int index);
 

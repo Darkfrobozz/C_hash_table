@@ -24,9 +24,9 @@ typedef bool(*custom_assemble)(ioopm_iterator_t *iter, elem_t *memory);
  * 
  * @return ioopm_iterator_t* 
  */
-ioopm_iterator_t *
-ioopm_run_pipeline(ioopm_iterator_t *iter, void **args);
 
+ioopm_iterator_t *
+ioopm_run_pipeline(ioopm_iterator_t *iter, elem_t *args, int amount);
 
 /**
  * @brief Used in construction of your own assembler

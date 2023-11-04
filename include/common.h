@@ -28,11 +28,9 @@ typedef elem_t(*type_cast)(void *arg);
 // Used for calculating a value across a function
 typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
 typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
-typedef (bool)(*custom_assemble)(ioopm_iterator_t *iter, elem_t *memory);
 
-
-enum pipe_assemblers{transformer, comparer,
-                     remover, controller, mover, breaker, custom};
+enum pipe_assemblers{transformer, cmpvalue, cmpkey,
+                     remover, controller, mover, custom};
 
 
 //Linkedlist types

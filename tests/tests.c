@@ -824,44 +824,64 @@ test_array_iter_misc(void)
 
 }
 
-// void
-// test_pipelist(void)
-// {
-//   ioopm_list_t *list = ioopm_linked_list_create();
-//   ioopm_list_t *assembly_list = ioopm_linked_list_create();
-//   ioopm_list_t *assembly_list2 = ioopm_linked_list_create();
-//   ioopm_list_t *assembly_list3 = ioopm_linked_list_create();
-//   ioopm_list_append(assembly_list, (elem_t) 0, (elem_t) (void *) ioopm_to_last);
-//   ioopm_list_append(assembly_list2, (elem_t) 0, (elem_t) (void *) ioopm_to_first);
-//   ioopm_list_append(assembly_list3, (elem_t) 2, (elem_t) (void *) ioopm_to_index);
-//   ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
-//   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_pipeline(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
-//   ioopm_run_pipeline(iter, assembly_list2);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
-//   ioopm_run_pipeline(iter, assembly_list);
-//   ioopm_run_pipeline(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
-//   ioopm_run_pipeline(iter, assembly_list3);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
-//   ioopm_run_pipeline(iter, assembly_list2);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
-//   ioopm_run_pipeline(iter, assembly_list3);
-//   CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
+void
+test_pipelist(void)
+{
+  ioopm_list_t *list = ioopm_linked_list_create(); 
+  enum pipe_assemblers to_lastarg = mover;
+  void **to_last = {mover, };
+  void **to_first = ioopm_linked_list_create();
+  void **assembly_list3 = ioopm_linked_list_create();
+  ioopm_list_append(assembly_list, (elem_t) 0, (elem_t) (void *) ioopm_to_last);
+  ioopm_list_append(assembly_list2, (elem_t) 0, (elem_t) (void *) ioopm_to_first);
+  ioopm_list_append(assembly_list3, (elem_t) 2, (elem_t) (void *) ioopm_to_index);
+  ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_iterator_t *iter = ioopm_list_iterator(list);
+  ioopm_run_pipeline(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
+  ioopm_run_pipeline(iter, assembly_list2);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
+  ioopm_run_pipeline(iter, assembly_list);
+  ioopm_run_pipeline(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 4);
+  ioopm_run_pipeline(iter, assembly_list3);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
+  ioopm_run_pipeline(iter, assembly_list2);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 1);
+  ioopm_run_pipeline(iter, assembly_list3);
+  CU_ASSERT_EQUAL(ioopm_iterator_value_at(iter).return_value.i, 3);
 
-//   ioopm_linked_list_clear(list);
-//   ioopm_linked_list_destroy(list);
-//   ioopm_linked_list_clear(assembly_list);
-//   ioopm_linked_list_destroy(assembly_list);
-//   ioopm_linked_list_clear(assembly_list2);
-//   ioopm_linked_list_destroy(assembly_list2);
-//   ioopm_linked_list_clear(assembly_list3);
-//   ioopm_linked_list_destroy(assembly_list3);
-// }
+  ioopm_linked_list_clear(list);
+  ioopm_linked_list_destroy(list);
+  ioopm_linked_list_clear(assembly_list);
+  ioopm_linked_list_destroy(assembly_list);
+  ioopm_linked_list_clear(assembly_list2);
+  ioopm_linked_list_destroy(assembly_list2);
+  ioopm_linked_list_clear(assembly_list3);
+  ioopm_linked_list_destroy(assembly_list3);
+}
+
+void
+test_pipe_remove_at(void)
+{
+  ioopm_list_t *list = ioopm_linked_list_create();
+  ioopm_list_t *assembly_list = ioopm_linked_list_create();
+  ioopm_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_pipe_remove_atr);
+
+  ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_iterator_t *iter = ioopm_list_iterator(list);
+  ioopm_run_pipeline(iter, assembly_list);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+  ioopm_linked_list_clear(assembly_list);
+  ioopm_linked_list_destroy(assembly_list);
+  ioopm_linked_list_destroy(list);
+}
 // void
 // test_pipe_inc(void)
 // {
@@ -901,24 +921,6 @@ test_array_iter_misc(void)
 //   ioopm_linked_list_destroy(assembly_list2);
 //   ioopm_linked_list_clear(assembly_list3);
 //   ioopm_linked_list_destroy(assembly_list3);
-// }
-// void
-// test_pipe_remove_at(void)
-// {
-//   ioopm_list_t *list = ioopm_linked_list_create();
-//   ioopm_list_t *assembly_list = ioopm_linked_list_create();
-//   ioopm_list_append(assembly_list, (elem_t) (void *) 0, (elem_t) (void *) ioopm_pipe_remove_atr);
-
-//   ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
-//   ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
-//   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-//   ioopm_run_pipeline(iter, assembly_list);
-//   CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
-//   ioopm_linked_list_clear(assembly_list);
-//   ioopm_linked_list_destroy(assembly_list);
-//   ioopm_linked_list_destroy(list);
 // }
 // void
 // test_pipe_until_true(void)
@@ -1040,9 +1042,9 @@ main(int argc, char *argv[])
     || (CU_add_test(array_suite, "Unit test: Iter edit in array", test_edit_array_iter) == NULL)
     || (CU_add_test(array_suite, "Unit test: misc: db_siz, increment, db_destroy and remove_at", test_array_iter_misc) == NULL)
     || (CU_add_test(iter_suite, "Unit test clearing allocated iters", test_clearing_iterators) == NULL)
-    // || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Iter move in pipe", test_pipelist) == NULL)
+    || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove_at) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Increment pipe", test_increment) == NULL)
-    // || (CU_add_test(pipeline_suite, "Unit test: Destructer pipe", test_pipe_remove_at) == NULL)
     // || (CU_add_test(pipeline_suite, "Unit test: Pipe until true", test_pipe_until_true) == NULL)
     || 0
   )

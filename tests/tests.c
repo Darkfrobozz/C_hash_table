@@ -765,7 +765,7 @@ test_edit_array_iter(void)
   int i = 0;
   do
   {
-    ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
+    ioopm_iterator_value_edit(iter, NULL, (void *)(integers + i));
     i++;
   } while (ioopm_iterator_next(iter));
 
@@ -792,8 +792,8 @@ test_array_iter_misc(void)
   int i = 0;
   do
   {
-    ioopm_iterator_edit(iter, NULL, (void *)(integers + i));
-    ioopm_iterator_edit(iter, ioopm_increment_int, (void *) &inc);
+    ioopm_iterator_value_edit(iter, NULL, (void *)(integers + i));
+    ioopm_iterator_value_edit(iter, ioopm_increment_int, (void *) &inc);
     i++;
   } while (ioopm_iterator_next(iter));
 
@@ -873,16 +873,22 @@ void
 test_pipe_remove_at(void)
 {
   ioopm_list_t *list = ioopm_linked_list_create();
+  void *clean_arg1[] = {ioopm_clean_strings, NULL};
+  elem_t cleanargs;
+  cleanargs.p = clean_arg1; 
   elem_t assembler;
+  elem_t cleaner;
+  cleaner.assemble = transformer;
   assembler.assemble = remover;
-  elem_t remover[] = {assembler, (elem_t) 1};
+  elem_t remover[] = {cleaner, cleanargs, assembler, (elem_t) NULL};
+  //We need a cleaner for the key
 
-  ioopm_list_append(list, (elem_t) 1, (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) 2, (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) 3, (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) 4, (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) strdup("1"), (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) strdup("2"), (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) strdup("3"), (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) strdup("4"), (elem_t) NULL);
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-  ioopm_run_pipeline(iter, remover, 1);
+  ioopm_run_pipeline(iter, remover, 2);
   CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
   ioopm_linked_list_destroy(list);
 }

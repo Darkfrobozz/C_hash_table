@@ -367,7 +367,7 @@ ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value)
         
         case REPLACE:
         {
-            ioopm_iterator_edit(iter, NULL, &value);
+            ioopm_iterator_value_edit(iter, NULL, &value);
             result = ioopm_iterator_value_at(iter);
             break;
         }
@@ -597,7 +597,7 @@ ioopm_hash_edit(ioopm_hash_table_t *ht, ioopm_transform_value edit,
         return (option_t) {0};
     }
     
-    ioopm_iterator_edit(iter, edit, arg);
+    ioopm_iterator_value_edit(iter, edit, arg);
     elem_t new_v = ioopm_iterator_value_at(iter).return_value;
     ioopm_iterator_destroy(iter);
     return (option_t) {.return_value = new_v, .success = 1};

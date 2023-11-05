@@ -13,7 +13,7 @@
 #define remove_at() ioopm_iterator_remove_at(iter)
 #define jumpable(a) ioopm_iterator_can_jump(iter,a)
 #define jump(a) ioopm_iterator_jump(iter,a)
-#define edit(y,z) ioopm_iterator_edit(iter,y,z)
+#define edit(y,z) ioopm_iterator_value_edit(iter,y,z)
 #define value() ioopm_iterator_value_at(iter)
 #define key() ioopm_iterator_key_at(iter)
 #define next() ioopm_iterator_jump(iter,1)

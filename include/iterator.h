@@ -86,7 +86,7 @@ ioopm_iterator_jump(ioopm_iterator_t *iter, int distance);
 /// @return False if db is empty, true else 
 /// And the element if list and pointer to element if array
 option_t
-ioopm_iterator_edit(ioopm_iterator_t *iter, 
+ioopm_iterator_value_edit(ioopm_iterator_t *iter, 
                     ioopm_transform_value transformation, 
                     void *arg);
 

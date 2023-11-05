@@ -372,7 +372,7 @@ ioopm_iterator_prev(ioopm_iterator_t *iter)
 }
 
 option_t
-ioopm_iterator_edit(ioopm_iterator_t *iter, 
+ioopm_iterator_value_edit(ioopm_iterator_t *iter, 
                     ioopm_transform_value transformation, 
                     void *arg)
 {

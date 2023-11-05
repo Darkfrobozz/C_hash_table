@@ -29,7 +29,8 @@ typedef elem_t(*type_cast)(void *arg);
 typedef option_t(*ioopm_calc_value)(elem_t value, void **extra);
 typedef elem_t(*ioopm_comb_value)(elem_t c_value, elem_t r_value);
 
-enum pipe_assemblers{transformer, cmpvalue, cmpkey,
+enum pipe_assemblers{transform_keys, transform_values, 
+                     cmpvalue, cmpkey,
                      remover, controller, mover, custom};
 
 
@@ -54,6 +55,11 @@ enum pipe_assemblers{transformer, cmpvalue, cmpkey,
 #define BYTE(x) ((char *)(x))
 #define option(a,b) ((option_t) {.return_value = a, .success = b}) 
 #define garbage ((option_t) {0})
+
+typedef enum {
+    data_value, data_key
+} node_data;
+
 
 union elem {
   //ELEMENTARY

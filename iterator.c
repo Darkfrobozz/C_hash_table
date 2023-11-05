@@ -12,13 +12,11 @@
 #define cast() (array()->caster(at()))
 
 #define i_next(a) (iter->index + a)
-#define siz() ((int)(ioopm_iter_db_siz(iter)))
 #define chunk() (array()->chunk_siz)
 #define within(a,x,b) (((x) >= (a)) && ((x) <= (b)))
 #define end_p() (siz() - 1)
 #define direction(to) (to - i_next(0))
 #define init_fail(a) (!(iter_init(iter, a)))
-#define empty() (!siz())
 #define force_list_move(a) move_c_adress_list(iter, a)
 
 #define START 1
@@ -113,7 +111,7 @@ return true;
 void 
 ioopm_iterator_destroy(ioopm_iterator_t *iter)
 {
-    ioopm_filter_all(iter->iterator_list, ioopm_equals_adress, iter); 
+    ioopm_filter_all(iter->iterator_list, ioopm_equals_adress, iter, data_value); 
 }
 
 
@@ -372,9 +370,24 @@ ioopm_iterator_prev(ioopm_iterator_t *iter)
 }
 
 option_t
+ioopm_iterator_key_edit(ioopm_iterator_t *iter, 
+                        ioopm_transform_value transformation, 
+                        void *arg)
+{
+    return ioopm_iterator_edit(iter, transformation, arg, data_key);
+}
+option_t
 ioopm_iterator_value_edit(ioopm_iterator_t *iter, 
+                         ioopm_transform_value transformation, 
+                         void *arg)
+{
+    return ioopm_iterator_edit(iter, transformation, arg, data_value);
+
+}
+option_t
+ioopm_iterator_edit(ioopm_iterator_t *iter, 
                     ioopm_transform_value transformation, 
-                    void *arg)
+                    void *arg, node_data choice)
 {
     //Here it means that we when not even moving are not in the
     //right place
@@ -384,7 +397,7 @@ ioopm_iterator_value_edit(ioopm_iterator_t *iter,
     switch(iter->type){
         case list_iter:
         ioopm_list_edit(list(), transformation, 
-                        node(), arg);
+                        node(), arg, choice);
         return value();
         case array_iter:
         {
@@ -405,7 +418,6 @@ ioopm_iterator_value_edit(ioopm_iterator_t *iter,
         default:
         assert(false);
     }
-
 }
 
 bool 

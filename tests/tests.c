@@ -188,7 +188,7 @@ void test_increment()
     ioopm_list_append(link, send_values[i], (elem_t) NULL);
   }
   int inc = 1;
-  ioopm_linked_list_apply_to_all(link, ioopm_increment_int, &inc);
+  ioopm_list_edit_values(link, ioopm_increment_int, &inc);
   int value = 6;
   CU_ASSERT(ioopm_linked_list_all(link, ioopm_equals_int, &value));
   ioopm_linked_list_clear(link);
@@ -874,21 +874,26 @@ test_pipe_remove_at(void)
 {
   ioopm_list_t *list = ioopm_linked_list_create();
   void *clean_arg1[] = {ioopm_clean_strings, NULL};
+  void *clean_arg2[] = {ioopm_clean_strings, NULL};
   elem_t cleanargs;
+  elem_t cleanargs2;
   cleanargs.p = clean_arg1; 
+  cleanargs2.p = clean_arg2;
   elem_t assembler;
   elem_t cleaner;
-  cleaner.assemble = transformer;
+  elem_t cleaner2;
+  cleaner.assemble = transform_values;
+  cleaner2.assemble = transform_keys;
   assembler.assemble = remover;
-  elem_t remover[] = {cleaner, cleanargs, assembler, (elem_t) NULL};
+  elem_t remover[] = {cleaner, cleanargs, cleaner2, cleanargs2, assembler, (elem_t) NULL};
   //We need a cleaner for the key
 
-  ioopm_list_append(list, (elem_t) strdup("1"), (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) strdup("2"), (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) strdup("3"), (elem_t) NULL);
-  ioopm_list_append(list, (elem_t) strdup("4"), (elem_t) NULL);
+  ioopm_list_append(list, (elem_t) strdup("1"), (elem_t) strdup("1"));
+  ioopm_list_append(list, (elem_t) strdup("2"), (elem_t) strdup("1"));
+  ioopm_list_append(list, (elem_t) strdup("3"), (elem_t) strdup("1"));
+  ioopm_list_append(list, (elem_t) strdup("4"), (elem_t) strdup("1"));
   ioopm_iterator_t *iter = ioopm_list_iterator(list);
-  ioopm_run_pipeline(iter, remover, 2);
+  ioopm_run_pipeline(iter, remover, 3);
   CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
   ioopm_linked_list_destroy(list);
 }
@@ -902,8 +907,8 @@ test_pipe_inc(void)
   int inc2 = 2;
   elem_t transformfirst;
   elem_t transformsec;
-  transformfirst.assemble = transformer;
-  transformsec.assemble = transformer;
+  transformfirst.assemble = transform_values;
+  transformsec.assemble = transform_values;
   elem_t argsfirst;
   elem_t argstwo;
   void *inc_arg1[] = {ioopm_increment_int, &inc1};
@@ -934,7 +939,7 @@ test_pipe_inc(void)
 }
 
 bool
-move_til_true(elem_t value, void *arg)
+test_func_move_til_true(elem_t value, void *arg)
 {
   void **args = arg;
   enum pipe_assemblers *assemble = args[0];
@@ -959,7 +964,7 @@ test_pipe_until_true(void)
   third.assemble = controller;
   int compare_to = 3;
   void *cmp_arg[] = {ioopm_equals_int, &compare_to};
-  void *ctrl_arg[] = {move_til_true, NULL};
+  void *ctrl_arg[] = {test_func_move_til_true, NULL};
   elem_t ctrl;
   ctrl.p = ctrl_arg;
   elem_t arg;

@@ -116,7 +116,7 @@ ioopm_linked_list_any(ioopm_list_t *list, ioopm_pred_value prop, void *extra);
 /// @param extra an additional argument (may be NULL) that will be passed to 
 /// all internal calls of fun
 void 
-ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_transform_value fun, 
+ioopm_list_edit_values(ioopm_list_t *list, ioopm_transform_value fun, 
                                void *extra);
 
 /// @brief 
@@ -124,7 +124,8 @@ ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_transform_value fun,
 /// @param pred
 /// @param extra
 void 
-ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra);
+ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, 
+                 void *extra, node_data choice);
 
 /// @brief
 /// @param value

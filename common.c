@@ -142,6 +142,7 @@ ioopm_clean_strings(elem_t *value, void *arg)
     char *string = value->normal_string;
     assert(string);
     free(string);
+    value = NULL;
 }
 
 //

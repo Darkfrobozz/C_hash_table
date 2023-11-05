@@ -2,6 +2,33 @@
 #include "include/array.h"
 #include "include/nodes.h"
 
+static
+bool
+pipe_editing(ioopm_iterator_t *iter, void **arg, node_data choice)
+{
+    ioopm_transform_value edit_func = arg[0];
+    return edit_choice(edit_func, arg[1], choice).success;
+}
+
+static
+bool
+pipe_cmping(ioopm_iterator_t *iter, void **arg, node_data choice)
+{
+    elem_t to_cmp;
+    if(choice == data_value)
+        to_cmp = value().return_value;
+    else
+        to_cmp = key().return_value;
+    
+    ioopm_pred_value cmp_func = arg[0];
+
+    if(!cmp_func)
+        return true;
+
+    if(cmp_func(to_cmp, arg[1]))
+        return true;
+    return false;
+}
 
 static
 elem_t * 
@@ -41,24 +68,21 @@ ioopm_run_pipeline(ioopm_iterator_t *iter, elem_t *args, int amount)
             shared_protocol = jump(mem[mover].i);
             break;
 
-            case transformer:
-            {
-                ioopm_transform_value edit_func = local_arg[0];
-                shared_protocol = edit(edit_func, local_arg[1]).success;
-                break;
-            }
+            case transform_values:
+            shared_protocol = pipe_editing(iter, local_arg, data_value);
+            break;
+
+            case transform_keys:
+            shared_protocol = pipe_editing(iter, local_arg, data_key);
+            break;
+
             case cmpvalue:
-            {
-                ioopm_pred_value cmp_func = local_arg[0];
-                shared_protocol = cmp_func(value().return_value, local_arg[1]);
-                break;
-            }
+            shared_protocol = pipe_cmping(iter, local_arg, data_value);
+            break;
+
             case cmpkey:
-            {
-                ioopm_pred_value cmp_func = local_arg[0];
-                shared_protocol = cmp_func(key().return_value, local_arg[1]);
-                break;
-            }
+            shared_protocol = pipe_cmping(iter, local_arg, data_key);
+            break; 
 
             case remover:
             shared_protocol = remove_at();
@@ -95,4 +119,75 @@ ioopm_run_pipeline(ioopm_iterator_t *iter, elem_t *args, int amount)
     return iter; 
 }
 
+static
+bool
+until_true(elem_t value, void *arg)
+{
+  void **args = arg;
+  enum pipe_assemblers *assemble = args[0];
+  switch (*assemble) {
+    case mover:
+    return value.b;
+    case controller:
+    return true;
+    default:
+    return !value.b;
+  }
+}
 
+bool
+ioopm_move_until_true(ioopm_iterator_t *iter, node_data choice, 
+                      ioopm_pred_value pred, void **extra)
+{
+    if(empty())
+        return false;
+    elem_t s_cmp;
+
+    if(choice == data_key)
+        s_cmp.assemble = cmpkey;
+    else
+        s_cmp.assemble = cmpvalue;
+
+    elem_t s_mv = {.assemble = mover};
+    elem_t s_ctrl = {.assemble = controller};
+    void *cmp_arg[] = {pred, extra};
+    void *ctrl_arg[] = {until_true, NULL};
+    elem_t s_ctrl_arg = {.p = ctrl_arg};
+    elem_t s_cmp_arg = {.p = cmp_arg};
+
+    //Assembly line:
+    elem_t line[] = {s_cmp, s_cmp_arg, s_mv, (elem_t) 1, s_ctrl, s_ctrl_arg};
+
+    ioopm_run_pipeline(iter, line, 3);
+
+    if(!has_next())
+    {
+        if(choice == data_key && (!pred || pred(key().return_value, extra)))
+            return true;
+        else if(!pred || pred(value().return_value, extra))
+            return true;
+        return false;
+    }
+
+    return true;
+}
+
+void
+ioopm_transform_all(ioopm_iterator_t *iter, node_data choice, 
+                    ioopm_transform_value t_func, void *extra)
+{
+    elem_t s_mv = {.assemble = mover};
+    elem_t s_edit;
+
+    if(choice == data_value)
+        s_edit.assemble = transform_values;
+    else
+        s_edit.assemble = transform_keys; 
+
+    void *edit_extras[] = {t_func, extra};
+    elem_t s_edit_extras = {.p = edit_extras};
+
+    elem_t line[] = {s_edit, s_edit_extras, s_mv, (elem_t) 1}; 
+
+    ioopm_run_pipeline(iter, line, 2);
+}

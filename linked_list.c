@@ -7,8 +7,7 @@
 #include <string.h>
 
 //List macros
-#define send_update(x,y) ioopm_linked_list_apply_to_all(x, ioopm_update_iterators, y)
-
+#define send_update(x,y) ioopm_list_edit_values(x, ioopm_update_iterators, y)
 
 typedef void(*handler)(node_t *node, bool *success, void **arg);
 
@@ -49,6 +48,8 @@ static
 void
 iter_send_updates(ioopm_list_t *iter_list, int index, enum updates update)
 {
+    if(iter_list == 0)
+        return;
     int send_i = index;
     enum updates send_t = update;
     void *action_info[] = {&send_t, &send_i};
@@ -140,18 +141,33 @@ ioopm_list_insert(node_t *prev_node, elem_t i_value,
 void
 ioopm_list_edit(ioopm_list_t *list, 
                 ioopm_transform_value edit_function, 
-                node_t *node_edit, void *arg)
-{
-    elem_t *to_edit = &(node_edit->value);
+                node_t *node_edit, void *arg, node_data choice)
+{    
+    elem_t *to_edit;
+    if(choice == data_value)
+        to_edit = &(node_edit->value);
+    else
+        to_edit = &(node_edit->key);
+    
     //EDITING
     if(edit_function)
         return edit_function(to_edit, arg);
+}
 
-    //IN CASE NO EDIT DEFAULTS TO REPLACE
+void
+ioopm_list_edit_value(ioopm_list_t *list, 
+                ioopm_transform_value edit_function, 
+                node_t *node_edit, void *arg)
+{
+    ioopm_list_edit(list, edit_function, node_edit, arg, data_value);
+}
 
-    //Here we clean up before replacing.
-    void *args[] = {arg, list->clean_value};
-    ioopm_replace(to_edit, args);
+void
+ioopm_list_edit_key(ioopm_list_t *list, 
+                    ioopm_transform_value edit_function, 
+                    node_t *node_edit, void *arg)
+{
+    ioopm_list_edit(list, edit_function, node_edit, arg, data_key);
 }
 
 void 
@@ -327,28 +343,6 @@ ioopm_add_cleaners(ioopm_list_t *list, ioopm_transform_value i_clean_value,
 }
 
 /**
- * @brief Function to actually test whether to filter out each node
- * 
- * @param remove_at_node 
- * @param success 
- * @param arg 
- */
-static
-void 
-filter(node_t *remove_at_node, bool *success, void **arg)
-{
-    //This does not track index...
-    ioopm_pred_value pred = arg[0];
-    ioopm_list_t *list = arg[1];
-    //idea is that it should not eval next statement... NULL IS A FREE PASS TO CHANGE ALL
-    if(!pred || pred(remove_at_node->value, arg[2]))
-    {    
-        //This should use this
-        ioopm_list_remove_at(list, remove_at_node, 0);
-    }
-}
-
-/**
  * @brief This will be our factory pipeline, we put each element in the list into the pipe
  * and make some change to it.
  * 
@@ -400,12 +394,20 @@ bool ioopm_linked_list_contains(ioopm_list_t *list, elem_t element, ioopm_pred_v
 }
 
 
-void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_transform_value fun, 
-                                    void *extra)
+void 
+ioopm_list_edit_values(ioopm_list_t *list, ioopm_transform_value fun, 
+                       void *extra)
 {
-    if(!list || !fun) return;
-
-    ioopm_list_apply_extended(list, fun, extra, NULL, NULL);
+    if(!list || !fun) 
+        return;
+    if(list->size == 0)
+        return;
+    if(list->size == 1)
+        return fun(&(list->first->next->value), extra);
+    
+    create_in();
+    ioopm_transform_all(iter, data_value, fun, extra);
+    destroy();
 }
 
 void 
@@ -418,30 +420,30 @@ ioopm_list_apply_extended(ioopm_list_t *list,
     pipeline(list, &placeholder, transform_list_node, arg);
 }
 
-
 void 
 ioopm_linked_list_clear(ioopm_list_t *list)
 {
-    if(!list)
-        return;
-    ioopm_filter_all(list, NULL, NULL);
+    ioopm_filter_all(list, NULL, NULL, data_value);
 }
 
 void 
-ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra)
+ioopm_filter_all(ioopm_list_t *list, ioopm_pred_value pred, void *extra, node_data choice)
 {
-    bool success;
-    void *arg[] = {pred, list, extra};
     //Special case to end recursion with pipeline
+    if(!list || list->size == 0)
+        return;
 
     if(list->size == 1)
     {
-        if(pred && !pred(list->first->next->value, extra))
-            return; 
-        ioopm_list_remove_at(list, list->first->next, 0);
-    } else
-        pipeline(list, &success, filter, arg);
+        if(!pred || pred(list->first->next->value, extra))
+            ioopm_list_remove_at(list, list->first->next, 0);
+        return;
+    } 
 
+    create_in();
+    while(ioopm_move_until_true(iter, choice, pred, extra))
+        remove_at();
+    destroy();
 }
 
 

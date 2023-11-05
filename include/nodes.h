@@ -14,11 +14,16 @@
 #define jumpable(a) ioopm_iterator_can_jump(iter,a)
 #define jump(a) ioopm_iterator_jump(iter,a)
 #define edit(y,z) ioopm_iterator_value_edit(iter,y,z)
+#define edit_choice(y,z, a) ioopm_iterator_edit(iter,y,z, a)
 #define value() ioopm_iterator_value_at(iter)
 #define key() ioopm_iterator_key_at(iter)
 #define next() ioopm_iterator_jump(iter,1)
+#define has_next() ioopm_iterator_has_next(iter)
 #define prev() ioopm_iterator_jump(iter,-1)
+#define has_prev() ioopm_iterator_has_prev(iter)
 #define reset() ioopm_iterator_reset(iter)
+#define siz() ((int)(ioopm_iter_db_siz(iter)))
+#define empty() (!siz())
 
 typedef struct node node_t;
 
@@ -57,6 +62,11 @@ struct array {
 
 enum updates{destroyed, has_removed, inserted};
 
+void
+ioopm_list_edit(ioopm_list_t *list, 
+                ioopm_transform_value edit_function, 
+                node_t *node_edit, void *arg, node_data choice);
+
 /**
  * @brief This edits a nodes value
  * 
@@ -68,11 +78,23 @@ enum updates{destroyed, has_removed, inserted};
  * @return New node and success of operation 
  */
 void
-ioopm_list_edit(ioopm_list_t *list, 
+ioopm_list_edit_value(ioopm_list_t *list, 
                 ioopm_transform_value edit, 
                 node_t *node_edit, void *arg);
 
-
+/**
+ * @brief Edit value But for keys
+ * 
+ * @param list 
+ * @param edit_function 
+ * @param node_edit 
+ * @param arg 
+ */
+void
+ioopm_list_edit_key(ioopm_list_t *list, 
+                    ioopm_transform_value edit_function, 
+                    node_t *node_edit, void *arg);
+            
 /// @brief
 /// @param iterator_list
 /// @param remove_at_node
@@ -112,3 +134,8 @@ array_track_iter(array_t *array, ioopm_iterator_t *iter);
 /// @param arg 
 void
 ioopm_iter_apply_destroy(elem_t *value, void *arg);
+
+option_t
+ioopm_iterator_edit(ioopm_iterator_t *iter, 
+                    ioopm_transform_value transformation, 
+                    void *arg, node_data choice);

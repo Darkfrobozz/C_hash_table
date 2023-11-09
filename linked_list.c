@@ -12,14 +12,10 @@ ioopm_list_t *
 ioopm_linked_list_create(void)
 {
     ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
-    node_t *first = calloc(1, sizeof(node_t));
-    node_t *last = calloc(1, sizeof(node_t));
     result->clean_key = NULL;
     result->clean_value = NULL;
-    result->first = first;
-    first->next = last;
-    last->previous = first;
-    result->last = last;
+    result->first.next = &result->last;
+    result->last.previous = &result->first;
     return result;
 }
 
@@ -31,8 +27,6 @@ ioopm_linked_list_destroy(ioopm_list_t *list)
     //iterator_list is merely destroyed but not cleared!
     ioopm_linked_list_clear(list->iterator_list);
     ioopm_linked_list_destroy(list->iterator_list);
-    free(list->first);
-    free(list->last);
     free(list);
 }
 
@@ -130,10 +124,10 @@ find_previous_node(ioopm_list_t *list, int index)
 
     if(index <= (list->size / 2))
     {
-        return traverse_list(list->first, -1, 1, index - 1);
+        return traverse_list(&list->first, -1, 1, index - 1);
     }
 
-    return traverse_list(list->last, list->size, -1, index - 1);
+    return traverse_list(&list->last, list->size, -1, index - 1);
 
 }
 
@@ -403,7 +397,7 @@ pipeline(ioopm_list_t *list, bool *success, handler func, void **arg)
 {
     if(list->size <= 0) return;
 
-    node_t *node_to_handle = list->first->next;
+    node_t *node_to_handle = list->first.next;
 
     while(node_to_handle->next)
     {

@@ -14,8 +14,10 @@ struct node
 struct list
 {
     size_t size;
-    node_t *first; //dummy node
-    node_t *last; // dummy node
+    //Allocate in list
+    node_t first; //dummy node
+    node_t last; // dummy node
+
     ioopm_transform_value clean_value;
     ioopm_transform_value clean_key;
     ioopm_list_t *iterator_list;

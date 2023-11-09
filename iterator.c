@@ -52,7 +52,7 @@ ioopm_list_iterator(ioopm_list_t *list)
 {
 
     ioopm_iterator_t *iter = calloc(1, sizeof(ioopm_iterator_t));
-    iter->current_adress = list->first;
+    iter->current_adress = &list->first;
     void *added_iter = iter;
     if(!(list->iterator_list))
     {
@@ -211,7 +211,7 @@ ioopm_iterator_reset(ioopm_iterator_t *iter)
     ioopm_list_t *list = iter->datastructure;
 
     if(!ioopm_linked_list_is_empty(list))
-    iter->current_adress = list->first;
+    iter->current_adress = &list->first;
     iter->dummied = true;
     iterator_init(iter);
 }

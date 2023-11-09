@@ -147,13 +147,11 @@ ioopm_linked_list_get(ioopm_list_t *list, int index)
     result.success = 1;
 
     return result;
-
 }
 
-option_t 
-ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
+option_t
+insert_after_alloc(node_t *insert, node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
-    node_t *insert = calloc(1, sizeof(node_t));
     insert->value = i_value;
     insert->key = i_key;
 
@@ -168,6 +166,44 @@ ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t 
 
     list->size++;
     return (option_t) {.return_value = i_value, .success = 1};    
+}
+
+ioopm_add_pre_alloc(ioopm_list_t *list, node_t *pre_alloc, size_t size)
+{
+    list->pre_alloc = pre_alloc;
+    list->pre_alloc_size = size;
+}
+
+bool
+ioopm_change_index(ioopm_list_t *list, int index)
+{
+    if(index > list->pre_alloc_size && index < 0)
+        return false;
+    list->pre_alloc_index = index;
+    return true;
+}
+
+option_t 
+ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
+{
+    node_t *insert = calloc(1, sizeof(node_t));
+    return insert_after_alloc(insert, prev_node, i_value, i_key, list); 
+}
+
+option_t
+ioopm_smart_insert(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
+{
+    if(list->pre_alloc && list->pre_alloc_index < list->pre_alloc_size)
+    {
+        node_t *insert = &list->pre_alloc[list->pre_alloc_index];
+        option_t result = insert_after_alloc(insert, prev_node, i_value, i_key, list);
+
+        if(result.success)
+            list->pre_alloc_index++;
+
+        return result;
+    }
+    return ioopm_insert_node(prev_node, i_value, i_key, list);
 }
 
 option_t 

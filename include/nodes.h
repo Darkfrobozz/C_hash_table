@@ -9,6 +9,7 @@ struct node
     elem_t value;
     elem_t key;
     node_t *next;
+    bool pre_alloced;
 };
 
 struct list
@@ -21,6 +22,10 @@ struct list
     ioopm_transform_value clean_value;
     ioopm_transform_value clean_key;
     ioopm_list_t *iterator_list;
+    //Smart allocation
+    node_t *pre_alloc;
+    int pre_alloc_index;
+    size_t pre_alloc_size;
 };
 
 

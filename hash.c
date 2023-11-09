@@ -1,5 +1,6 @@
 #include "include/hash.h"
 #include "include/iterator.h"
+#include "include/nodes.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -20,6 +21,11 @@ struct hash_table
     compare_func cf;
     ioopm_transform_value clean_value;
     ioopm_transform_value clean_key;
+    //pre alloc!
+    node_t *pre_alloc;
+    int pre_alloc_index;
+    int pre_alloc_size;
+
 };
 
 //CALC FUNCTION

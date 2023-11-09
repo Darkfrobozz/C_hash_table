@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g -Iinclude
+CFLAGS = -Wall -pg -g -Iinclude
 ENDFLAGS = -lcunit -lm -o
 HEADER_FILES := $(wildcard include/*.h)
 SRC_FILES := $(wildcard *.c)

@@ -12,11 +12,15 @@ ioopm_list_t *
 ioopm_linked_list_create(void)
 {
     ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
-    result->clean_key = NULL;
-    result->clean_value = NULL;
-    result->first.next = &result->last;
-    result->last.previous = &result->first;
-    return result;
+    return ioopm_prep_list(result);
+}
+
+ioopm_list_t *
+ioopm_prep_list(ioopm_list_t *list)
+{
+    list->first.next = &list->last;
+    list->last.previous = &list->first;
+    return list;
 }
 
 void 
@@ -150,7 +154,8 @@ ioopm_linked_list_get(ioopm_list_t *list, int index)
 }
 
 option_t
-insert_after_alloc(node_t *insert, node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
+ioopm_prep_node(node_t *insert, node_t *prev_node, 
+                elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
     insert->value = i_value;
     insert->key = i_key;
@@ -168,10 +173,17 @@ insert_after_alloc(node_t *insert, node_t *prev_node, elem_t i_value, elem_t i_k
     return (option_t) {.return_value = i_value, .success = 1};    
 }
 
+void
 ioopm_add_pre_alloc(ioopm_list_t *list, node_t *pre_alloc, size_t size)
 {
     list->pre_alloc = pre_alloc;
     list->pre_alloc_size = size;
+}
+
+node_t *
+ioopm_pre_alloc_node(ioopm_list_t *list)
+{
+    return calloc(1, sizeof(node_t));
 }
 
 bool
@@ -186,8 +198,8 @@ ioopm_change_index(ioopm_list_t *list, int index)
 option_t 
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
-    node_t *insert = calloc(1, sizeof(node_t));
-    return insert_after_alloc(insert, prev_node, i_value, i_key, list); 
+    node_t *insert = ioopm_pre_alloc_node(list);
+    return ioopm_prep_node(insert, prev_node, i_value, i_key, list); 
 }
 
 option_t
@@ -196,7 +208,7 @@ ioopm_smart_insert(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t
     if(list->pre_alloc && list->pre_alloc_index < list->pre_alloc_size)
     {
         node_t *insert = &list->pre_alloc[list->pre_alloc_index];
-        option_t result = insert_after_alloc(insert, prev_node, i_value, i_key, list);
+        option_t result = ioopm_prep_node(insert, prev_node, i_value, i_key, list);
 
         if(result.success)
             list->pre_alloc_index++;

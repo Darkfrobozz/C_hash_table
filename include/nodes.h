@@ -26,8 +26,19 @@ struct list
     node_t *pre_alloc;
     int pre_alloc_index;
     size_t pre_alloc_size;
+
+    bool pre_alloced;
 };
 
+/**
+ * 
+ * @brief Preparing a list for use without calloc
+ * 
+ * @param list 
+ * @return ioopm_list_t* 
+ */
+ioopm_list_t *
+ioopm_prep_list(ioopm_list_t *list);
 
 /**
  * @brief This edits a nodes value
@@ -61,4 +72,3 @@ ioopm_remove_node(ioopm_list_t *iterator_list, node_t *remove_node);
 option_t 
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, 
                   ioopm_list_t *list);
-

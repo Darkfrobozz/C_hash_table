@@ -1,6 +1,7 @@
 #include <CUnit/Basic.h>
 #include "../include/hash.h"
 #include "../include/iterator.h"
+#include "../include/pre_alloced.h"
 #include <stdlib.h>
 #define arr_siz 100
 #define test_array_siz 100
@@ -712,12 +713,29 @@ test_hash_stats(void)
   ioopm_hash_table_clear(hash);
   ioopm_hash_table_destroy(hash);
 }
+
 void
 test_resize(void)
 {
 
 }
 
+void
+test_gen_alloc(void)
+{
+  pre_alloc_t *alloc = ioopm_gen_pre_alloc(15, list_alloc);
+  ioopm_destruct_pre_alloc(alloc);
+}
+
+void
+test_gen_set_alloc(void)
+{
+  pre_alloc_t *alloc = ioopm_gen_pre_alloc(15, list_alloc);
+  ioopm_list_t *list = ioopm_pre_alloc_get(alloc).return_value.p;
+  ioopm_linked_list_append(list, (elem_t) 0, (elem_t) 0);
+  ioopm_linked_list_clear(list);
+  ioopm_destruct_pre_alloc(alloc);
+}
 
 int 
 main(int argc, char *argv[]) 
@@ -731,7 +749,8 @@ main(int argc, char *argv[])
   // the init and cleanup functions
   CU_pSuite list_suite = CU_add_suite("Testing linked list", init_suite, clean_suite);
   CU_pSuite hash_suite = CU_add_suite("My awesome hash suite", init_suite, clean_suite);
-  if (hash_suite == NULL) {
+  CU_pSuite pre_alloc_suite = CU_add_suite("My pre alloc suite", init_suite, clean_suite);
+  if (hash_suite == NULL || list_suite == NULL || pre_alloc_suite == NULL) {
       // If the test suite could not be added, tear down CUnit and exit
       CU_cleanup_registry();
       return CU_get_error();
@@ -771,6 +790,8 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "Hash Stat", test_hash_stats) == NULL)
     || (CU_add_test(hash_suite, "True for all", test_all) == NULL)
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
+    || (CU_add_test(pre_alloc_suite, "Generate alloc", test_gen_alloc) == NULL)
+    || (CU_add_test(pre_alloc_suite, "Getting list from pre_alloc", test_gen_set_alloc) == NULL)
     || 0
   )
     {

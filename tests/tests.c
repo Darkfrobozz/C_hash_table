@@ -732,9 +732,76 @@ test_gen_set_alloc(void)
 {
   pre_alloc_t *alloc = ioopm_gen_pre_alloc(15, list_alloc);
   ioopm_list_t *list = ioopm_pre_alloc_get(alloc).return_value.p;
+  ioopm_list_t *list2 = ioopm_pre_alloc_get(alloc).return_value.p;
+  CU_ASSERT_NOT_EQUAL(list, list2);
+
+  //Tests using lists from alloc
   ioopm_linked_list_append(list, (elem_t) 0, (elem_t) 0);
+  ioopm_linked_list_append(list2, (elem_t) 0, (elem_t) 0);
+  ioopm_linked_list_append(list2, (elem_t) 2, (elem_t) 0);
+  elem_t result1 = ioopm_linked_list_get(list, 0).return_value;
+  elem_t result2 = ioopm_linked_list_get(list2, 0).return_value;
+  elem_t result3 = ioopm_linked_list_get(list2, 1).return_value;
+  CU_ASSERT_EQUAL(result1.i, 0);
+  CU_ASSERT_EQUAL(result2.i, 0);
+  CU_ASSERT_EQUAL(result3.i, 2);
   ioopm_linked_list_clear(list);
+  ioopm_remove_alloc_slot(alloc, 0);
+
+  //Test using a removed alloc slot
+  ioopm_list_t *list3 = ioopm_pre_alloc_get(alloc).return_value.p;
+  ioopm_linked_list_append(list3, (elem_t) 4, (elem_t) 0);
+  ioopm_linked_list_append(list3, (elem_t) 5, (elem_t) 0);
+  elem_t result4 = ioopm_linked_list_get(list3, 0).return_value;
+  elem_t result5 = ioopm_linked_list_get(list3, 1).return_value;
+  CU_ASSERT_EQUAL(result4.i, 4);
+  CU_ASSERT_EQUAL(result5.i, 5);
+  ioopm_linked_list_clear(list3);
+
+  //Test using adress as remove
+  ioopm_remove_alloc_adress(alloc, list3);
+  ioopm_list_t *list4 = ioopm_pre_alloc_get(alloc).return_value.p;
+  ioopm_linked_list_append(list4, (elem_t) 4, (elem_t) 0);
+  ioopm_linked_list_append(list4, (elem_t) 5, (elem_t) 0);
+  elem_t result6 = ioopm_linked_list_get(list4, 0).return_value;
+  elem_t result7 = ioopm_linked_list_get(list4, 1).return_value;
+  CU_ASSERT_EQUAL(result6.i, 4);
+  CU_ASSERT_EQUAL(result7.i, 5);
+
+  //Freeing the lists
+  ioopm_linked_list_clear(list2);
+  ioopm_linked_list_clear(list4);
   ioopm_destruct_pre_alloc(alloc);
+}
+
+void
+test_use_alloc(void)
+{
+  pre_alloc_t *alloc_lists = ioopm_gen_pre_alloc(15, list_alloc);
+  pre_alloc_t *alloc_nodes = ioopm_gen_pre_alloc(15, node_alloc);
+  
+  //Initiating hash with values
+  ioopm_hash_table_t *hash = ioopm_hash_table_create(ioopm_int_hash, ioopm_int_compare, 17);
+  ioopm_hash_add_cleaner(hash, NULL, ioopm_clean_strings);
+  ioopm_hash_add_pre_alloc(hash, alloc_lists, alloc_nodes);
+  char *send1 = strdup("hello");
+  char *send2 = strdup("Bye");
+  char *send3 = strdup("See");
+  char *send4 = strdup("You");
+  char *send5 = strdup("You");
+  char *send6 = strdup("You");
+  ioopm_hash_table_insert(hash, (elem_t) 5, (elem_t) send1);
+  ioopm_hash_table_insert(hash, (elem_t) 8, (elem_t) send2);
+  ioopm_hash_table_insert(hash, (elem_t) 4, (elem_t) send3);
+  ioopm_hash_table_insert(hash, (elem_t) 2, (elem_t) send4);
+  ioopm_hash_table_insert(hash, (elem_t) 2, (elem_t) send5);
+  ioopm_hash_table_insert(hash, (elem_t) 19, (elem_t) send6);
+
+  // Cleaning
+  ioopm_hash_table_destroy(hash);
+  ioopm_recursive_clear_list_alloc(alloc_lists, NULL, ioopm_clean_strings);
+  ioopm_destruct_pre_alloc(alloc_lists);
+  ioopm_destruct_pre_alloc(alloc_nodes);
 }
 
 int 
@@ -792,6 +859,7 @@ main(int argc, char *argv[])
     || (CU_add_test(hash_suite, "Apply to all", test_apply_all) == NULL)
     || (CU_add_test(pre_alloc_suite, "Generate alloc", test_gen_alloc) == NULL)
     || (CU_add_test(pre_alloc_suite, "Getting list from pre_alloc", test_gen_set_alloc) == NULL)
+    || (CU_add_test(pre_alloc_suite, "Using pre_alloc in lists and hashtables", test_use_alloc) == NULL)
     || 0
   )
     {

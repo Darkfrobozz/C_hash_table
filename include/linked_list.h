@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "pre_alloced.h"
 
 typedef struct list ioopm_list_t; 
 
@@ -173,3 +174,11 @@ ioopm_list_apply_extended(ioopm_list_t *list,
 elem_t
 ioopm_element_to_list(elem_t list, elem_t item);
 
+/**
+ * @brief Adds only node alloc
+ * 
+ * @param list 
+ * @param alloc 
+ */
+void
+ioopm_list_add_pre_alloc(ioopm_list_t *list, pre_alloc_t *node_alloc);

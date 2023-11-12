@@ -28,10 +28,13 @@ ioopm_linked_list_destroy(ioopm_list_t *list)
 {
     if(!list) 
         return;
-    //iterator_list is merely destroyed but not cleared!
+
+    //Cleaning iterator lists
     ioopm_linked_list_clear(list->iterator_list);
     ioopm_linked_list_destroy(list->iterator_list);
-    free(list);
+
+    if(!list->pre_alloced)
+        free(list);
 }
 
 /**
@@ -79,9 +82,7 @@ clean_data(node_t *node_to_clean, ioopm_transform_value clean_value,
     {
         elem_t value = node_to_clean->value;
         clean_value(&value, NULL);
-    } 
-    
-    free(node_to_clean);
+    }     
 }
 
 /**
@@ -174,48 +175,30 @@ ioopm_prep_node(node_t *insert, node_t *prev_node,
 }
 
 void
-ioopm_add_pre_alloc(ioopm_list_t *list, node_t *pre_alloc, size_t size)
+ioopm_list_add_pre_alloc(ioopm_list_t *list, pre_alloc_t *alloc)
 {
-    list->pre_alloc = pre_alloc;
-    list->pre_alloc_size = size;
-}
-
-node_t *
-ioopm_pre_alloc_node(ioopm_list_t *list)
-{
-    return calloc(1, sizeof(node_t));
-}
-
-bool
-ioopm_change_index(ioopm_list_t *list, int index)
-{
-    if(index > list->pre_alloc_size && index < 0)
-        return false;
-    list->pre_alloc_index = index;
-    return true;
+    list->smart_insert = alloc;
 }
 
 option_t 
 ioopm_insert_node(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
 {
-    node_t *insert = ioopm_pre_alloc_node(list);
-    return ioopm_prep_node(insert, prev_node, i_value, i_key, list); 
-}
+    node_t *insert;
+    option_t result = {0};
 
-option_t
-ioopm_smart_insert(node_t *prev_node, elem_t i_value, elem_t i_key, ioopm_list_t *list)
-{
-    if(list->pre_alloc && list->pre_alloc_index < list->pre_alloc_size)
+    //Check pre alloc
+    if(list->smart_insert)
+        result = ioopm_pre_alloc_get(list->smart_insert); 
+    //Check if it is successful then grab node from it else create a new node 
+    if(result.success)
     {
-        node_t *insert = &list->pre_alloc[list->pre_alloc_index];
-        option_t result = ioopm_prep_node(insert, prev_node, i_value, i_key, list);
-
-        if(result.success)
-            list->pre_alloc_index++;
-
-        return result;
+        insert = result.return_value.p;
+        insert->pre_alloced = true;
     }
-    return ioopm_insert_node(prev_node, i_value, i_key, list);
+    else
+        insert = calloc(1, sizeof(node_t)); 
+    
+    return ioopm_prep_node(insert, prev_node, i_value, i_key, list); 
 }
 
 option_t 
@@ -294,19 +277,25 @@ ioopm_remove_node(ioopm_list_t *list, node_t *remove_node)
 
     if(!(list->clean_value))
         result.return_value = remove_node->value;
+    
 
     //informing iterators
     ioopm_linked_list_apply_to_all(list->iterator_list, ioopm_inform_removal, remove_node);
 
     //contracting, this should never be a non existent node.
     contract(remove_node);
-    
+  
     //clean the value of nodes
     clean_data(remove_node, list->clean_value, list->clean_key);
 
     list->size--;
 
     result.success = 1;
+
+    if(!remove_node->pre_alloced)
+        free(remove_node);
+    else
+        ioopm_remove_alloc_adress(list->smart_insert, remove_node);
 
     return result; 
 }
@@ -422,6 +411,9 @@ filter(node_t *remove_node, bool *success, void **arg)
 
         //clean the data of the node so that the heap can be reused
         clean_data(remove_node, list->clean_value, list->clean_key);
+
+        if(!remove_node->pre_alloced)
+            free(remove_node);
 
        (list->size)--;
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include "linked_list.h"
 #include <stdio.h>
+#include "pre_alloced.h"
 
 
 typedef struct hash_table ioopm_hash_table_t;
@@ -190,3 +191,14 @@ ioopm_rehash(ioopm_hash_table_t *ht, elem_t old_key, elem_t new_key);
  */
 option_t
 ioopm_hash_bucket_iter(ioopm_hash_table_t *ht, elem_t key);
+
+/**
+ * @brief Adds both list pre alloc and node pre alloc
+ * 
+ * @param hash 
+ * @param list_alloc 
+ * @param node_alloc 
+ */
+void
+ioopm_hash_add_pre_alloc(ioopm_hash_table_t *hash,
+                         pre_alloc_t *list_alloc, pre_alloc_t *node_alloc);

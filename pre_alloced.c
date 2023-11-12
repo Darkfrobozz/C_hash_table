@@ -60,6 +60,8 @@ ioopm_pre_alloc_get(pre_alloc_t *alloc_s)
 
     if(result.success)
         choice = result.return_value.i; 
+    else
+        alloc_s->index++;
 
     if(choice == -1)
         return (option_t) {0};
@@ -81,7 +83,7 @@ ioopm_pre_alloc_get(pre_alloc_t *alloc_s)
             break;
         }
     }
-    alloc_s->index++;
+    result.success = 1;
     return result;
 }
 
@@ -96,6 +98,52 @@ ioopm_remove_alloc_slot(pre_alloc_t *alloc_s, int index)
     if(index >= alloc_s->index 
        || ioopm_linked_list_contains(&alloc_s->dynamic_list, i, ioopm_equals_int))
         return result;
-
+    //This is to be able to ruuse removed parts
     return ioopm_linked_list_append(&alloc_s->dynamic_list, i, (elem_t) 0);
 }
+
+option_t
+ioopm_remove_alloc_adress(pre_alloc_t *alloc_s, void *adress) {
+    switch (alloc_s->type) {
+        case (list_alloc):
+        {
+            ioopm_list_t *list = adress;
+            ioopm_list_t *startlist = alloc_s->d_struct;
+            return ioopm_remove_alloc_slot(alloc_s, startlist - list);
+        }
+        case (node_alloc):
+        {
+            node_t *node = adress;
+            node_t *startnode = alloc_s->d_struct;
+            return ioopm_remove_alloc_slot(alloc_s, startnode - node);
+        }
+        default:
+        assert(false);
+    }
+}
+
+bool
+ioopm_recursive_clear_list_alloc(pre_alloc_t *alloc_s, 
+                                 ioopm_transform_value clean_key,
+                                 ioopm_transform_value clean_value)
+{
+
+    if(alloc_s->type == node_alloc)
+        return false;
+
+    ioopm_list_t *first_list = alloc_s->d_struct;
+
+    for(int i = 0; i < alloc_s->index; i++)
+    {
+        ioopm_list_t *to_clean = first_list + i;
+        if(ioopm_linked_list_contains(&alloc_s->dynamic_list, 
+                                      (elem_t) i, ioopm_equals_int))
+            continue;
+        
+        ioopm_add_cleaners(to_clean, clean_value, clean_key);
+        ioopm_linked_list_clear(to_clean);
+        ioopm_linked_list_destroy(to_clean);
+    }
+    return true;
+}
+

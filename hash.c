@@ -16,16 +16,15 @@ struct hash_table
     size_t hash_siz;
     size_t elements;
     ioopm_list_t **buckets;
-    hashing_func hh;
     //should return int.
+    hashing_func hh;
     compare_func cf;
     ioopm_transform_value clean_value;
     ioopm_transform_value clean_key;
-    //pre alloc!
-    node_t *pre_alloc;
-    int pre_alloc_index;
-    int pre_alloc_size;
 
+    //Chunk allocation
+    pre_alloc_t *smart_list_insert;
+    pre_alloc_t *smart_node_insert;
 };
 
 //CALC FUNCTION
@@ -85,6 +84,14 @@ fetch_list_elements(ioopm_list_t *listB, void **arg)
     ioopm_append_lists(result, listB, *take_key);
     return true;
 
+}
+
+void
+ioopm_hash_add_pre_alloc(ioopm_hash_table_t *hash, 
+                         pre_alloc_t *list_alloc, pre_alloc_t *node_alloc)
+{
+    hash->smart_list_insert = list_alloc;
+    hash->smart_node_insert = node_alloc;
 }
 
 /** HANDLER
@@ -185,7 +192,19 @@ static
 void
 init_bucket(ioopm_hash_table_t *ht, int key)
 {
-    ht->buckets[key] = ioopm_linked_list_create();
+    option_t result = {0};
+    if(ht->smart_list_insert)
+        result = ioopm_pre_alloc_get(ht->smart_list_insert);
+
+    if(result.success)
+    {
+        ht->buckets[key] = result.return_value.p;
+        ht->buckets[key]->pre_alloced = true;
+    }
+    else        
+        ht->buckets[key] = ioopm_linked_list_create();
+
+    ioopm_list_add_pre_alloc(ht->buckets[key], ht->smart_node_insert);
 }
 
 
@@ -203,6 +222,7 @@ clear_bucket(ioopm_list_t *list, ioopm_pred_value placeholder, void **arg)
 {
     ioopm_hash_table_t *ht = arg[0];
     int *key = arg[1];
+
 
     if(list)
     {

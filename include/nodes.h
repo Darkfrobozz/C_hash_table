@@ -1,4 +1,5 @@
 #include "linked_list.h"
+#include "pre_alloced.h"
 
 
 typedef struct node node_t;
@@ -22,11 +23,9 @@ struct list
     ioopm_transform_value clean_value;
     ioopm_transform_value clean_key;
     ioopm_list_t *iterator_list;
-    //Smart allocation
-    node_t *pre_alloc;
-    int pre_alloc_index;
-    size_t pre_alloc_size;
 
+    //Smart allocation
+    pre_alloc_t *smart_insert;
     bool pre_alloced;
 };
 

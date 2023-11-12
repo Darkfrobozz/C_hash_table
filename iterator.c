@@ -188,7 +188,7 @@ ioopm_iterator_insert(ioopm_iterator_t *iter, elem_t value, elem_t key, short di
         to_send = to_send->previous;
 
     result = ioopm_insert_node(to_send, value, 
-                      key, (ioopm_list_t  *) iter->datastructure);
+                               key, (ioopm_list_t  *) iter->datastructure);
     
     iter->current_adress = to_send->next;
     
